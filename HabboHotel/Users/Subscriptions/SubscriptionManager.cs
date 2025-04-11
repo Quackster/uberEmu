@@ -49,7 +49,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
             {
                 foreach (DataRow Row in SubscriptionData.Rows)
                 {
-                    Subscriptions.TryAdd((string)Row["subscription_id"], new Subscription((string)Row["subscription_id"], (int)Row["timestamp_activated"], (int)Row["timestamp_expire"]));
+                    Subscriptions.TryAdd((string)Row["subscription_id"], new Subscription((string)Row["subscription_id"], (long)Row["timestamp_activated"], (long)Row["timestamp_expire"]));
                 }
             }
         }
@@ -103,8 +103,8 @@ namespace Uber.HabboHotel.Users.Subscriptions
                 return;
             }
 
-            int TimeCreated = (int)UberEnvironment.GetUnixTimestamp();
-            int TimeExpire = ((int)UberEnvironment.GetUnixTimestamp() + DurationSeconds);
+            long TimeCreated = (long)UberEnvironment.GetUnixTimestamp();
+            long TimeExpire = ((long)UberEnvironment.GetUnixTimestamp() + DurationSeconds);
 
             Subscription NewSub = new Subscription(SubscriptionId, TimeCreated, TimeExpire);
 

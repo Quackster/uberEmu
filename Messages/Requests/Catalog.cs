@@ -308,7 +308,7 @@ namespace Uber.Messages
                 Row = dbClient.ReadDataRow("SELECT * FROM catalog_marketplace_offers WHERE offer_id = '" + ItemId + "' LIMIT 1");
             }
 
-            if (Row == null || (string)Row["state"] != "1" || (double)Row["timestamp"] <= UberEnvironment.GetGame().GetCatalog().GetMarketplace().FormatTimestamp())
+            if (Row == null || (string)Row["state"] != "1" || (long)Row["timestamp"] <= UberEnvironment.GetGame().GetCatalog().GetMarketplace().FormatTimestamp())
             {
                 Session.SendNotif("Sorry, this offer has expired.");
                 return;

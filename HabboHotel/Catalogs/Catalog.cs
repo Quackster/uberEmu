@@ -558,7 +558,7 @@ namespace Uber.HabboHotel.Catalogs
                 return null;
             }
 
-            return new Pet((uint)Row["id"], (uint)Row["user_id"], (uint)Row["room_id"], (string)Row["name"], (uint)Row["type"], (string)Row["race"], (string)Row["color"], (int)Row["expirience"], (int)Row["energy"], (int)Row["nutrition"], (int)Row["respect"], (double)Row["createstamp"], (int)Row["x"], (int)Row["y"], (double)Row["z"]);
+            return new Pet((uint)Row["id"], (uint)Row["user_id"], (uint)Row["room_id"], (string)Row["name"], (uint)Row["type"], (string)Row["race"], (string)Row["color"], (int)Row["expirience"], (int)Row["energy"], (int)Row["nutrition"], (int)Row["respect"], (long)Row["createstamp"], (int)Row["x"], (int)Row["y"], (double)Row["z"]);
         }
 
         public uint GenerateItemId()

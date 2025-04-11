@@ -183,7 +183,7 @@ namespace Uber.Net
 
                 catch (Exception e)
                 {
-                    UberEnvironment.GetLogging().WriteLine("[TCPConnection.WaitForData]: Unhandled exception while attempting to receive data: " + e.Message, LogLevel.Error);
+                    UberEnvironment.GetLogging().WriteLine("[TCPConnection.WaitForData]: Unhandled exception while attempting to receive data: " + e.ToString(), LogLevel.Error);
                     ConnectionDead();
                 }
             }
@@ -216,7 +216,7 @@ namespace Uber.Net
 
             catch (Exception e)
             {
-                UberEnvironment.GetLogging().WriteLine("[TCPConnection.DataReceived]: Unhandled exception while attempting to complete receive data: " + e.Message, LogLevel.Error);
+                UberEnvironment.GetLogging().WriteLine("[TCPConnection.DataReceived]: Unhandled exception while attempting to complete receive data: " + e.ToString(), LogLevel.Error);
                 ConnectionDead();
                 return;
             }

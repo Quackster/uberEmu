@@ -195,7 +195,7 @@ namespace Uber.HabboHotel.Support
 
             foreach (DataRow Row in Data.Rows)
             {
-                SupportTicket Ticket = new SupportTicket((uint)Row["id"], (int)Row["score"], (int)Row["type"], (uint)Row["sender_id"], (uint)Row["reported_id"], (String)Row["message"], (uint)Row["room_id"], (String)Row["room_name"], (Double)Row["timestamp"]);
+                SupportTicket Ticket = new SupportTicket((uint)Row["id"], (int)Row["score"], (int)Row["type"], (uint)Row["sender_id"], (uint)Row["reported_id"], (String)Row["message"], (uint)Row["room_id"], (String)Row["room_name"], (long)Row["timestamp"]);
 
                 if (Row["status"].ToString().ToLower() == "picked")
                 {
@@ -591,7 +591,7 @@ namespace Uber.HabboHotel.Support
             }
         }
 
-        public void BanUser(GameClient ModSession, uint UserId, int Length, String Message)
+        public void BanUser(GameClient ModSession, uint UserId, long Length, String Message)
         {
             GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 
@@ -606,9 +606,7 @@ namespace Uber.HabboHotel.Support
                 return;
             }
 
-            Double dLength = Length;
-
-            UberEnvironment.GetGame().GetBanManager().BanUser(Client, ModSession.GetHabbo().Username, dLength, Message, false);
+            UberEnvironment.GetGame().GetBanManager().BanUser(Client, ModSession.GetHabbo().Username, Length, Message, false);
         }
 
         #endregion
@@ -638,8 +636,8 @@ namespace Uber.HabboHotel.Support
 
             if (Info != null)
             {
-                Message.AppendInt32((int)Math.Ceiling((UberEnvironment.GetUnixTimestamp() - (Double)Info["reg_timestamp"]) / 60)); 
-                Message.AppendInt32((int)Math.Ceiling((UberEnvironment.GetUnixTimestamp() - (Double)Info["login_timestamp"]) / 60));
+                Message.AppendInt32((int)Math.Ceiling((UberEnvironment.GetUnixTimestamp() - (long)Info["reg_timestamp"]) / 60.0));
+                Message.AppendInt32((int)Math.Ceiling((UberEnvironment.GetUnixTimestamp() - (long)Info["login_timestamp"]) / 60.0));
             }
             else
             {
@@ -735,14 +733,14 @@ namespace Uber.HabboHotel.Support
                 {
                     DataTable Chatlogs = null;
 
-                    if ((Double)Visit["exit_timestamp"] <= 0.0)
+                    if ((long)Visit["exit_timestamp"] <= 0.0)
                     {
                         Visit["exit_timestamp"] = UberEnvironment.GetUnixTimestamp();
                     }
 
                     using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
                     {
-                        Chatlogs = dbClient.ReadDataTable("SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '" + (uint)Visit["room_id"] + "' AND timestamp > " + (Double)Visit["entry_timestamp"] + " AND timestamp < " + (Double)Visit["exit_timestamp"] + " ORDER BY timestamp DESC");
+                        Chatlogs = dbClient.ReadDataTable("SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '" + (uint)Visit["room_id"] + "' AND timestamp > " + (Double)Visit["entry_timestamp"] + " AND timestamp < " + (long)Visit["exit_timestamp"] + " ORDER BY timestamp DESC");
                     }
 
                     RoomData RoomData = UberEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData((uint)Visit["room_id"]);
@@ -778,7 +776,7 @@ namespace Uber.HabboHotel.Support
             return Message;
         }
 
-        public ServerMessage SerializeTicketChatlog(SupportTicket Ticket, RoomData RoomData, Double Timestamp)
+        public ServerMessage SerializeTicketChatlog(SupportTicket Ticket, RoomData RoomData, long Timestamp)
         {
             DataTable Data = null;
 

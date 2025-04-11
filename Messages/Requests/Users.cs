@@ -50,9 +50,10 @@ namespace Uber.Messages
 
             if (Session.GetHabbo().GetSubscriptionManager().HasSubscription(SubscriptionId))
             {
-                Double Expire = Session.GetHabbo().GetSubscriptionManager().GetSubscription(SubscriptionId).ExpireTime;
-                Double TimeLeft = Expire - UberEnvironment.GetUnixTimestamp();
-                int TotalDaysLeft = (int)Math.Ceiling(TimeLeft / 86400);
+                long Expire = Session.GetHabbo().GetSubscriptionManager().GetSubscription(SubscriptionId).ExpireTime;
+                long TimeLeft = Expire - UberEnvironment.GetUnixTimestamp();
+
+                int TotalDaysLeft = (int)Math.Ceiling(TimeLeft / 86400.0);
                 int MonthsLeft = TotalDaysLeft / 31;
 
                 if (MonthsLeft >= 1) MonthsLeft--;

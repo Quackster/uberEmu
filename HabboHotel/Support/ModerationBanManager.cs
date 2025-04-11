@@ -72,12 +72,12 @@ namespace Uber.HabboHotel.Support
         }
 
         // PENDING REWRITE
-        public void BanUser(GameClient Client, string Moderator, Double LengthSeconds, string Reason, Boolean IpBan)
+        public void BanUser(GameClient Client, string Moderator, long LengthSeconds, string Reason, Boolean IpBan)
         {
             ModerationBanType Type = ModerationBanType.USERNAME;
             string Var = Client.GetHabbo().Username;
             string RawVar = "user";
-            Double Expire = UberEnvironment.GetUnixTimestamp() + LengthSeconds;
+            long Expire = UberEnvironment.GetUnixTimestamp() + LengthSeconds;
 
             if (IpBan)
             {

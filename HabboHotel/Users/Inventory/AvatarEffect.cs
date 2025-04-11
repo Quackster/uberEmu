@@ -10,7 +10,7 @@ namespace Uber.HabboHotel.Users.Inventory
         public int EffectId;
         public int TotalDuration;
         public bool Activated;
-        public double StampActivated;
+        public long StampActivated;
 
         public int TimeLeft
         {
@@ -21,7 +21,7 @@ namespace Uber.HabboHotel.Users.Inventory
                     return -1;
                 }
 
-                double diff = UberEnvironment.GetUnixTimestamp() - StampActivated;
+                long diff = UberEnvironment.GetUnixTimestamp() - StampActivated;
 
                 if (diff >= TotalDuration)
                 {
@@ -50,7 +50,7 @@ namespace Uber.HabboHotel.Users.Inventory
             }
         }
 
-        public AvatarEffect(int EffectId, int TotalDuration, bool Activated, double ActivateTimestamp)
+        public AvatarEffect(int EffectId, int TotalDuration, bool Activated, long ActivateTimestamp)
         {
             this.EffectId = EffectId;
             this.TotalDuration = TotalDuration;

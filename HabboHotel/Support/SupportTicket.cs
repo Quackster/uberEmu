@@ -36,7 +36,7 @@ namespace Uber.HabboHotel.Support
         public uint RoomId;
         public String RoomName;
 
-        public Double Timestamp;
+        public long Timestamp;
 
         public int TabId
         {
@@ -64,7 +64,7 @@ namespace Uber.HabboHotel.Support
             }
         }
 
-        public SupportTicket(uint Id, int Score, int Type, uint SenderId, uint ReportedId, String Message, uint RoomId, String RoomName, Double Timestamp)
+        public SupportTicket(uint Id, int Score, int Type, uint SenderId, uint ReportedId, String Message, uint RoomId, String RoomName, long Timestamp)
         {
             this.Id = Id;
             this.Score = Score;

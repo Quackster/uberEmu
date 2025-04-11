@@ -147,10 +147,14 @@ namespace Uber
             return Quick.Next(Min, Max);
         }
 
-        public static Double GetUnixTimestamp()
+        public static long GetUnixTimestamp()
         {
+            /*
             TimeSpan ts = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
-            return ts.TotalSeconds;
+            return ts.TotalSeconds;*/
+
+            DateTimeOffset dto = new DateTimeOffset(DateTime.UtcNow);
+            return dto.ToUnixTimeSeconds();
         }
 
         public static string FilterInjectionChars(string Input)

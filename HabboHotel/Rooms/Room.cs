@@ -53,7 +53,7 @@ namespace Uber.HabboHotel.Rooms
         public RoomIcon myIcon;
 
         public SynchronizedCollection<uint> UsersWithRights;
-        private ConcurrentDictionary<uint, Double> Bans;
+        private ConcurrentDictionary<uint, long> Bans;
 
         public RoomEvent Event;
 
@@ -245,7 +245,7 @@ namespace Uber.HabboHotel.Rooms
             this.UserList = new SynchronizedCollection<RoomUser>();
             this.myIcon = Icon;
             this.Password = Password;
-            this.Bans = new ConcurrentDictionary<uint, double>();
+            this.Bans = new ConcurrentDictionary<uint, long>();
             this.Event = null;
             this.Wallpaper = Wallpaper;
             this.Floor = Floor;
@@ -1280,7 +1280,7 @@ namespace Uber.HabboHotel.Rooms
                 return true;
             }
 
-            Double diff = UberEnvironment.GetUnixTimestamp() - Bans[Id];
+            long diff = UberEnvironment.GetUnixTimestamp() - Bans[Id];
 
             if (diff > 900)
             {

@@ -50,7 +50,7 @@ namespace Uber.HabboHotel.Users.Inventory
 
             foreach (DataRow Row in Data.Rows)
             {
-                AvatarEffect Effect = new AvatarEffect((int)Row["effect_id"], (int)Row["total_duration"], UberEnvironment.EnumToBool(Row["is_activated"].ToString()), (double)Row["activated_stamp"]);
+                AvatarEffect Effect = new AvatarEffect((int)Row["effect_id"], (int)Row["total_duration"], UberEnvironment.EnumToBool(Row["is_activated"].ToString()), (long)Row["activated_stamp"]);
 
                 if (Effect.HasExpired)
                 {

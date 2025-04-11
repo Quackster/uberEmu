@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `bantype` enum('user','ip') NOT NULL DEFAULT 'user',
   `value` varchar(50) NOT NULL,
   `reason` text NOT NULL,
-  `expire` double NOT NULL DEFAULT '0',
+  `expire` long NOT NULL DEFAULT '0',
   `added_by` varchar(50) NOT NULL,
   `added_date` varchar(50) NOT NULL,
   `appeal_state` enum('0','1','2') NOT NULL DEFAULT '1',
@@ -2441,7 +2441,7 @@ CREATE TABLE IF NOT EXISTS `catalog_marketplace_offers` (
   `public_name` text NOT NULL,
   `sprite_id` int(11) NOT NULL,
   `item_type` enum('1','2') NOT NULL DEFAULT '1',
-  `timestamp` double NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   `state` enum('1','2') NOT NULL DEFAULT '1',
   `extra_data` text NOT NULL,
   PRIMARY KEY (`offer_id`)
@@ -2587,7 +2587,7 @@ CREATE TABLE IF NOT EXISTS `chatlogs` (
   `hour` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
   `full_date` varchar(120) NOT NULL,
-  `timestamp` double NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   `message` text NOT NULL,
   `user_name` varchar(100) NOT NULL DEFAULT 'Unknown User',
   PRIMARY KEY (`id`),
@@ -6437,7 +6437,7 @@ CREATE TABLE IF NOT EXISTS `moderation_forum_threads` (
   `poster` varchar(100) NOT NULL,
   `subject` varchar(120) NOT NULL,
   `date` varchar(50) NOT NULL,
-  `timestamp` double NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   `message` text NOT NULL,
   `locked` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
@@ -6490,7 +6490,7 @@ CREATE TABLE IF NOT EXISTS `moderation_tickets` (
   `message` text NOT NULL,
   `room_id` int(10) unsigned NOT NULL,
   `room_name` varchar(100) NOT NULL,
-  `timestamp` double NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -6982,7 +6982,7 @@ CREATE TABLE IF NOT EXISTS `site_minimail` (
   `subject` varchar(120) NOT NULL,
   `date` varchar(120) NOT NULL,
   `isodate` varchar(120) NOT NULL,
-  `timestamp` int(11) NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   `body` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
@@ -7049,7 +7049,7 @@ CREATE TABLE IF NOT EXISTS `site_news` (
   `body` text NOT NULL,
   `snippet` text NOT NULL,
   `datestr` varchar(50) NOT NULL,
-  `timestamp` int(11) NOT NULL,
+  `timestamp` BIGINT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -7248,8 +7248,8 @@ CREATE TABLE IF NOT EXISTS `user_info` (
   `user_id` int(11) NOT NULL,
   `bans` int(11) NOT NULL DEFAULT '0',
   `cautions` int(11) NOT NULL DEFAULT '0',
-  `reg_timestamp` double NOT NULL DEFAULT '0',
-  `login_timestamp` double NOT NULL DEFAULT '0',
+  `reg_timestamp` BIGINT NOT NULL DEFAULT '0',
+  `login_timestamp` BIGINT NOT NULL DEFAULT '0',
   `cfhs` int(11) NOT NULL DEFAULT '0',
   `cfhs_abusive` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
@@ -7297,7 +7297,7 @@ CREATE TABLE IF NOT EXISTS `user_pets` (
   `energy` int(11) NOT NULL,
   `nutrition` int(11) NOT NULL DEFAULT '100',
   `respect` int(11) NOT NULL DEFAULT '0',
-  `createstamp` double NOT NULL DEFAULT '0',
+  `createstamp` BIGINT NOT NULL DEFAULT '0',
   `x` int(11) NOT NULL DEFAULT '0',
   `y` int(11) NOT NULL DEFAULT '0',
   `z` double NOT NULL DEFAULT '0',
@@ -7338,8 +7338,8 @@ CREATE TABLE IF NOT EXISTS `user_presents` (
 CREATE TABLE IF NOT EXISTS `user_roomvisits` (
   `user_id` int(10) unsigned NOT NULL,
   `room_id` int(10) unsigned NOT NULL,
-  `entry_timestamp` double NOT NULL,
-  `exit_timestamp` double NOT NULL,
+  `entry_timestamp` BIGINT NOT NULL,
+  `exit_timestamp` BIGINT NOT NULL,
   `hour` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
   KEY `user_id` (`user_id`)
@@ -7359,8 +7359,8 @@ CREATE TABLE IF NOT EXISTS `user_roomvisits` (
 CREATE TABLE IF NOT EXISTS `user_subscriptions` (
   `user_id` int(10) unsigned NOT NULL,
   `subscription_id` varchar(50) NOT NULL,
-  `timestamp_activated` int(11) NOT NULL,
-  `timestamp_expire` int(11) NOT NULL,
+  `timestamp_activated` BIGINT NOT NULL,
+  `timestamp_expire` BIGINT NOT NULL,
   KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

@@ -9,8 +9,8 @@ namespace Uber.HabboHotel.Users.Subscriptions
     {
         private string Caption;
 
-        private int TimeActivated;
-        private int TimeExpire;
+        private long TimeActivated;
+        private long TimeExpire;
 
         public string SubscriptionId
         {
@@ -20,7 +20,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
             }
         }
 
-        public int ExpireTime
+        public long ExpireTime
         {
             get
             {
@@ -28,7 +28,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
             }
         }
 
-        public Subscription(string Caption, int TimeActivated, int TimeExpire)
+        public Subscription(string Caption, long TimeActivated, long TimeExpire)
         {
             this.Caption = Caption;
             this.TimeActivated = TimeActivated;

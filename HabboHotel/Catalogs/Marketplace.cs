@@ -168,7 +168,8 @@ namespace Uber.HabboHotel.Catalogs
                 {
                     // IhHI`n~^II[EFPN[OKPA
 
-                    int MinutesLeft = (int)Math.Floor((((Double)Row["timestamp"] + 172800) - UberEnvironment.GetUnixTimestamp()) / 60);
+                    long timestamp = Convert.ToInt64(Row["timestamp"]);
+                    int MinutesLeft = (int)Math.Floor(((timestamp + 172800) - UberEnvironment.GetUnixTimestamp()) / 60.0);
                     int state = int.Parse(Row["state"].ToString());
 
                     if (MinutesLeft <= 0)
