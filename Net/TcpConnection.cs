@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 
@@ -157,7 +158,7 @@ namespace Uber.Net
                 return;
             }
 
-            //UberEnvironment.GetLogging().WriteLine("[" + Id + "] <-- " + Message.ToString(), LogLevel.Debug);
+            UberEnvironment.GetLogging().WriteLine("[" + Id + "] <-- " + Message.ToString(), LogLevel.Debug);
 
             SendData(Message.GetBytes());
         }
@@ -227,7 +228,12 @@ namespace Uber.Net
                 return;
             }
 
+            string Message = Encoding.UTF8.GetString(Buffer, 0, rcvBytesCount);
+
+            UberEnvironment.GetLogging().WriteLine("[" + Id + "] --> " + Message, LogLevel.Debug);
+
             byte[] toProcess = ByteUtil.ChompBytes(Buffer, 0, rcvBytesCount);
+
             RouteData(ref toProcess);
 
             WaitForData();
