@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7442A0B7-B74A-4836-9675-5EE1D69881AC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Uber</RootNamespace>
+    <AssemblyName>uberEmu</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>Resources\coffee-cup.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MySql.Data, Version=6.1.2.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\CommandParser.cs" />
+    <Compile Include="Core\ConfigurationData.cs" />
+    <Compile Include="Core\Logging.cs" />
+    <Compile Include="Core\RandomBase.cs" />
+    <Compile Include="HabboHotel\Achievements\Achievement.cs" />
+    <Compile Include="HabboHotel\Achievements\AchievementManager.cs" />
+    <Compile Include="HabboHotel\Advertisements\AdvertisementManager.cs" />
+    <Compile Include="HabboHotel\Advertisements\RoomAdvertisement.cs" />
+    <Compile Include="HabboHotel\Catalogs\Catalog.cs" />
+    <Compile Include="HabboHotel\Catalogs\CatalogItem.cs" />
+    <Compile Include="HabboHotel\Catalogs\CatalogPage.cs" />
+    <Compile Include="HabboHotel\Catalogs\EcotronReward.cs" />
+    <Compile Include="HabboHotel\Catalogs\Marketplace.cs" />
+    <Compile Include="HabboHotel\Catalogs\VoucherHandler.cs" />
+    <Compile Include="HabboHotel\GameClients\GameClient.cs" />
+    <Compile Include="HabboHotel\GameClients\GameClientManager.cs" />
+    <Compile Include="HabboHotel\Game.cs" />
+    <Compile Include="HabboHotel\GameClients\GameClientManagerExtension.cs" />
+    <Compile Include="HabboHotel\Items\FurniInteractor.cs" />
+    <Compile Include="HabboHotel\Items\MoodlightData.cs" />
+    <Compile Include="HabboHotel\Items\RoomItem.cs" />
+    <Compile Include="HabboHotel\Items\TeleHandler.cs" />
+    <Compile Include="HabboHotel\Items\UserItem.cs" />
+    <Compile Include="HabboHotel\Misc\AntiMutant.cs" />
+    <Compile Include="HabboHotel\Misc\LowPriorityWorker.cs" />
+    <Compile Include="HabboHotel\Navigators\FlatCat.cs" />
+    <Compile Include="HabboHotel\Pathfinding\Pathfinder.cs" />
+    <Compile Include="HabboHotel\Pets\Pet.cs" />
+    <Compile Include="HabboHotel\RoomBots\BotAI.cs" />
+    <Compile Include="HabboHotel\RoomBots\BotManager.cs" />
+    <Compile Include="HabboHotel\RoomBots\BotResponse.cs" />
+    <Compile Include="HabboHotel\RoomBots\PetBot.cs" />
+    <Compile Include="HabboHotel\RoomBots\GenericBot.cs" />
+    <Compile Include="HabboHotel\RoomBots\GuideBot.cs" />
+    <Compile Include="HabboHotel\RoomBots\RandomSpeech.cs" />
+    <Compile Include="HabboHotel\RoomBots\RoomBot.cs" />
+    <Compile Include="HabboHotel\Rooms\Trade.cs" />
+    <Compile Include="HabboHotel\Pathfinding\Coord.cs" />
+    <Compile Include="HabboHotel\Pathfinding\ShitPathfinder.cs" />
+    <Compile Include="HabboHotel\Support\HelpCategory.cs" />
+    <Compile Include="HabboHotel\Support\HelpTool.cs" />
+    <Compile Include="HabboHotel\Support\HelpTopic.cs" />
+    <Compile Include="HabboHotel\Items\Item.cs" />
+    <Compile Include="HabboHotel\Items\ItemManager.cs" />
+    <Compile Include="HabboHotel\Misc\ChatCommandHandler.cs" />
+    <Compile Include="HabboHotel\Misc\PixelManager.cs" />
+    <Compile Include="HabboHotel\Support\ModerationBan.cs" />
+    <Compile Include="HabboHotel\Support\ModerationBanException.cs" />
+    <Compile Include="HabboHotel\Support\ModerationBanManager.cs" />
+    <Compile Include="HabboHotel\Support\ModerationTool.cs" />
+    <Compile Include="HabboHotel\Support\SupportTicket.cs" />
+    <Compile Include="HabboHotel\Navigators\Navigator.cs" />
+    <Compile Include="HabboHotel\Navigators\PublicItem.cs" />
+    <Compile Include="HabboHotel\Navigators\VoucherHandler.cs" />
+    <Compile Include="HabboHotel\Pathfinding\Rotation.cs" />
+    <Compile Include="HabboHotel\Roles\Role.cs" />
+    <Compile Include="HabboHotel\Roles\RoleManager.cs" />
+    <Compile Include="HabboHotel\Rooms\Room.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomData.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomEvent.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomIcon.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomManager.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomModel.cs" />
+    <Compile Include="HabboHotel\Rooms\RoomUser.cs" />
+    <Compile Include="HabboHotel\Users\Authenticator\Authenticator.cs" />
+    <Compile Include="HabboHotel\Users\Authenticator\IncorrectLoginException.cs" />
+    <Compile Include="HabboHotel\Users\Badges\Badge.cs" />
+    <Compile Include="HabboHotel\Users\Badges\BadgeComponent.cs" />
+    <Compile Include="HabboHotel\Users\Inventory\AvatarEffectsInventoryComponent.cs" />
+    <Compile Include="HabboHotel\Users\Inventory\InventoryComponent.cs" />
+    <Compile Include="HabboHotel\Users\Inventory\AvatarEffect.cs" />
+    <Compile Include="HabboHotel\Users\Messenger\HabboMessenger.cs" />
+    <Compile Include="HabboHotel\Users\Messenger\MessengerBuddy.cs" />
+    <Compile Include="HabboHotel\Users\Messenger\MessengerRequest.cs" />
+    <Compile Include="HabboHotel\Users\Subscriptions\Subscription.cs" />
+    <Compile Include="HabboHotel\Users\Subscriptions\SubscriptionManager.cs" />
+    <Compile Include="Messages\GameClientMessageHander.cs" />
+    <Compile Include="HabboHotel\Users\Habbo.cs" />
+    <Compile Include="HabboHotel\Misc\CrossdomainPolicy.cs" />
+    <Compile Include="Messages\ClientMessage.cs" />
+    <Compile Include="Messages\Requests\Catalog.cs" />
+    <Compile Include="Messages\Requests\Rooms.cs" />
+    <Compile Include="Messages\Requests\Navigator.cs" />
+    <Compile Include="Messages\Requests\Help.cs" />
+    <Compile Include="Messages\Requests\Messenger.cs" />
+    <Compile Include="Messages\Requests\Users.cs" />
+    <Compile Include="Messages\Requests\Handshake.cs" />
+    <Compile Include="Messages\Requests\Global.cs" />
+    <Compile Include="Messages\ServerMessage.cs" />
+    <Compile Include="Net\MusSocket.cs" />
+    <Compile Include="Net\TcpConnection.cs" />
+    <Compile Include="Net\TcpConnectionFactory.cs" />
+    <Compile Include="Net\TcpConnectionListener.cs" />
+    <Compile Include="Net\TcpConnectionManager.cs" />
+    <Compile Include="Plugins\PluginHandler.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\Database.cs" />
+    <Compile Include="UberEnvironment.cs" />
+    <Compile Include="Util\Base64Encoding.cs" />
+    <Compile Include="Util\ByteUtil.cs" />
+    <Compile Include="Util\HabboHexRC4.cs" />
+    <Compile Include="Util\OldWireEncoding.cs" />
+    <Compile Include="Util\WireEncoding.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\coffee-cup.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.VisualBasic.PowerPacks.10.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Visual Basic PowerPacks 10.0</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary1\PluginInterface.csproj">
+      <Project>{1E4B7636-E0F2-44B0-AC74-2CC51B6B53D1}</Project>
+      <Name>PluginInterface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="uber-config.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
