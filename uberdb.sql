@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `bantype` enum('user','ip') NOT NULL DEFAULT 'user',
   `value` varchar(50) NOT NULL,
   `reason` text NOT NULL,
-  `expire` long NOT NULL DEFAULT '0',
+  `expire` BIGINT NOT NULL DEFAULT '0',
   `added_by` varchar(50) NOT NULL,
   `added_date` varchar(50) NOT NULL,
   `appeal_state` enum('0','1','2') NOT NULL DEFAULT '1',
