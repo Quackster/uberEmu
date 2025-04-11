@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using Uber.Core;
 
 namespace Uber.Net
 {
@@ -83,7 +82,7 @@ namespace Uber.Net
                 return;
             }
 
-            //UberEnvironment.GetLogging().WriteLine("Dropped connection [" + Id + "/" + Connection.IPAddress + "]", Uber.Core.LogLevel.Debug);
+            UberEnvironment.GetLogging().WriteLine("Dropped connection [" + Id + "/" + Connection.IPAddress + "]", LogLevel.Debug);
 
             Connection.Stop();
             Connections.TryRemove(Id, out var _);
