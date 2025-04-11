@@ -9,6 +9,7 @@ using Uber.HabboHotel.GameClients;
 using Uber.Messages;
 using Uber.Storage;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Uber.HabboHotel.Navigators
 {
@@ -36,7 +37,7 @@ namespace Uber.HabboHotel.Navigators
             {
                 dPubCats = dbClient.ReadDataTable("SELECT id,caption FROM navigator_pubcats WHERE enabled = '1'");
                 dPrivCats = dbClient.ReadDataTable("SELECT id,caption,min_rank FROM navigator_flatcats WHERE enabled = '1'");
-                dPubItems = dbClient.ReadDataTable("SELECT id,bannertype,caption,image,image_type,room_id,category_id,category_parent_id FROM navigator_publics ORDER BY ordernum ASC");
+                dPubItems = dbClient.ReadDataTable("SELECT id,bannertype,caption,image,image_type,room_id,category_id,category_parent_id,ordernum FROM navigator_publics ORDER BY ordernum ASC");
             }
 
             if (dPubCats != null)
@@ -61,7 +62,7 @@ namespace Uber.HabboHotel.Navigators
                 {
                     PublicItems.TryAdd((int)Row["id"], new PublicItem((int)Row["id"], int.Parse(Row["bannertype"].ToString()), (string)Row["caption"],
                         (string)Row["image"], ((Row["image_type"].ToString().ToLower() == "internal") ? PublicImageType.INTERNAL : PublicImageType.EXTERNAL),
-                        (uint)Row["room_id"], (int)Row["category_id"], (int)Row["category_parent_id"]));
+                        (uint)Row["room_id"], (int)Row["category_id"], (int)Row["category_parent_id"], (int)Row["ordernum"]));
                 }
             }
         }
@@ -83,13 +84,13 @@ namespace Uber.HabboHotel.Navigators
 
         public FlatCat GetFlatCat(int Id)
         {
-                foreach (FlatCat FlatCat in PrivateCategories.Values)
+            foreach (FlatCat FlatCat in PrivateCategories.Values)
+            {
+                if (FlatCat.Id == Id)
                 {
-                    if (FlatCat.Id == Id)
-                    {
-                        return FlatCat;
-                    }
+                    return FlatCat;
                 }
+            }
 
             return null;
         }
@@ -120,13 +121,15 @@ namespace Uber.HabboHotel.Navigators
             // GBPAS[Cafes and RestaurantsPQLounges and Entertainment[{APubs and ClubsQQOutside Spaces & Swimming PoolsQA
             // GBSP[DlHDe Elfstedentocht!officialrooms_nl/schaats_official_rooms.gifHPFJiUp`RHElfstedentocht - 1 - STARTElfstedentochtHPFQFBinnenkort - De Elfstedentocht!HHXZHHHHHHHYElHHabbo Hotel Werkvloerofficialrooms_nl/exec_official_rooms.gifHRLJiouUWHHabbo Hotel WerkvloerCrowleyHRLRLHHZWHHHHHHYFlDe Ontva
 
-            ServerMessage Frontpage = new ServerMessage(450);            
+            var publicItems = new List<PublicItem>(PublicItems.Values).OrderBy(x => x.OrderId).ToList();
+
+            ServerMessage Frontpage = new ServerMessage(450);
             Frontpage.AppendInt32(GetCountForParent(-1));
 
-                foreach (PublicItem Pub in PublicItems.Values)
-                {
-                    Pub.Serialize(Frontpage);
-                }
+            foreach (PublicItem Pub in publicItems)
+            {
+                Pub.Serialize(Frontpage);
+            }
 
             return Frontpage;
         }
@@ -246,9 +249,9 @@ namespace Uber.HabboHotel.Navigators
 
             List<KeyValuePair<string, int>> SortedTags = new List<KeyValuePair<string, int>>(Tags);
 
-            SortedTags.Sort (
+            SortedTags.Sort(
 
-                delegate(KeyValuePair<string, int> firstPair,
+                delegate (KeyValuePair<string, int> firstPair,
 
                 KeyValuePair<string, int> nextPair)
                 {
@@ -353,17 +356,17 @@ namespace Uber.HabboHotel.Navigators
 
                         List<uint> FriendRooms = new List<uint>();
 
-                            foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
+                        foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
+                        {
+                            GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);
+
+                            if (Client == null || Client.GetHabbo() == null || Client.GetHabbo().CurrentRoomId <= 0)
                             {
-                                GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);
-
-                                if (Client == null || Client.GetHabbo() == null || Client.GetHabbo().CurrentRoomId <= 0)
-                                {
-                                    continue;
-                                }
-
-                                FriendRooms.Add(Client.GetHabbo().CurrentRoomId);
+                                continue;
                             }
+
+                            FriendRooms.Add(Client.GetHabbo().CurrentRoomId);
+                        }
 
                         StringBuilder _Query = new StringBuilder("SELECT * FROM rooms WHERE");
 
@@ -396,18 +399,18 @@ namespace Uber.HabboHotel.Navigators
 
                     case -4:
 
-                        ConcurrentDictionary<uint, string> FriendsNames = new ConcurrentDictionary<uint, string>();
+                        SynchronizedCollection<string> FriendsNames = new SynchronizedCollection<string>();
 
-                            foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
-                            {
-                                FriendsNames.TryAdd(Buddy.Id, Buddy.Username);
-                            }
+                        foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
+                        {
+                            FriendsNames.Add(Buddy.Username);
+                        }
 
                         StringBuilder Query = new StringBuilder("SELECT * FROM rooms WHERE");
 
                         int i = 0;
 
-                        foreach (string Name in FriendsNames.Values)
+                        foreach (string Name in FriendsNames)
                         {
                             if (i > 0)
                             {

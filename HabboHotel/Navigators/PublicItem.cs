@@ -25,6 +25,7 @@ namespace Uber.HabboHotel.Navigators
         public int CategoryId;
 
         public int ParentId;
+        public int OrderId;
 
         public int Id
         {
@@ -60,7 +61,7 @@ namespace Uber.HabboHotel.Navigators
             }
         }
 
-        public PublicItem(int Id, int Type, string Caption, string Image, PublicImageType ImageType, uint RoomId, int CategoryId, int ParentId)
+        public PublicItem(int Id, int Type, string Caption, string Image, PublicImageType ImageType, uint RoomId, int CategoryId, int ParentId, int OrderId)
         {
             this.BannerId = Id;
             this.Type = Type;
@@ -70,6 +71,7 @@ namespace Uber.HabboHotel.Navigators
             this.RoomId = RoomId;
             this.CategoryId = CategoryId;
             this.ParentId = ParentId;
+            this.OrderId = OrderId;
         }
 
         public void Serialize(ServerMessage Message)
