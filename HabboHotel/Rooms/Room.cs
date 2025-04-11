@@ -728,6 +728,12 @@ namespace Uber.HabboHotel.Rooms
         {
             int i = 0;
 
+            if (!KeepAlive)
+            {
+                // Don't bother processing a room if it should be DEAD! - Quackster
+                return;
+            }
+
             // Loop through all furni and process them if they want to be processed
             foreach (RoomItem Item in Items.Values)
             {
