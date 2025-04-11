@@ -6666,7 +6666,7 @@ CREATE TABLE IF NOT EXISTS `rooms` (
   `allow_pets_eat` enum('0','1') NOT NULL DEFAULT '0',
   `allow_walkthrough` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5520 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=100 ;
 
 --
 -- Dumping data for table `rooms`
