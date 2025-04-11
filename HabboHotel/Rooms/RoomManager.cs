@@ -319,7 +319,7 @@ namespace Uber.HabboHotel.Rooms
                 dbClient.AddParamWithValue("caption", Name);
                 dbClient.AddParamWithValue("model", Model);
                 dbClient.AddParamWithValue("username", Session.GetHabbo().Username);
-                dbClient.ExecuteQuery("INSERT INTO rooms (roomtype,caption,owner,model_name) VALUES ('private',@caption,@username,@model)");
+                dbClient.ExecuteQuery("INSERT INTO rooms (roomtype,caption,owner,model_name,description, public_ccts, password, tags) VALUES ('private',@caption,@username,@model,'',NULL,NULL,'')");
             }
 
             uint RoomId = 0;

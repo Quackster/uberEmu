@@ -16,13 +16,13 @@ namespace Uber.HabboHotel.Rooms
         public string Description;
         public string Type;
         public string Owner;
-        public string Password;
+        public string? Password;
         public int State;
         public int Category;
         public int UsersNow;
         public int UsersMax;
         public string ModelName;
-        public string CCTs;
+        public string? CCTs;
         public int Score;
         public SynchronizedCollection<string> Tags;
         public bool AllowPets;
@@ -129,13 +129,13 @@ namespace Uber.HabboHotel.Rooms
             this.UsersNow = (int)Row["users_now"];
             this.UsersMax = (int)Row["users_max"];
             this.ModelName = (string)Row["model_name"];
-            this.CCTs = (string)Row["public_ccts"];
+            this.CCTs = Row["public_ccts"] != DBNull.Value ? (string)Row["public_ccts"] : null;
             this.Score = (int)Row["score"];
             this.Tags = new SynchronizedCollection<string>();
             this.AllowPets = UberEnvironment.EnumToBool(Row["allow_pets"].ToString());
             this.AllowPetsEating = UberEnvironment.EnumToBool(Row["allow_pets_eat"].ToString());
             this.AllowWalkthrough = UberEnvironment.EnumToBool(Row["allow_walkthrough"].ToString());
-            this.Password = (string)Row["password"];
+            this.Password = Row["password"] != DBNull.Value ? (string)Row["password"] : null;
             this.Wallpaper = (string)Row["wallpaper"];
             this.Floor = (string)Row["floor"];
             this.Landscape = (string)Row["landscape"];
@@ -143,7 +143,7 @@ namespace Uber.HabboHotel.Rooms
 
             ConcurrentDictionary<int, int> IconItems = new ConcurrentDictionary<int,int>();
 
-            if (Row["icon_items"].ToString() != "")
+            if (Row["icon_items"] != DBNull.Value && Row["icon_items"].ToString() != "")
             {
                 foreach (string Bit in Row["icon_items"].ToString().Split('|'))
                 {
