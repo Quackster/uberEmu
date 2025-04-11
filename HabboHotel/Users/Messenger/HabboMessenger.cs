@@ -14,21 +14,21 @@ namespace Uber.HabboHotel.Users.Messenger
     {
         private uint UserId;
 
-        private List<MessengerBuddy> Buddies;
-        private List<MessengerRequest> Requests;
+        private SynchronizedCollection<MessengerBuddy> Buddies;
+        private SynchronizedCollection<MessengerRequest> Requests;
 
         public bool AppearOffline;
 
         public HabboMessenger(uint UserId)
         {
-            this.Buddies = new List<MessengerBuddy>();
-            this.Requests = new List<MessengerRequest>();
+            this.Buddies = new SynchronizedCollection<MessengerBuddy>();
+            this.Requests = new SynchronizedCollection<MessengerRequest>();
             this.UserId = UserId;
         }
 
         public void LoadBuddies()
         {
-            Buddies = new List<MessengerBuddy>();
+            Buddies = new SynchronizedCollection<MessengerBuddy>();
             DataTable Data = null;
 
             using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
@@ -49,7 +49,7 @@ namespace Uber.HabboHotel.Users.Messenger
 
         public void LoadRequests()
         {
-            Requests = new List<MessengerRequest>();
+            Requests = new SynchronizedCollection<MessengerRequest>();
             DataTable Data = null;
 
             using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
@@ -80,9 +80,17 @@ namespace Uber.HabboHotel.Users.Messenger
 
         public MessengerRequest GetRequest(uint RequestId)
         {
-            lock (this.Requests)
+            foreach (MessengerRequest Request in Requests)
             {
-                List<MessengerRequest>.Enumerator eRequests = this.Requests.GetEnumerator();
+                if (Request.RequestId == RequestId)
+                {
+                    return Request;
+                }
+            }
+            /*
+            badlock (this.Requests)
+            {
+                ConcurrentDictionary<MessengerRequest>.Enumerator eRequests = this.Requests.GetEnumerator();
 
                 while (eRequests.MoveNext())
                 {
@@ -93,16 +101,17 @@ namespace Uber.HabboHotel.Users.Messenger
                         return Request;
                     }
                 }
-            }
+            }*/
 
             return null;
         }
 
         public void OnStatusChanged(bool instantUpdate)
         {
-            lock (this.Buddies)
+            /*
+            badlock (this.Buddies)
             {
-                List<MessengerBuddy>.Enumerator eBuddies = this.Buddies.GetEnumerator();
+                ConcurrentDictionary<MessengerBuddy>.Enumerator eBuddies = this.Buddies.GetEnumerator();
 
                 while (eBuddies.MoveNext())
                 {
@@ -121,24 +130,34 @@ namespace Uber.HabboHotel.Users.Messenger
                         Client.GetHabbo().GetMessenger().ForceUpdate();
                     }
                 }
+            }*/
+
+            foreach (MessengerBuddy Buddy in this.Buddies)
+            {
+                GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);
+
+                if (Client == null || Client.GetHabbo() == null || Client.GetHabbo().GetMessenger() == null)
+                {
+                    continue;
+                }
+
+                Client.GetHabbo().GetMessenger().SetUpdateNeeded(UserId);
+
+                if (instantUpdate)
+                {
+                    Client.GetHabbo().GetMessenger().ForceUpdate();
+                }
             }
         }
 
         public bool SetUpdateNeeded(uint UserId)
         {
-            lock (this.Buddies)
+            foreach (MessengerBuddy Buddy in this.Buddies)
             {
-                List<MessengerBuddy>.Enumerator eBuddies = this.Buddies.GetEnumerator();
-
-                while (eBuddies.MoveNext())
+                if (Buddy.Id == UserId)
                 {
-                    MessengerBuddy Buddy = eBuddies.Current;
-
-                    if (Buddy.Id == UserId)
-                    {
-                        Buddy.UpdateNeeded = true;
-                        return true;
-                    }
+                    Buddy.UpdateNeeded = true;
+                    return true;
                 }
             }
 
@@ -268,15 +287,12 @@ namespace Uber.HabboHotel.Users.Messenger
 
         public void OnDestroyFriendship(uint Friend)
         {
-            lock (Buddies)
+            foreach (MessengerBuddy Buddy in Buddies)
             {
-                foreach (MessengerBuddy Buddy in Buddies)
+                if (Buddy.Id == Friend)
                 {
-                    if (Buddy.Id == Friend)
-                    {
-                        Buddies.Remove(Buddy);
-                        break;
-                    }
+                    Buddies.Remove(Buddy);
+                    break;
                 }
             }
 
@@ -422,13 +438,10 @@ namespace Uber.HabboHotel.Users.Messenger
             Friends.AppendBoolean(false);
             Friends.AppendInt32(Buddies.Count);
 
-            lock (Buddies)
-            {
                 foreach (MessengerBuddy Buddy in Buddies)
                 {
                     Buddy.Serialize(Friends, false);
                 }
-            }
 
             return Friends;
         }
@@ -438,16 +451,13 @@ namespace Uber.HabboHotel.Users.Messenger
             List<MessengerBuddy> UpdateBuddies = new List<MessengerBuddy>();
             int UpdateCount = 0;
 
-            lock (Buddies)
+            foreach (MessengerBuddy Buddy in this.Buddies)
             {
-                foreach (MessengerBuddy Buddy in Buddies)
+                if (Buddy.UpdateNeeded)
                 {
-                    if (Buddy.UpdateNeeded)
-                    {
-                        UpdateCount++;
-                        UpdateBuddies.Add(Buddy);
-                        Buddy.UpdateNeeded = false;
-                    }
+                    UpdateCount++;
+                    UpdateBuddies.Add(Buddy);
+                    Buddy.UpdateNeeded = false;
                 }
             }
 
@@ -471,13 +481,10 @@ namespace Uber.HabboHotel.Users.Messenger
             Reqs.AppendInt32(Requests.Count);
             Reqs.AppendInt32(Requests.Count);
 
-            lock (Requests)
-            {
                 foreach (MessengerRequest Request in Requests)
                 {
                     Request.Serialize(Reqs);
                 }
-            }
 
             return Reqs;
         }
@@ -534,7 +541,7 @@ namespace Uber.HabboHotel.Users.Messenger
             return UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
         }
 
-        public List<MessengerBuddy> GetBuddies()
+        public SynchronizedCollection<MessengerBuddy> GetBuddies()
         {
             return Buddies;
         }

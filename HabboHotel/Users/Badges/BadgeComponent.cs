@@ -11,7 +11,7 @@ namespace Uber.HabboHotel.Users.Badges
 {
     class BadgeComponent
     {
-        private List<Badge> Badges;
+        private SynchronizedCollection<Badge> Badges;
         private uint UserId;
 
         public int Count
@@ -28,24 +28,21 @@ namespace Uber.HabboHotel.Users.Badges
             {
                 int i = 0;
 
-                lock (Badges)
+                foreach (Badge Badge in Badges)
                 {
-                    foreach (Badge Badge in Badges)
+                    if (Badge.Slot <= 0)
                     {
-                        if (Badge.Slot <= 0)
-                        {
-                            continue;
-                        }
-
-                        i++;
+                        continue;
                     }
+
+                    i++;
                 }
 
                 return i;
             }
         }
 
-        public List<Badge> BadgeList
+        public SynchronizedCollection<Badge> BadgeList
         {
             get
             {
@@ -55,14 +52,12 @@ namespace Uber.HabboHotel.Users.Badges
 
         public BadgeComponent(uint UserId)
         {
-            this.Badges = new List<Badge>();
+            this.Badges = new SynchronizedCollection<Badge>();
             this.UserId = UserId;
         }
 
         public Badge GetBadge(string Badge)
         {
-            lock (Badges)
-            {
                 foreach (Badge B in Badges)
                 {
                     if (Badge.ToLower() == B.Code.ToLower())
@@ -70,7 +65,6 @@ namespace Uber.HabboHotel.Users.Badges
                         return B;
                     }
                 }
-            }
 
             return null;
         }
@@ -122,12 +116,9 @@ namespace Uber.HabboHotel.Users.Badges
 
         public void ResetSlots()
         {
-            lock (Badges)
+            foreach (Badge Badge in Badges)
             {
-                foreach (Badge Badge in Badges)
-                {
-                    Badge.Slot = 0;
-                }
+                Badge.Slot = 0;
             }
         }
 
@@ -169,13 +160,11 @@ namespace Uber.HabboHotel.Users.Badges
 
         public ServerMessage Serialize()
         {
-            List<Badge> EquippedBadges = new List<Badge>();
+            SynchronizedCollection<Badge> EquippedBadges = new SynchronizedCollection<Badge>();
 
             ServerMessage Message = new ServerMessage(229);
             Message.AppendInt32(Count);
 
-            lock (Badges)
-            {
                 foreach (Badge Badge in Badges)
                 {
                     Message.AppendStringWithBreak(Badge.Code);
@@ -185,7 +174,6 @@ namespace Uber.HabboHotel.Users.Badges
                         EquippedBadges.Add(Badge);
                     }
                 }
-            }
 
             Message.AppendInt32(EquippedBadges.Count);
 

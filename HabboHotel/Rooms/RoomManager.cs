@@ -8,6 +8,7 @@ using System.Threading;
 using Uber.HabboHotel.Items;
 using Uber.HabboHotel.GameClients;
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Rooms
 {
@@ -15,12 +16,12 @@ namespace Uber.HabboHotel.Rooms
     {
         public readonly int MAX_PETS_PER_ROOM = 15;
 
-        private Dictionary<uint, Room> Rooms;
-        private Dictionary<string, RoomModel> Models;
-        private List<TeleUserData> TeleActions;
+        private ConcurrentDictionary<uint, Room> Rooms;
+        private ConcurrentDictionary<string, RoomModel> Models;
+        private SynchronizedCollection<TeleUserData> TeleActions;
         private Thread EngineThread;
 
-        private List<uint> RoomsToUnload;
+        private SynchronizedCollection<uint> RoomsToUnload;
 
         public int LoadedRoomsCount
         {
@@ -32,50 +33,42 @@ namespace Uber.HabboHotel.Rooms
 
         public RoomManager()
         {
-            this.Rooms = new Dictionary<uint, Room>();
-            this.Models = new Dictionary<string, RoomModel>();
-            this.TeleActions = new List<TeleUserData>();
+            this.Rooms = new ConcurrentDictionary<uint, Room>();
+            this.Models = new ConcurrentDictionary<string, RoomModel>();
+            this.TeleActions = new SynchronizedCollection<TeleUserData>();
 
             this.EngineThread = new Thread(ProcessEngine);
             this.EngineThread.Name = "Room Engine";
             this.EngineThread.Priority = ThreadPriority.AboveNormal;
             this.EngineThread.Start();
 
-            this.RoomsToUnload = new List<uint>();
+            this.RoomsToUnload = new SynchronizedCollection<uint>();
         }
 
         public void AddTeleAction(TeleUserData Act)
         {
-            lock (this.TeleActions)
-            {
-                this.TeleActions.Add(Act);
-            }
+            this.TeleActions.Add(Act);
         }
 
         public List<Room> GetEventRoomsForCategory(int Category)
         {
             List<Room> EventRooms = new List<Room>();
 
-            lock (this.Rooms)
+            foreach (var kvp in this.Rooms)
             {
-                Dictionary<uint, Room>.Enumerator eRooms = this.Rooms.GetEnumerator();
+                Room Room = kvp.Value;
 
-                while (eRooms.MoveNext())
+                if (Room.Event == null)
                 {
-                    Room Room = eRooms.Current.Value;
-
-                    if (Room.Event == null)
-                    {
-                        continue;
-                    }
-
-                    if (Category > 0 && Room.Event.Category != Category)
-                    {
-                        continue;
-                    }
-
-                    EventRooms.Add(Room);
+                    continue;
                 }
+
+                if (Category > 0 && Room.Event.Category != Category)
+                {
+                    continue;
+                }
+
+                EventRooms.Add(Room);
             }
 
             return EventRooms;
@@ -91,36 +84,34 @@ namespace Uber.HabboHotel.Rooms
 
                 try
                 {
-                    lock (this.Rooms)
+                    foreach (var kvp in this.Rooms)
                     {
-                        Dictionary<uint, Room>.Enumerator eRooms = this.Rooms.GetEnumerator();
+                        Room Room = kvp.Value;
 
-                        while (eRooms.MoveNext())
+                        if (!Room.KeepAlive)
                         {
-                            Room Room = eRooms.Current.Value;
-
-                            if (!Room.KeepAlive)
-                            {
-                                continue;
-                            }
-
-                            Room.ProcessRoom();
-                        }
-                    }
-
-                    lock (this.RoomsToUnload)
-                    {
-                        foreach (uint RoomId in this.RoomsToUnload)
-                        {
-                            UnloadRoom(RoomId);
+                            continue;
                         }
 
-                        this.RoomsToUnload.Clear();
+                        Room.ProcessRoom();
                     }
 
-                    lock (this.TeleActions)
+                    foreach (uint RoomId in this.RoomsToUnload)
                     {
-                        List<TeleUserData>.Enumerator eTeleActions = this.TeleActions.GetEnumerator();
+                        UnloadRoom(RoomId);
+                    }
+
+                    this.RoomsToUnload.Clear();
+
+
+                    foreach (var eTeleActions in this.TeleActions)
+                    {
+                        eTeleActions.Execute();
+                    }
+                    /*
+                    badlock (this.TeleActions)
+                    {
+                        ConcurrentDictionary<TeleUserData>.Enumerator eTeleActions = this.TeleActions.GetEnumerator();
 
                         while (eTeleActions.MoveNext())
                         {
@@ -128,7 +119,7 @@ namespace Uber.HabboHotel.Rooms
                         }
 
                         this.TeleActions.Clear();
-                    }
+                    }*/
                 }
 
                 catch (InvalidOperationException)
@@ -175,7 +166,7 @@ namespace Uber.HabboHotel.Rooms
 
             foreach (DataRow Row in Data.Rows)
             {
-                Models.Add((string)Row["id"], new RoomModel((string)Row["id"], (int)Row["door_x"],
+                Models.TryAdd((string)Row["id"], new RoomModel((string)Row["id"], (int)Row["door_x"],
                     (int)Row["door_y"], (Double)Row["door_z"], (int)Row["door_dir"], (string)Row["heightmap"],
                     (string)Row["public_items"], UberEnvironment.EnumToBool(Row["club_only"].ToString())));
             }
@@ -259,10 +250,7 @@ namespace Uber.HabboHotel.Rooms
                 Data.UsersMax, Data.ModelName, Data.CCTs, Data.Score, Data.Tags, Data.AllowPets, Data.AllowPetsEating,
                 Data.AllowWalkthrough, Data.Icon, Data.Password, Data.Wallpaper, Data.Floor, Data.Landscape);
 
-            lock (this.Rooms)
-            {
-                Rooms.Add(Room.RoomId, Room);
-            }
+            Rooms.TryAdd(Room.RoomId, Room);
 
             Room.InitBots();
             Room.InitPets();
@@ -277,11 +265,8 @@ namespace Uber.HabboHotel.Rooms
                 return;
             }
 
-            lock (this.RoomsToUnload)
-            {
-                GetRoom(Id).KeepAlive = false;
-                RoomsToUnload.Add(Id);
-            }
+            GetRoom(Id).KeepAlive = false;
+            RoomsToUnload.Add(Id);
         }
 
         public void UnloadRoom(uint Id)
@@ -293,29 +278,21 @@ namespace Uber.HabboHotel.Rooms
                 return;
             }
 
-            lock (this.Rooms)
-            {
-                Room.Destroy();
-                Rooms.Remove(Id);
-            }
+            Room.Destroy();
+            Rooms.TryRemove(Id, out var _);
 
             UberEnvironment.GetLogging().WriteLine("[RoomMgr] Unloaded room: \"" + Room.Name + "\" (ID: " + Id + ")", Uber.Core.LogLevel.Information);
         }
 
         public Room GetRoom(uint RoomId)
         {
-            lock (this.Rooms)
+            foreach (var kvp in this.Rooms)
             {
-                Dictionary<uint, Room>.Enumerator eRooms = this.Rooms.GetEnumerator();
+                Room Room = kvp.Value;
 
-                while (eRooms.MoveNext())
+                if (Room.RoomId == RoomId)
                 {
-                    Room Room = eRooms.Current.Value;
-
-                    if (Room.RoomId == RoomId)
-                    {
-                        return Room;
-                    }
+                    return Room;
                 }
             }
 

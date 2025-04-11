@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,9 @@ namespace Uber.HabboHotel.Rooms
     {
         public int BackgroundImage;
         public int ForegroundImage;
-        public Dictionary<int, int> Items;
+        public ConcurrentDictionary<int, int> Items;
 
-        public RoomIcon(int BackgroundImage, int ForegroundImage, Dictionary<int, int> Items)
+        public RoomIcon(int BackgroundImage, int ForegroundImage, ConcurrentDictionary<int, int> Items)
         {
             this.BackgroundImage = BackgroundImage;
             this.ForegroundImage = ForegroundImage;
@@ -26,13 +27,10 @@ namespace Uber.HabboHotel.Rooms
             Message.AppendInt32(ForegroundImage);
             Message.AppendInt32(Items.Count);
 
-            lock (Items)
+            foreach (KeyValuePair<int, int> Item in Items)
             {
-                foreach (KeyValuePair<int, int> Item in Items)
-                {
-                    Message.AppendInt32(Item.Key);
-                    Message.AppendInt32(Item.Value);
-                }
+                Message.AppendInt32(Item.Key);
+                Message.AppendInt32(Item.Value);
             }
         }
     }

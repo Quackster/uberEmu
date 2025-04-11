@@ -17,19 +17,14 @@ namespace Uber.HabboHotel.GameClients
         {
             List<uint> ToRemove = new List<uint>();
 
-            lock (this.Clients)
+            foreach (var kvp in this.Clients)
             {
-                Dictionary<uint, GameClient>.Enumerator eClients = this.Clients.GetEnumerator();
+                GameClient Client = kvp.Value;
 
-                while (eClients.MoveNext())
+                if (Client.GetHabbo() != null && Client.GetHabbo().Username.ToLower() == Username.ToLower())
                 {
-                    GameClient Client = eClients.Current.Value;
-
-                    if (Client.GetHabbo() != null && Client.GetHabbo().Username.ToLower() == Username.ToLower())
-                    {
-                        ToRemove.Add(Client.ClientId);
-                        continue;
-                    }
+                    ToRemove.Add(Client.ClientId);
+                    continue;
                 }
             }
 
@@ -65,66 +60,56 @@ namespace Uber.HabboHotel.GameClients
 
         public void DeployHotelCreditsUpdate()
         {
-            lock (this.Clients)
+            foreach (var kvp in this.Clients)
             {
-                Dictionary<uint, GameClient>.Enumerator eClients = this.Clients.GetEnumerator();
+                GameClient Client = kvp.Value;
 
-                while (eClients.MoveNext())
+                if (Client.GetHabbo() == null)
                 {
-                    GameClient Client = eClients.Current.Value;
+                    continue;
+                }
 
-                    if (Client.GetHabbo() == null)
-                    {
-                        continue;
-                    }
+                int newCredits = 0;
 
-                    int newCredits = 0;
+                using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
+                {
+                    newCredits = (int)dbClient.ReadDataRow("SELECT credits FROM users WHERE id = '" + Client.GetHabbo().Id + "' LIMIT 1")[0];
+                }
 
-                    using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
-                    {
-                        newCredits = (int)dbClient.ReadDataRow("SELECT credits FROM users WHERE id = '" + Client.GetHabbo().Id + "' LIMIT 1")[0];
-                    }
+                int oldBalance = Client.GetHabbo().Credits;
 
-                    int oldBalance = Client.GetHabbo().Credits;
+                Client.GetHabbo().Credits = newCredits;
 
-                    Client.GetHabbo().Credits = newCredits;
-
-                    if (oldBalance < 3000)
-                    {
-                        Client.GetHabbo().UpdateCreditsBalance(false);
-                        Client.SendNotif("Uber Credits Update" + Convert.ToChar(13) + "-----------------------------------" + Convert.ToChar(13) + "We have refilled your credits up to 3000 - enjoy! The next credits update will occur in 3 hours.", "http://uber.meth0d.org/credits");
-                    }
-                    else if (oldBalance >= 3000)
-                    {
-                        Client.SendNotif("Uber Credits Update" + Convert.ToChar(13) + "-----------------------------------" + Convert.ToChar(13) + "Sorry! Because your credit balance is 3000 or higher, we have not refilled your credits. The next credits update will occur in 3 hours.", "http://uber.meth0d.org/credits");
-                    }
+                if (oldBalance < 3000)
+                {
+                    Client.GetHabbo().UpdateCreditsBalance(false);
+                    Client.SendNotif("Uber Credits Update" + Convert.ToChar(13) + "-----------------------------------" + Convert.ToChar(13) + "We have refilled your credits up to 3000 - enjoy! The next credits update will occur in 3 hours.", "http://uber.meth0d.org/credits");
+                }
+                else if (oldBalance >= 3000)
+                {
+                    Client.SendNotif("Uber Credits Update" + Convert.ToChar(13) + "-----------------------------------" + Convert.ToChar(13) + "Sorry! Because your credit balance is 3000 or higher, we have not refilled your credits. The next credits update will occur in 3 hours.", "http://uber.meth0d.org/credits");
                 }
             }
         }
-
         public void CheckForAllBanConflicts()
         {
             Dictionary<GameClient, ModerationBanException> ConflictsFound = new Dictionary<GameClient, ModerationBanException>();
 
-            lock (this.Clients)
+            foreach (var kvp in this.Clients)
             {
-                Dictionary<uint, GameClient>.Enumerator eClients = this.Clients.GetEnumerator();
+                GameClient Client = kvp.Value;
 
-                while (eClients.MoveNext())
+                try
                 {
-                    GameClient Client = eClients.Current.Value;
+                    UberEnvironment.GetGame().GetBanManager().CheckForBanConflicts(Client);
+                }
 
-                    try
-                    {
-                        UberEnvironment.GetGame().GetBanManager().CheckForBanConflicts(Client);
-                    }
-
-                    catch (ModerationBanException e)
-                    {
-                        ConflictsFound.Add(Client, e);
-                    }
+                catch (ModerationBanException e)
+                {
+                    ConflictsFound.Add(Client, e);
                 }
             }
+
 
             foreach (KeyValuePair<GameClient, ModerationBanException> Data in ConflictsFound)
             {
@@ -137,21 +122,16 @@ namespace Uber.HabboHotel.GameClients
         {
             try
             {
-                lock (this.Clients)
+                foreach (var kvp in this.Clients)
                 {
-                    Dictionary<uint, GameClient>.Enumerator eClients = this.Clients.GetEnumerator();
+                    GameClient Client = kvp.Value;
 
-                    while (eClients.MoveNext())
+                    if (Client.GetHabbo() == null || !UberEnvironment.GetGame().GetPixelManager().NeedsUpdate(Client))
                     {
-                        GameClient Client = eClients.Current.Value;
-
-                        if (Client.GetHabbo() == null || !UberEnvironment.GetGame().GetPixelManager().NeedsUpdate(Client))
-                        {
-                            continue;
-                        }
-
-                        UberEnvironment.GetGame().GetPixelManager().GivePixels(Client);
+                        continue;
                     }
+
+                    UberEnvironment.GetGame().GetPixelManager().GivePixels(Client);
                 }
             }
 

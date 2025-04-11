@@ -11,11 +11,11 @@ namespace Uber.HabboHotel.Support
 {
     class ModerationBanManager
     {
-        public List<ModerationBan> Bans;
+        public SynchronizedCollection<ModerationBan> Bans;
 
         public ModerationBanManager()
         {
-            Bans = new List<ModerationBan>();
+            Bans = new SynchronizedCollection<ModerationBan>();
         }
 
         public void LoadBans()
@@ -49,26 +49,23 @@ namespace Uber.HabboHotel.Support
 
         public void CheckForBanConflicts(GameClient Client)
         {
-            lock (Bans)
+            foreach (ModerationBan Ban in Bans)
             {
-                foreach (ModerationBan Ban in Bans)
+                if (Ban.Expired)
                 {
-                    if (Ban.Expired)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (Ban.Type == ModerationBanType.IP && Client.GetConnection().IPAddress == Ban.Variable)
+                if (Ban.Type == ModerationBanType.IP && Client.GetConnection().IPAddress == Ban.Variable)
+                {
+                    throw new ModerationBanException(Ban.ReasonMessage);
+                }
+
+                if (Client.GetHabbo() != null)
+                {
+                    if (Ban.Type == ModerationBanType.USERNAME && Client.GetHabbo().Username.ToLower() == Ban.Variable.ToLower())
                     {
                         throw new ModerationBanException(Ban.ReasonMessage);
-                    }
-
-                    if (Client.GetHabbo() != null)
-                    {
-                        if (Ban.Type == ModerationBanType.USERNAME && Client.GetHabbo().Username.ToLower() == Ban.Variable.ToLower())
-                        {
-                            throw new ModerationBanException(Ban.ReasonMessage);
-                        }
                     }
                 }
             }

@@ -6,21 +6,22 @@ using System.Data;
 
 using Uber.HabboHotel.Rooms;
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.RoomBots
 {
     class BotManager
     {
-        private List<RoomBot> Bots;
+        private SynchronizedCollection<RoomBot> Bots;
 
         public BotManager()
         {
-            Bots = new List<RoomBot>();
+            Bots = new SynchronizedCollection<RoomBot>();
         }
 
         public void LoadBots()
         {
-            Bots = new List<RoomBot>();
+            Bots = new SynchronizedCollection<RoomBot>();
 
             DataTable Data = null;
 
@@ -51,14 +52,11 @@ namespace Uber.HabboHotel.RoomBots
         {
             List<RoomBot> List = new List<RoomBot>();
 
-            lock (Bots)
+            foreach (RoomBot Bot in Bots)
             {
-                foreach (RoomBot Bot in Bots)
+                if (Bot.RoomId == RoomId)
                 {
-                    if (Bot.RoomId == RoomId)
-                    {
-                        List.Add(Bot);
-                    }
+                    List.Add(Bot);
                 }
             }
 
@@ -67,14 +65,11 @@ namespace Uber.HabboHotel.RoomBots
 
         public RoomBot GetBot(uint BotId)
         {
-            lock (Bots)
+            foreach (RoomBot Bot in Bots)
             {
-                foreach (RoomBot Bot in Bots)
+                if (Bot.BotId == BotId)
                 {
-                    if (Bot.BotId == BotId)
-                    {
-                        return Bot;
-                    }
+                    return Bot;
                 }
             }
 

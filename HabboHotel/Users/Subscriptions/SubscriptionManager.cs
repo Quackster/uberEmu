@@ -5,27 +5,25 @@ using System.Text;
 using System.Data;
 
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Users.Subscriptions
 {
     class SubscriptionManager
     {
         private uint UserId;
-        private Dictionary<string, Subscription> Subscriptions;
+        private ConcurrentDictionary<string, Subscription> Subscriptions;
 
-        public List<string> SubList
+        public SynchronizedCollection<string> SubList
         {
             get
             {
-                List<string> List = new List<string>();
+                SynchronizedCollection<string> List = new SynchronizedCollection<string>();
 
-                lock (this.Subscriptions.Values)
-                {
                     foreach (Subscription Subscription in Subscriptions.Values)
                     {
                         List.Add(Subscription.SubscriptionId);
                     }
-                }
 
                 return List;
             }
@@ -35,7 +33,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
         {
             this.UserId = UserId;
 
-            Subscriptions = new Dictionary<string, Subscription>();
+            Subscriptions = new ConcurrentDictionary<string, Subscription>();
         }
 
         public void LoadSubscriptions()
@@ -51,7 +49,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
             {
                 foreach (DataRow Row in SubscriptionData.Rows)
                 {
-                    Subscriptions.Add((string)Row["subscription_id"], new Subscription((string)Row["subscription_id"], (int)Row["timestamp_activated"], (int)Row["timestamp_expire"]));
+                    Subscriptions.TryAdd((string)Row["subscription_id"], new Subscription((string)Row["subscription_id"], (int)Row["timestamp_activated"], (int)Row["timestamp_expire"]));
                 }
             }
         }
@@ -115,7 +113,7 @@ namespace Uber.HabboHotel.Users.Subscriptions
                 dbClient.ExecuteQuery("INSERT INTO user_subscriptions (user_id,subscription_id,timestamp_activated,timestamp_expire) VALUES ('" + UserId + "','" + SubscriptionId + "','" + TimeCreated + "','" + TimeExpire + "')");
             }
 
-            Subscriptions.Add(NewSub.SubscriptionId.ToLower(), NewSub);
+            Subscriptions.TryAdd(NewSub.SubscriptionId.ToLower(), NewSub);
         }
     }
 }

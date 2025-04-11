@@ -179,11 +179,7 @@ namespace Uber.HabboHotel.Misc
                         if (TargetRoom != null && TargetRoom.CheckRights(Session, true))
                         {
                             List<RoomItem> ToRemove = new List<RoomItem>();
-
-                            lock (TargetRoom.Items)
-                            {
-                                ToRemove.AddRange(TargetRoom.Items);
-                            }
+                            ToRemove.AddRange(TargetRoom.Items.Values);
 
                             foreach (RoomItem Item in ToRemove)
                             {
@@ -509,7 +505,7 @@ namespace Uber.HabboHotel.Misc
                     #endregion
                 }
             }
-            catch { }
+            catch (ExecutionEngineException) { }
 
             return false;
         }

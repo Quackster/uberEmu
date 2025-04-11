@@ -8,16 +8,17 @@ using Uber.Messages;
 using Uber.Storage;
 using Uber.HabboHotel.GameClients;
 using Uber.HabboHotel.Users.Badges;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Achievements
 {
     class AchievementManager
     {
-        public Dictionary<uint, Achievement> Achievements;
+        public ConcurrentDictionary<uint, Achievement> Achievements;
 
         public AchievementManager()
         {
-            this.Achievements = new Dictionary<uint, Achievement>();
+            this.Achievements = new ConcurrentDictionary<uint, Achievement>();
         }
 
         public void LoadAchievements()
@@ -37,7 +38,7 @@ namespace Uber.HabboHotel.Achievements
 
             foreach (DataRow Row in Data.Rows)
             {
-                Achievements.Add((uint)Row["id"], new Achievement((uint)Row["id"], (int)Row["levels"], (string)Row["badge"], (int)Row["pixels_base"], (double)Row["pixels_multiplier"], UberEnvironment.EnumToBool(Row["dynamic_badgelevel"].ToString())));
+                Achievements.TryAdd((uint)Row["id"], new Achievement((uint)Row["id"], (int)Row["levels"], (string)Row["badge"], (int)Row["pixels_base"], (double)Row["pixels_multiplier"], UberEnvironment.EnumToBool(Row["dynamic_badgelevel"].ToString())));
             }
         }
 
@@ -59,27 +60,24 @@ namespace Uber.HabboHotel.Achievements
         public ServerMessage SerializeAchievementList(GameClient Session)
         {
             List<Achievement> AchievementsToList = new List<Achievement>();
-            Dictionary<uint, int> NextAchievementLevels = new Dictionary<uint, int>();
+            ConcurrentDictionary<uint, int> NextAchievementLevels = new ConcurrentDictionary<uint, int>();
 
-            lock (Achievements)
+            foreach (Achievement Achievement in Achievements.Values)
             {
-                foreach (Achievement Achievement in Achievements.Values)
+                if (!Session.GetHabbo().Achievements.ContainsKey(Achievement.Id))
                 {
-                    if (!Session.GetHabbo().Achievements.ContainsKey(Achievement.Id))
+                    AchievementsToList.Add(Achievement);
+                    NextAchievementLevels.TryAdd(Achievement.Id, 1);
+                }
+                else
+                {
+                    if (Session.GetHabbo().Achievements[Achievement.Id] >= Achievement.Levels)
                     {
-                        AchievementsToList.Add(Achievement);
-                        NextAchievementLevels.Add(Achievement.Id, 1);
+                        continue;
                     }
-                    else
-                    {
-                        if (Session.GetHabbo().Achievements[Achievement.Id] >= Achievement.Levels)
-                        {
-                            continue;
-                        }
 
-                        AchievementsToList.Add(Achievement);
-                        NextAchievementLevels.Add(Achievement.Id, Session.GetHabbo().Achievements[Achievement.Id] + 1);
-                    }
+                    AchievementsToList.Add(Achievement);
+                    NextAchievementLevels.TryAdd(Achievement.Id, Session.GetHabbo().Achievements[Achievement.Id] + 1);
                 }
             }
 
@@ -113,22 +111,19 @@ namespace Uber.HabboHotel.Achievements
             int Value = CalculateAchievementValue(Achievement.PixelBase, Achievement.PixelMultiplier, Level);
 
             // Remove any previous badges for this achievement (old levels)
-            lock (Session.GetHabbo().GetBadgeComponent().BadgeList)
-            {
                 List<string> BadgesToRemove = new List<string>();
 
-                foreach (Badge Badge in Session.GetHabbo().GetBadgeComponent().BadgeList)
+            foreach (Badge Badge in Session.GetHabbo().GetBadgeComponent().BadgeList)
+            {
+                if (Badge.Code.StartsWith(Achievement.BadgeCode))
                 {
-                    if (Badge.Code.StartsWith(Achievement.BadgeCode))
-                    {
-                        BadgesToRemove.Add(Badge.Code);
-                    }
+                    BadgesToRemove.Add(Badge.Code);
                 }
+            }
 
-                foreach (string Badge in BadgesToRemove)
-                {
-                    Session.GetHabbo().GetBadgeComponent().RemoveBadge(Badge);
-                }
+            foreach (string Badge in BadgesToRemove)
+            {
+                Session.GetHabbo().GetBadgeComponent().RemoveBadge(Badge);
             }
 
             // Give the user the new badge
@@ -146,7 +141,7 @@ namespace Uber.HabboHotel.Achievements
             }
             else
             {
-                Session.GetHabbo().Achievements.Add(Achievement.Id, Level);
+                Session.GetHabbo().Achievements.TryAdd(Achievement.Id, Level);
 
                 using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
                 {

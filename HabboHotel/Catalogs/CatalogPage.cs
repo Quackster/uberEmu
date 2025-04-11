@@ -7,6 +7,7 @@ using System.Data;
 using Uber.Storage;
 using Uber.Messages;
 using Uber.HabboHotel.GameClients;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Catalogs
 {
@@ -38,7 +39,7 @@ namespace Uber.HabboHotel.Catalogs
         public string TextDetails;
         public string TextTeaser;
 
-        public List<CatalogItem> Items;
+        public SynchronizedCollection<CatalogItem> Items;
 
         public int PageId
         {
@@ -53,7 +54,7 @@ namespace Uber.HabboHotel.Catalogs
             string LayoutTeaser, string LayoutSpecial, string Text1, string Text2, string TextDetails,
             string TextTeaser)
         {
-            Items = new List<CatalogItem>();
+            Items = new SynchronizedCollection<CatalogItem>();
 
             this.Id = Id;
             this.ParentId = ParentId;
@@ -97,14 +98,11 @@ namespace Uber.HabboHotel.Catalogs
 
         public CatalogItem GetItem(uint Id)
         {
-            lock (Items)
+            foreach (CatalogItem Item in Items)
             {
-                foreach (CatalogItem Item in Items)
+                if (Item.Id == Id)
                 {
-                    if (Item.Id == Id)
-                    {
-                        return Item;
-                    }
+                    return Item;
                 }
             }
 

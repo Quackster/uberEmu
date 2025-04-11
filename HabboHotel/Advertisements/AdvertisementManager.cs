@@ -5,16 +5,17 @@ using System.Text;
 using System.Data;
 
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Advertisements
 {
     class AdvertisementManager
     {
-        public List<RoomAdvertisement> RoomAdvertisements;
+        public ConcurrentDictionary<uint, RoomAdvertisement> RoomAdvertisements;
 
         public AdvertisementManager()
         {
-            RoomAdvertisements = new List<RoomAdvertisement>();
+            RoomAdvertisements = new ConcurrentDictionary<uint, RoomAdvertisement>();
         }
 
         public void LoadRoomAdvertisements()
@@ -35,7 +36,7 @@ namespace Uber.HabboHotel.Advertisements
 
             foreach (DataRow Row in Data.Rows)
             {
-                RoomAdvertisements.Add(new RoomAdvertisement((uint)Row["id"], (string)Row["ad_image"],
+                RoomAdvertisements.TryAdd((uint)Row["id"], new RoomAdvertisement((uint)Row["id"], (string)Row["ad_image"],
                     (string)Row["ad_link"], (int)Row["views"], (int)Row["views_limit"]));
             }
         }
@@ -49,11 +50,12 @@ namespace Uber.HabboHotel.Advertisements
 
             while (true)
             {
+                var snapshotRoomAdvertisements = RoomAdvertisements.Values.ToList();
                 int RndId = UberEnvironment.GetRandomNumber(0, (RoomAdvertisements.Count - 1));
 
-                if (RoomAdvertisements[RndId] != null && !RoomAdvertisements[RndId].ExceededLimit)
+                if (snapshotRoomAdvertisements[RndId] != null && !snapshotRoomAdvertisements[RndId].ExceededLimit)
                 {
-                    return RoomAdvertisements[RndId];
+                    return snapshotRoomAdvertisements[RndId];
                 }
             }
         }

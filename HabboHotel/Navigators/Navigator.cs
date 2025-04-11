@@ -8,15 +8,15 @@ using Uber.HabboHotel.Users.Messenger;
 using Uber.HabboHotel.GameClients;
 using Uber.Messages;
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Navigators
 {
     class Navigator
     {
-        private Dictionary<int, string> PublicCategories;
-        private List<FlatCat> PrivateCategories;
-
-        private Dictionary<int, PublicItem> PublicItems;
+        private ConcurrentDictionary<int, string> PublicCategories;
+        private ConcurrentDictionary<int, FlatCat> PrivateCategories;
+        private ConcurrentDictionary<int, PublicItem> PublicItems;
 
         public Navigator()
         {
@@ -24,9 +24,9 @@ namespace Uber.HabboHotel.Navigators
 
         public void Initialize()
         {
-            PublicCategories = new Dictionary<int, string>();
-            PrivateCategories = new List<FlatCat>();
-            PublicItems = new Dictionary<int, PublicItem>();
+            PublicCategories = new ConcurrentDictionary<int, string>();
+            PrivateCategories = new ConcurrentDictionary<int, FlatCat>();
+            PublicItems = new ConcurrentDictionary<int, PublicItem>();
 
             DataTable dPubCats = null;
             DataTable dPrivCats = null;
@@ -43,7 +43,7 @@ namespace Uber.HabboHotel.Navigators
             {
                 foreach (DataRow Row in dPubCats.Rows)
                 {
-                    PublicCategories.Add((int)Row["id"], (string)Row["caption"]);
+                    PublicCategories.TryAdd((int)Row["id"], (string)Row["caption"]);
                 }
             }
 
@@ -51,7 +51,7 @@ namespace Uber.HabboHotel.Navigators
             {
                 foreach (DataRow Row in dPrivCats.Rows)
                 {
-                    PrivateCategories.Add(new FlatCat((int)Row["id"], (string)Row["caption"], (int)Row["min_rank"]));
+                    PrivateCategories.TryAdd((int)Row["id"], new FlatCat((int)Row["id"], (string)Row["caption"], (int)Row["min_rank"]));
                 }
             }
 
@@ -59,7 +59,7 @@ namespace Uber.HabboHotel.Navigators
             {
                 foreach (DataRow Row in dPubItems.Rows)
                 {
-                    PublicItems.Add((int)Row["id"], new PublicItem((int)Row["id"], int.Parse(Row["bannertype"].ToString()), (string)Row["caption"],
+                    PublicItems.TryAdd((int)Row["id"], new PublicItem((int)Row["id"], int.Parse(Row["bannertype"].ToString()), (string)Row["caption"],
                         (string)Row["image"], ((Row["image_type"].ToString().ToLower() == "internal") ? PublicImageType.INTERNAL : PublicImageType.EXTERNAL),
                         (uint)Row["room_id"], (int)Row["category_id"], (int)Row["category_parent_id"]));
                 }
@@ -70,14 +70,11 @@ namespace Uber.HabboHotel.Navigators
         {
             int i = 0;
 
-            lock (PublicItems)
+            foreach (PublicItem Item in PublicItems.Values)
             {
-                foreach (PublicItem Item in PublicItems.Values)
+                if (Item.ParentId == ParentId || ParentId == -1)
                 {
-                    if (Item.ParentId == ParentId || ParentId == -1)
-                    {
-                        i++;
-                    }
+                    i++;
                 }
             }
 
@@ -86,16 +83,13 @@ namespace Uber.HabboHotel.Navigators
 
         public FlatCat GetFlatCat(int Id)
         {
-            lock (PrivateCategories)
-            {
-                foreach (FlatCat FlatCat in PrivateCategories)
+                foreach (FlatCat FlatCat in PrivateCategories.Values)
                 {
                     if (FlatCat.Id == Id)
                     {
                         return FlatCat;
                     }
                 }
-            }
 
             return null;
         }
@@ -105,7 +99,7 @@ namespace Uber.HabboHotel.Navigators
             ServerMessage Cats = new ServerMessage(221);
             Cats.AppendInt32(PrivateCategories.Count);
 
-            foreach (FlatCat FlatCat in PrivateCategories)
+            foreach (FlatCat FlatCat in PrivateCategories.Values)
             {
                 if (FlatCat.Id > 0)
                 {
@@ -129,13 +123,10 @@ namespace Uber.HabboHotel.Navigators
             ServerMessage Frontpage = new ServerMessage(450);            
             Frontpage.AppendInt32(GetCountForParent(-1));
 
-            lock (PublicItems)
-            {
                 foreach (PublicItem Pub in PublicItems.Values)
                 {
                     Pub.Serialize(Frontpage);
                 }
-            }
 
             return Frontpage;
         }
@@ -148,12 +139,9 @@ namespace Uber.HabboHotel.Navigators
             Rooms.AppendStringWithBreak("");
             Rooms.AppendInt32(Session.GetHabbo().FavoriteRooms.Count);
 
-            lock (Session.GetHabbo().FavoriteRooms)
+            foreach (uint Id in Session.GetHabbo().FavoriteRooms)
             {
-                foreach (uint Id in Session.GetHabbo().FavoriteRooms)
-                {
-                    UberEnvironment.GetGame().GetRoomManager().GenerateRoomData(Id).Serialize(Rooms, false);
-                }
+                UberEnvironment.GetGame().GetRoomManager().GenerateRoomData(Id).Serialize(Rooms, false);
             }
 
             return Rooms;
@@ -223,7 +211,7 @@ namespace Uber.HabboHotel.Navigators
 
         public ServerMessage SerializePopularRoomTags()
         {
-            Dictionary<string, int> Tags = new Dictionary<string, int>();
+            ConcurrentDictionary<string, int> Tags = new ConcurrentDictionary<string, int>();
             DataTable Data = null;
 
             using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
@@ -250,7 +238,7 @@ namespace Uber.HabboHotel.Navigators
                         }
                         else
                         {
-                            Tags.Add(Tag, (int)Row["users_now"]);
+                            Tags.TryAdd(Tag, (int)Row["users_now"]);
                         }
                     }
                 }
@@ -365,8 +353,6 @@ namespace Uber.HabboHotel.Navigators
 
                         List<uint> FriendRooms = new List<uint>();
 
-                        lock (Session.GetHabbo().GetMessenger().GetBuddies())
-                        {
                             foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
                             {
                                 GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);
@@ -378,7 +364,6 @@ namespace Uber.HabboHotel.Navigators
 
                                 FriendRooms.Add(Client.GetHabbo().CurrentRoomId);
                             }
-                        }
 
                         StringBuilder _Query = new StringBuilder("SELECT * FROM rooms WHERE");
 
@@ -411,21 +396,18 @@ namespace Uber.HabboHotel.Navigators
 
                     case -4:
 
-                        List<string> FriendsNames = new List<string>();
+                        ConcurrentDictionary<uint, string> FriendsNames = new ConcurrentDictionary<uint, string>();
 
-                        lock (Session.GetHabbo().GetMessenger().GetBuddies())
-                        {
                             foreach (MessengerBuddy Buddy in Session.GetHabbo().GetMessenger().GetBuddies())
                             {
-                                FriendsNames.Add(Buddy.Username);
+                                FriendsNames.TryAdd(Buddy.Id, Buddy.Username);
                             }
-                        }
 
                         StringBuilder Query = new StringBuilder("SELECT * FROM rooms WHERE");
 
                         int i = 0;
 
-                        foreach (string Name in FriendsNames)
+                        foreach (string Name in FriendsNames.Values)
                         {
                             if (i > 0)
                             {

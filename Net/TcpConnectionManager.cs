@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Uber.Net
     {
         private readonly int MAX_SIMULTANEOUS_CONNECTIONS = 100;
 
-        private Dictionary<uint, TcpConnection> Connections;
+        private ConcurrentDictionary<uint, TcpConnection> Connections;
         private TcpConnectionListener Listener;
 
         public int AmountOfActiveConnections
@@ -29,7 +30,7 @@ namespace Uber.Net
                 initialCapicity /= 4;
             }
 
-            Connections = new Dictionary<uint, TcpConnection>(initialCapicity);
+            Connections = new ConcurrentDictionary<uint, TcpConnection>(/*initialCapicity*/);
             MAX_SIMULTANEOUS_CONNECTIONS = maxSimultaneousConnections;
             Listener = new TcpConnectionListener(LocalIP, Port, this);
         }
@@ -68,7 +69,7 @@ namespace Uber.Net
                 return;
             }
 
-            Connections.Add(connection.Id, connection);
+            Connections.TryAdd(connection.Id, connection);
 
             UberEnvironment.GetGame().GetClientManager().StartClient(connection.Id);
         }
@@ -85,7 +86,7 @@ namespace Uber.Net
             //UberEnvironment.GetLogging().WriteLine("Dropped connection [" + Id + "/" + Connection.IPAddress + "]", Uber.Core.LogLevel.Debug);
 
             Connection.Stop();
-            Connections.Remove(Id);
+            Connections.TryRemove(Id, out var _);
         }
 
         public Boolean VerifyConnection(uint Id)

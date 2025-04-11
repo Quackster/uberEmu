@@ -8,6 +8,7 @@ using Uber.Messages;
 using Uber.Storage;
 using Uber.HabboHotel.Items;
 using Uber.HabboHotel.Pets;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Catalogs
 {
@@ -18,8 +19,6 @@ namespace Uber.HabboHotel.Catalogs
 
         private VoucherHandler VoucherHandler;
         private Marketplace Marketplace;
-
-        private readonly object ItemGeneratorLock = new object();
 
         public Catalog()
         {
@@ -84,19 +83,13 @@ namespace Uber.HabboHotel.Catalogs
 
         public CatalogItem FindItem(uint ItemId)
         {
-            lock (Pages.Values)
+            foreach (CatalogPage Page in Pages.Values)
             {
-                foreach (CatalogPage Page in Pages.Values)
+                foreach (CatalogItem Item in Page.Items)
                 {
-                    lock (Page.Items)
+                    if (Item.Id == ItemId)
                     {
-                        foreach (CatalogItem Item in Page.Items)
-                        {
-                            if (Item.Id == ItemId)
-                            {
-                                return Item;
-                            }
-                        }
+                        return Item;
                     }
                 }
             }
@@ -125,19 +118,16 @@ namespace Uber.HabboHotel.Catalogs
         {
             int i = 0;
 
-            lock (Pages)
+            foreach (CatalogPage Page in Pages.Values)
             {
-                foreach (CatalogPage Page in Pages.Values)
+                if (Page.MinRank > Session.GetHabbo().Rank)
                 {
-                    if (Page.MinRank > Session.GetHabbo().Rank)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (Page.ParentId == TreeId)
-                    {
-                        i++;
-                    }
+                if (Page.ParentId == TreeId)
+                {
+                    i++;
                 }
             }
 
@@ -540,25 +530,22 @@ namespace Uber.HabboHotel.Catalogs
         {
             DataRow Row = null;
 
-            lock (UberEnvironment.GetGame().GetCatalog().ItemGeneratorLock)
+            using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
             {
-                using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
-                {
-                    dbClient.AddParamWithValue("userid", UserId);
-                    dbClient.AddParamWithValue("name", Name);
-                    dbClient.AddParamWithValue("type", Type);
-                    dbClient.AddParamWithValue("race", Race);
-                    dbClient.AddParamWithValue("color", Color);
-                    dbClient.AddParamWithValue("createstamp", UberEnvironment.GetUnixTimestamp());
-                    dbClient.ReadDataRow("INSERT INTO user_pets (user_id,name,type,race,color,expirience,energy,createstamp) VALUES (@userid,@name,@type,@race,@color,0,100,@createstamp)");
-                }
+                dbClient.AddParamWithValue("userid", UserId);
+                dbClient.AddParamWithValue("name", Name);
+                dbClient.AddParamWithValue("type", Type);
+                dbClient.AddParamWithValue("race", Race);
+                dbClient.AddParamWithValue("color", Color);
+                dbClient.AddParamWithValue("createstamp", UberEnvironment.GetUnixTimestamp());
+                dbClient.ReadDataRow("INSERT INTO user_pets (user_id,name,type,race,color,expirience,energy,createstamp) VALUES (@userid,@name,@type,@race,@color,0,100,@createstamp)");
+            }
 
-                using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
-                {
-                    dbClient.AddParamWithValue("userid", UserId);
-                    dbClient.AddParamWithValue("name", Name);
-                    Row = dbClient.ReadDataRow("SELECT * FROM user_pets WHERE user_id = @userid AND name = @name LIMIT 1");
-                }
+            using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
+            {
+                dbClient.AddParamWithValue("userid", UserId);
+                dbClient.AddParamWithValue("name", Name);
+                Row = dbClient.ReadDataRow("SELECT * FROM user_pets WHERE user_id = @userid AND name = @name LIMIT 1");
             }
 
             return this.GeneratePetFromRow(Row);
@@ -576,8 +563,6 @@ namespace Uber.HabboHotel.Catalogs
 
         public uint GenerateItemId()
         {
-            lock (this.ItemGeneratorLock)
-            {
                 uint i = 0;
 
                 using (DatabaseClient dbClient = UberEnvironment.GetDatabase().GetClient())
@@ -587,7 +572,6 @@ namespace Uber.HabboHotel.Catalogs
                 }
 
                 return i;
-            }
         }
 
         public EcotronReward GetRandomEcotronReward()
@@ -627,8 +611,6 @@ namespace Uber.HabboHotel.Catalogs
         {
             List<EcotronReward> Rewards = new List <EcotronReward>();
 
-            lock (EcotronRewards)
-            {
                 foreach (EcotronReward R in EcotronRewards)
                 {
                     if (R.RewardLevel == Level)
@@ -636,7 +618,6 @@ namespace Uber.HabboHotel.Catalogs
                         Rewards.Add(R);
                     }
                 }
-            }
 
             return Rewards;
         }
@@ -652,26 +633,23 @@ namespace Uber.HabboHotel.Catalogs
             Index.AppendBoolean(false);
             Index.AppendInt32(GetTreeSize(Client, -1));
 
-            lock (Pages)
+            foreach (CatalogPage Page in Pages.Values)
             {
-                foreach (CatalogPage Page in Pages.Values)
+                if (Page.ParentId != -1)
                 {
-                    if (Page.ParentId != -1)
+                    continue;
+                }
+
+                Page.Serialize(Client, Index);
+
+                foreach (CatalogPage _Page in Pages.Values)
+                {
+                    if (_Page.ParentId != Page.PageId)
                     {
                         continue;
                     }
 
-                    Page.Serialize(Client, Index);
-
-                    foreach (CatalogPage _Page in Pages.Values)
-                    {
-                        if (_Page.ParentId != Page.PageId)
-                        {
-                            continue;
-                        }
-
-                        _Page.Serialize(Client, Index);
-                    }
+                    _Page.Serialize(Client, Index);
                 }
             }
 
@@ -801,12 +779,9 @@ namespace Uber.HabboHotel.Catalogs
 
             PageData.AppendInt32(Page.Items.Count);
 
-            lock (Page.Items)
+            foreach (CatalogItem Item in Page.Items)
             {
-                foreach (CatalogItem Item in Page.Items)
-                {
-                    Item.Serialize(PageData);
-                }
+                Item.Serialize(PageData);
             }
 
             return PageData;

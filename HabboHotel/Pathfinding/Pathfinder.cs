@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Drawing;
+
+using Uber.HabboHotel.GameClients;
 using Uber.HabboHotel.Rooms;
 
 namespace Uber.HabboHotel.Pathfinding
@@ -70,7 +74,7 @@ namespace Uber.HabboHotel.Pathfinding
             }
         }
 
-        public List<Coord> FindPath()
+        public SynchronizedCollection<Coord> FindPath()
         {
             // Locate the user, and set the distance to zero
             int UserX = User.X;
@@ -123,7 +127,7 @@ namespace Uber.HabboHotel.Pathfinding
             }
 
             // Now trace the shortest possible route to our goal
-            List<Coord> Path = new List<Coord>();
+            SynchronizedCollection<Coord> Path = new SynchronizedCollection<Coord>();
 
             Path.Add(new Coord(User.GoalX, User.GoalY));
 

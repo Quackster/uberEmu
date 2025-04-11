@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Uber.HabboHotel.Rooms
 {
     class Trade
     {
-        private List<TradeUser> Users;
+        private ConcurrentDictionary<uint, TradeUser> Users;
         private int TradeStage;
         private uint RoomId;
 
@@ -23,14 +24,16 @@ namespace Uber.HabboHotel.Rooms
             this.oneId = UserOneId;
             this.twoId = UserTwoId;
 
-            this.Users = new List<TradeUser>(2);
-            this.Users.Add(new TradeUser(UserOneId, RoomId));
-            this.Users.Add(new TradeUser(UserTwoId, RoomId));
+            this.Users = new ConcurrentDictionary<uint, TradeUser>();
+            this.Users.TryAdd(UserOneId, new TradeUser(UserOneId, RoomId));
+            this.Users.TryAdd(UserTwoId, new TradeUser(UserTwoId, RoomId));
             this.TradeStage = 1;
             this.RoomId = RoomId;
 
-            foreach (TradeUser User in Users)
+            foreach (var kvp in Users)
             {
+                TradeUser User = kvp.Value;
+
                 if (!User.GetRoomUser().Statusses.ContainsKey("trd"))
                 {
                     User.GetRoomUser().AddStatus("trd", "");
@@ -50,16 +53,15 @@ namespace Uber.HabboHotel.Rooms
         {
             get
             {
-                lock (Users)
+                foreach (var kvp in Users)
                 {
-                    foreach (TradeUser User in Users)
-                    {
-                        if (!User.HasAccepted)
+                    TradeUser User = kvp.Value;
+
+                    if (!User.HasAccepted)
                         {
                             return false;
                         }
                     }
-                }
 
                 return true;
             }
@@ -67,32 +69,30 @@ namespace Uber.HabboHotel.Rooms
 
         public bool ContainsUser(uint Id)
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    if (User.UserId == Id)
+                TradeUser User = kvp.Value;
+
+                if (User.UserId == Id)
                     {
                         return true;
                     }
                 }
-            }
 
             return false;
         }
 
         public TradeUser GetTradeUser(uint Id)
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    if (User.UserId == Id)
+                TradeUser User = kvp.Value;
+
+                if (User.UserId == Id)
                     {
                         return User;
                     }
                 }
-            }
 
             return null;
         }
@@ -108,7 +108,7 @@ namespace Uber.HabboHotel.Rooms
 
             ClearAccepted();
 
-            User.OfferedItems.Add(Item);
+            User.OfferedItems.TryAdd(Item.Id, Item);
             UpdateTradeWindow();
         }
 
@@ -123,7 +123,7 @@ namespace Uber.HabboHotel.Rooms
 
             ClearAccepted();
 
-            User.OfferedItems.Remove(Item);
+            User.OfferedItems.TryRemove(Item.Id, out var _);
             UpdateTradeWindow();
         }
 
@@ -194,12 +194,11 @@ namespace Uber.HabboHotel.Rooms
 
         public void ClearAccepted()
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    User.HasAccepted = false;
-                }
+                TradeUser User = kvp.Value;
+
+                User.HasAccepted = false;
             }
         }
 
@@ -207,33 +206,31 @@ namespace Uber.HabboHotel.Rooms
         {
             ServerMessage Message = new ServerMessage(108);
 
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
+                TradeUser User = kvp.Value;
+
+                Message.AppendUInt(User.UserId);
+                Message.AppendInt32(User.OfferedItems.Count);
+
+                foreach (var offeredItems in User.OfferedItems)
                 {
-                    Message.AppendUInt(User.UserId);
-                    Message.AppendInt32(User.OfferedItems.Count);
+                    UserItem Item = offeredItems.Value;
 
-                    lock (User.OfferedItems)
+                    Message.AppendUInt(Item.Id);
+                    Message.AppendStringWithBreak(Item.GetBaseItem().Type.ToLower());
+                    Message.AppendUInt(Item.Id);
+                    Message.AppendInt32(Item.GetBaseItem().SpriteId);
+                    Message.AppendBoolean(true);
+                    Message.AppendBoolean(true);
+                    Message.AppendStringWithBreak("");
+                    Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, with wired day (wat?)
+                    Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, wired month (wat?)
+                    Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, wired year (wat?)
+
+                    if (Item.GetBaseItem().Type.ToLower() == "s")
                     {
-                        foreach (UserItem Item in User.OfferedItems)
-                        {
-                            Message.AppendUInt(Item.Id);
-                            Message.AppendStringWithBreak(Item.GetBaseItem().Type.ToLower());
-                            Message.AppendUInt(Item.Id);
-                            Message.AppendInt32(Item.GetBaseItem().SpriteId);
-                            Message.AppendBoolean(true);
-                            Message.AppendBoolean(true);
-                            Message.AppendStringWithBreak("");
-                            Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, with wired day (wat?)
-                            Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, wired month (wat?)
-                            Message.AppendBoolean(false); // xmas 09 furni had a special furni tag here, wired year (wat?)
-
-                            if (Item.GetBaseItem().Type.ToLower() == "s")
-                            {
-                                Message.AppendInt32(-1);
-                            }
-                        }
+                        Message.AppendInt32(-1);
                     }
                 }
             }
@@ -244,12 +241,14 @@ namespace Uber.HabboHotel.Rooms
         public void DeliverItems()
         {
             // List items
-            List<UserItem> ItemsOne = GetTradeUser(oneId).OfferedItems;
-            List<UserItem> ItemsTwo = GetTradeUser(twoId).OfferedItems;
+            ConcurrentDictionary<uint, UserItem> ItemsOne = GetTradeUser(oneId).OfferedItems;
+            ConcurrentDictionary<uint, UserItem> ItemsTwo = GetTradeUser(twoId).OfferedItems;
 
             // Verify they are still in user inventory
-            foreach (UserItem I in ItemsOne)
+            foreach (var kvp in ItemsOne)
             {
+                UserItem I = kvp.Value;
+
                 if (GetTradeUser(oneId).GetClient().GetHabbo().GetInventoryComponent().GetItem(I.Id) == null)
                 {
                     GetTradeUser(oneId).GetClient().SendNotif("Trade failed.");
@@ -258,8 +257,11 @@ namespace Uber.HabboHotel.Rooms
                     return;
                 }
             }
-            foreach (UserItem I in ItemsTwo)
+
+            foreach (var kvp in ItemsTwo)
             {
+                UserItem I = kvp.Value;
+
                 if (GetTradeUser(twoId).GetClient().GetHabbo().GetInventoryComponent().GetItem(I.Id) == null)
                 {
                     GetTradeUser(oneId).GetClient().SendNotif("Trade failed.");
@@ -270,13 +272,18 @@ namespace Uber.HabboHotel.Rooms
             }
 
             // Deliver them
-            foreach (UserItem I in ItemsOne)
+            foreach (var kvp in ItemsOne)
             {
+                UserItem I = kvp.Value;
+
                 GetTradeUser(oneId).GetClient().GetHabbo().GetInventoryComponent().RemoveItem(I.Id);
                 GetTradeUser(twoId).GetClient().GetHabbo().GetInventoryComponent().AddItem(I.Id, I.BaseItem, I.ExtraData);
             }
-            foreach (UserItem I in ItemsTwo)
+
+            foreach (var kvp in ItemsTwo)
             {
+                UserItem I = kvp.Value;
+
                 GetTradeUser(twoId).GetClient().GetHabbo().GetInventoryComponent().RemoveItem(I.Id);
                 GetTradeUser(oneId).GetClient().GetHabbo().GetInventoryComponent().AddItem(I.Id, I.BaseItem, I.ExtraData);
             }
@@ -288,14 +295,13 @@ namespace Uber.HabboHotel.Rooms
 
         public void CloseTradeClean()
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    User.GetRoomUser().RemoveStatus("trd");
+                TradeUser User = kvp.Value;
+
+                User.GetRoomUser().RemoveStatus("trd");
                     User.GetRoomUser().UpdateNeeded = true;
                 }
-            }
 
             SendMessageToUsers(new ServerMessage(112));
             GetRoom().ActiveTrades.Remove(this);
@@ -303,11 +309,11 @@ namespace Uber.HabboHotel.Rooms
 
         public void CloseTrade(uint UserId)
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    if (User.GetRoomUser() == null)
+                TradeUser User = kvp.Value;
+
+                if (User.GetRoomUser() == null)
                     {
                         continue;
                     }
@@ -315,7 +321,6 @@ namespace Uber.HabboHotel.Rooms
                     User.GetRoomUser().RemoveStatus("trd");
                     User.GetRoomUser().UpdateNeeded = true;
                 }
-            }
 
             ServerMessage Message = new ServerMessage(110);
             Message.AppendUInt(UserId);
@@ -324,12 +329,11 @@ namespace Uber.HabboHotel.Rooms
 
         public void SendMessageToUsers(ServerMessage Message)
         {
-            lock (Users)
+            foreach (var kvp in Users)
             {
-                foreach (TradeUser User in Users)
-                {
-                    User.GetClient().SendMessage(Message);
-                }
+                TradeUser User = kvp.Value;
+
+                User.GetClient().SendMessage(Message);
             }
         }
 
@@ -345,7 +349,7 @@ namespace Uber.HabboHotel.Rooms
         private uint RoomId;
         private bool Accepted;
 
-        public List<UserItem> OfferedItems;
+        public ConcurrentDictionary<uint, UserItem> OfferedItems;
 
         public bool HasAccepted
         {
@@ -365,7 +369,7 @@ namespace Uber.HabboHotel.Rooms
             this.UserId = UserId;
             this.RoomId = RoomId;
             this.Accepted = false;
-            this.OfferedItems = new List<UserItem>();
+            this.OfferedItems = new ConcurrentDictionary<uint, UserItem>();
         }
 
         public RoomUser GetRoomUser()

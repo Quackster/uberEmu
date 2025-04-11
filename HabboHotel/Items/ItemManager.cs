@@ -5,12 +5,13 @@ using System.Text;
 using System.Data;
 
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Items
 {
     class ItemManager
     {
-        private Dictionary<uint, Item> Items;
+        private ConcurrentDictionary<uint, Item> Items;
 
         public ItemManager()
         {
@@ -18,7 +19,7 @@ namespace Uber.HabboHotel.Items
 
         public void LoadItems()
         {
-            Items = new Dictionary<uint, Item>();
+            Items = new ConcurrentDictionary<uint, Item>();
 
             DataTable ItemData = null;
 
@@ -36,7 +37,7 @@ namespace Uber.HabboHotel.Items
                 {
                     try
                     {
-                        Items.Add((uint)Row["id"], new Item((uint)Row["id"], (int)Row["sprite_id"], (string)Row["public_name"], 
+                        Items.TryAdd((uint)Row["id"], new Item((uint)Row["id"], (int)Row["sprite_id"], (string)Row["public_name"], 
                             (string)Row["item_name"], (string)Row["type"], (int)Row["width"], (int)Row["length"],
                             (Double)Row["stack_height"], UberEnvironment.EnumToBool(Row["can_stack"].ToString()),
                             UberEnvironment.EnumToBool(Row["is_walkable"].ToString()),

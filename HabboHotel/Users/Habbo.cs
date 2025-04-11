@@ -12,6 +12,7 @@ using Uber.HabboHotel.Users.Inventory;
 using Uber.HabboHotel.Rooms;
 using Uber.HabboHotel.GameClients;
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Users
 {
@@ -48,11 +49,11 @@ namespace Uber.HabboHotel.Users
         public bool IsTeleporting;
         public uint TeleporterId;
 
-        public List<uint> FavoriteRooms;
-        public List<uint> MutedUsers;
-        public List<string> Tags;
-        public Dictionary<uint, int> Achievements;
-        public List<uint> RatedRooms;
+        public SynchronizedCollection<uint> FavoriteRooms;
+        public SynchronizedCollection<uint> MutedUsers;
+        public SynchronizedCollection<string> Tags;
+        public ConcurrentDictionary<uint, int> Achievements;
+        public SynchronizedCollection<uint> RatedRooms;
 
         private SubscriptionManager SubscriptionManager;
         private HabboMessenger Messenger;
@@ -113,11 +114,11 @@ namespace Uber.HabboHotel.Users
             this.LoadingChecksPassed = false;
             this.CurrentRoomId = 0;
             this.HomeRoom = HomeRoom;
-            this.FavoriteRooms = new List<uint>();
-            this.MutedUsers = new List<uint>();
-            this.Tags = new List<string>();
-            this.Achievements = new Dictionary<uint, int>();
-            this.RatedRooms = new List<uint>();
+            this.FavoriteRooms = new SynchronizedCollection<uint>();
+            this.MutedUsers = new SynchronizedCollection<uint>();
+            this.Tags = new SynchronizedCollection<string>();
+            this.Achievements = new ConcurrentDictionary<uint, int>();
+            this.RatedRooms = new SynchronizedCollection<uint>();
             this.Respect = Respect;
             this.DailyRespectPoints = DailyRespectPoints;
             this.DailyPetRespectPoints = DailyPetRespectPoints;
@@ -256,7 +257,7 @@ namespace Uber.HabboHotel.Users
 
             foreach (DataRow Row in Data.Rows)
             {
-                Achievements.Add((uint)Row["achievement_id"], (int)Row["achievement_level"]);
+                Achievements.TryAdd((uint)Row["achievement_id"], (int)Row["achievement_level"]);
             }
         }
 

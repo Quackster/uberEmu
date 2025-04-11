@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
 using Uber.Messages;
-using PluginInterface;
 
 namespace Uber.Core
 {
@@ -68,17 +64,14 @@ namespace Uber.Core
 
                     UberEnvironment.GetLogging().WriteLine("The following plugins are currently loaded:");
 
-                    lock (UberEnvironment.GetPluginHandler().AvailablePlugins)
+                    foreach (Plugins.Types.AvailablePlugin Plugin in UberEnvironment.GetPluginHandler().AvailablePlugins)
                     {
-                        foreach (Plugins.Types.AvailablePlugin Plugin in UberEnvironment.GetPluginHandler().AvailablePlugins)
-                        {
-                            UberEnvironment.GetLogging().WriteLine("-------------------------------------------------------------");
-                            UberEnvironment.GetLogging().WriteLine("Name: " + Plugin.Instance.Name);
-                            UberEnvironment.GetLogging().WriteLine(Plugin.Instance.Description);
-                            UberEnvironment.GetLogging().WriteLine("Version: " + Plugin.Instance.Version);
-                            UberEnvironment.GetLogging().WriteLine("Author: " + Plugin.Instance.Author);
-                            UberEnvironment.GetLogging().WriteLine("-------------------------------------------------------------");
-                        }
+                        UberEnvironment.GetLogging().WriteLine("-------------------------------------------------------------");
+                        UberEnvironment.GetLogging().WriteLine("Name: " + Plugin.Instance.Name);
+                        UberEnvironment.GetLogging().WriteLine(Plugin.Instance.Description);
+                        UberEnvironment.GetLogging().WriteLine("Version: " + Plugin.Instance.Version);
+                        UberEnvironment.GetLogging().WriteLine("Author: " + Plugin.Instance.Author);
+                        UberEnvironment.GetLogging().WriteLine("-------------------------------------------------------------");
                     }
 
                     break;

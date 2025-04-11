@@ -12,7 +12,7 @@ namespace Uber.HabboHotel.Items
     {
         public Boolean Enabled;
         public int CurrentPreset;
-        public List<MoodlightPreset> Presets;
+        public SynchronizedCollection<MoodlightPreset> Presets;
 
         public uint ItemId;
 
@@ -34,7 +34,7 @@ namespace Uber.HabboHotel.Items
 
             this.Enabled = UberEnvironment.EnumToBool(Row["enabled"].ToString());
             this.CurrentPreset = (int)Row["current_preset"];
-            this.Presets = new List<MoodlightPreset>();
+            this.Presets = new SynchronizedCollection<MoodlightPreset>();
 
             this.Presets.Add(GeneratePreset((string)Row["preset_one"]));
             this.Presets.Add(GeneratePreset((string)Row["preset_two"]));

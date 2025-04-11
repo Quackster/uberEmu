@@ -16,6 +16,7 @@ using Uber.HabboHotel.Users.Messenger;
 using Uber.HabboHotel.Rooms;
 using Uber.HabboHotel.Catalogs;
 using Uber.Storage;
+using System.Collections.Concurrent;
 
 namespace Uber.Messages
 {
@@ -202,17 +203,14 @@ namespace Uber.Messages
 
             List<RoomUser> UsersToDisplay = new List<RoomUser>();
 
-            lock (Room.UserList)
+            foreach (RoomUser User in Room.UserList)
             {
-                foreach (RoomUser User in Room.UserList)
+                if (User.IsSpectator)
                 {
-                    if (User.IsSpectator)
-                    {
-                        continue;
-                    }
-
-                    UsersToDisplay.Add(User);
+                    continue;
                 }
+
+                UsersToDisplay.Add(User);
             }
 
             GetResponse().Init(28);
@@ -286,48 +284,45 @@ namespace Uber.Messages
                 Session.SendMessage(Updates);
             }
 
-            lock (Room.UserList)
+            foreach (RoomUser User in Room.UserList)
             {
-                foreach (RoomUser User in Room.UserList)
+                if (User.IsSpectator)
                 {
-                    if (User.IsSpectator)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (User.IsDancing)
+                if (User.IsDancing)
+                {
+                    GetResponse().Init(480);
+                    GetResponse().AppendInt32(User.VirtualId);
+                    GetResponse().AppendInt32(User.DanceId);
+                    SendResponse();
+                }
+
+                if (User.IsAsleep)
+                {
+                    GetResponse().Init(486);
+                    GetResponse().AppendInt32(User.VirtualId);
+                    GetResponse().AppendBoolean(true);
+                    SendResponse();
+                }
+
+                if (User.CarryItemID > 0 && User.CarryTimer > 0)
+                {
+                    GetResponse().Init(482);
+                    GetResponse().AppendInt32(User.VirtualId);
+                    GetResponse().AppendInt32(User.CarryTimer);
+                    SendResponse();
+                }
+
+                if (!User.IsBot)
+                {
+                    if (User.GetClient().GetHabbo() != null && User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent() != null && User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect >= 1)
                     {
-                        GetResponse().Init(480);
+                        GetResponse().Init(485);
                         GetResponse().AppendInt32(User.VirtualId);
-                        GetResponse().AppendInt32(User.DanceId);
+                        GetResponse().AppendInt32(User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect);
                         SendResponse();
-                    }
-
-                    if (User.IsAsleep)
-                    {
-                        GetResponse().Init(486);
-                        GetResponse().AppendInt32(User.VirtualId);
-                        GetResponse().AppendBoolean(true);
-                        SendResponse();
-                    }
-
-                    if (User.CarryItemID > 0 && User.CarryTimer > 0)
-                    {
-                        GetResponse().Init(482);
-                        GetResponse().AppendInt32(User.VirtualId);
-                        GetResponse().AppendInt32(User.CarryTimer);
-                        SendResponse();
-                    }
-
-                    if (!User.IsBot)
-                    {
-                        if (User.GetClient().GetHabbo() != null && User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent() != null && User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect >= 1)
-                        {
-                            GetResponse().Init(485);
-                            GetResponse().AppendInt32(User.VirtualId);
-                            GetResponse().AppendInt32(User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect);
-                            SendResponse();
-                        }
                     }
                 }
             }
@@ -762,7 +757,7 @@ namespace Uber.Messages
 
             int Junk = Request.PopWiredInt32(); // always 3
 
-            Dictionary<int, int> Items = new Dictionary<int, int>();
+            ConcurrentDictionary<int, int> Items = new ConcurrentDictionary<int, int>();
 
             int Background = Request.PopWiredInt32();
             int TopLayer = Request.PopWiredInt32();
@@ -788,7 +783,7 @@ namespace Uber.Messages
                     return;
                 }
 
-                Items.Add(Pos, Item);
+                Items.TryAdd(Pos, Item);
             }
 
             if (Background < 1 || Background > 24)
@@ -859,7 +854,7 @@ namespace Uber.Messages
             int CategoryId = Request.PopWiredInt32();
             int TagCount = Request.PopWiredInt32();
 
-            List<string> Tags = new List<string>();
+            SynchronizedCollection<string> Tags = new SynchronizedCollection<string>();
             StringBuilder formattedTags = new StringBuilder();
 
             for (int i = 0; i < TagCount; i++)
@@ -1222,18 +1217,15 @@ namespace Uber.Messages
 
             if (Room != null)
             {
-                lock (Room.UserList)
+                foreach (RoomUser User in Room.UserList)
                 {
-                    foreach (RoomUser User in Room.UserList)
+                    if (User.IsBot)
                     {
-                        if (User.IsBot)
-                        {
-                            continue;
-                        }
-
-                        User.GetClient().SendMessage(new ServerMessage(18));
-                        User.GetClient().GetHabbo().OnLeaveRoom();
+                        continue;
                     }
+
+                    User.GetClient().SendMessage(new ServerMessage(18));
+                    User.GetClient().GetHabbo().OnLeaveRoom();
                 }
 
                 UberEnvironment.GetGame().GetRoomManager().UnloadRoom(Data.Id);
@@ -1405,7 +1397,7 @@ namespace Uber.Messages
             int tagCount = Request.PopWiredInt32();
 
             Room.Event = new RoomEvent(Room.RoomId, name, descr, category, null);
-            Room.Event.Tags = new List<string>();
+            Room.Event.Tags = new SynchronizedCollection<string>();
 
             for (int i = 0; i < tagCount; i++)
             {
@@ -1448,7 +1440,7 @@ namespace Uber.Messages
             Room.Event.Category = category;
             Room.Event.Name = name;
             Room.Event.Description = descr;
-            Room.Event.Tags = new List<string>();
+            Room.Event.Tags = new SynchronizedCollection<string>();
 
             for (int i = 0; i < tagCount; i++)
             {
@@ -1503,13 +1495,10 @@ namespace Uber.Messages
             GetResponse().AppendUInt(User.GetClient().GetHabbo().Id);
             GetResponse().AppendInt32(User.GetClient().GetHabbo().Tags.Count);
 
-            lock (User.GetClient().GetHabbo().Tags)
-            {
                 foreach (string Tag in User.GetClient().GetHabbo().Tags)
                 {
                     GetResponse().AppendStringWithBreak(Tag);
                 }
-            }
 
             SendResponse();
         }
@@ -1536,8 +1525,6 @@ namespace Uber.Messages
             GetResponse().AppendUInt(User.GetClient().GetHabbo().Id);
             GetResponse().AppendInt32(User.GetClient().GetHabbo().GetBadgeComponent().EquippedCount);
 
-            lock (User.GetClient().GetHabbo().GetBadgeComponent().BadgeList)
-            {
                 foreach (Badge Badge in User.GetClient().GetHabbo().GetBadgeComponent().BadgeList)
                 {
                     if (Badge.Slot <= 0)
@@ -1548,7 +1535,6 @@ namespace Uber.Messages
                     GetResponse().AppendInt32(Badge.Slot);
                     GetResponse().AppendStringWithBreak(Badge.Code);
                 }
-            }
 
             SendResponse();
         }
@@ -2056,19 +2042,16 @@ namespace Uber.Messages
             GetResponse().AppendInt32(Room.MoodlightData.Presets.Count);
             GetResponse().AppendInt32(Room.MoodlightData.CurrentPreset);
 
-            lock (Room.MoodlightData.Presets)
+            int i = 0;
+
+            foreach (MoodlightPreset Preset in Room.MoodlightData.Presets)
             {
-                int i = 0;
+                i++;
 
-                foreach (MoodlightPreset Preset in Room.MoodlightData.Presets)
-                {
-                    i++;
-
-                    GetResponse().AppendInt32(i);
-                    GetResponse().AppendInt32(int.Parse(UberEnvironment.BoolToEnum(Preset.BackgroundOnly)) + 1);
-                    GetResponse().AppendStringWithBreak(Preset.ColorCode);
-                    GetResponse().AppendInt32(Preset.ColorIntensity);
-                }
+                GetResponse().AppendInt32(i);
+                GetResponse().AppendInt32(int.Parse(UberEnvironment.BoolToEnum(Preset.BackgroundOnly)) + 1);
+                GetResponse().AppendStringWithBreak(Preset.ColorCode);
+                GetResponse().AppendInt32(Preset.ColorIntensity);
             }
 
             SendResponse();
@@ -2085,15 +2068,12 @@ namespace Uber.Messages
 
             RoomItem Item = null;
 
-            lock (Room.Items)
+            foreach (RoomItem I in Room.Items.Values)
             {
-                foreach (RoomItem I in Room.Items)
+                if (I.GetBaseItem().InteractionType.ToLower() == "dimmer")
                 {
-                    if (I.GetBaseItem().InteractionType.ToLower() == "dimmer")
-                    {
-                        Item = I;
-                        break;
-                    }
+                    Item = I;
+                    break;
                 }
             }
 
@@ -2135,17 +2115,18 @@ namespace Uber.Messages
 
             RoomItem Item = null;
 
-            lock (Room.Items)
+            /*
+            badlock (Room.Items)
+            {*/
+            foreach (RoomItem I in Room.Items.Values)
             {
-                foreach (RoomItem I in Room.Items)
+                if (I.GetBaseItem().InteractionType.ToLower() == "dimmer")
                 {
-                    if (I.GetBaseItem().InteractionType.ToLower() == "dimmer")
-                    {
-                        Item = I;
-                        break;
-                    }
+                    Item = I;
+                    break;
                 }
             }
+            // }
 
             if (Item == null)
             {

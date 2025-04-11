@@ -328,9 +328,10 @@ namespace Uber.Messages
                 return;
             }
 
-            lock (Room.UserList)
+            /*
+            badlock (Room.UserList)
             {
-                List<RoomUser>.Enumerator Users = Room.UserList.GetEnumerator();
+                ConcurrentDictionary<RoomUser>.Enumerator Users = Room.UserList.GetEnumerator();
 
                 while (Users.MoveNext())
                 {
@@ -344,6 +345,19 @@ namespace Uber.Messages
 
                         return;
                     }
+                }
+            }
+            */
+
+            foreach (RoomUser User in Room.UserList)
+            {
+                if (User.IsBot && User.BotData.AiType == "guide")
+                {
+                    Session.GetMessageHandler().GetResponse().Init(33);
+                    Session.GetMessageHandler().GetResponse().AppendInt32(4009);
+                    Session.GetMessageHandler().SendResponse();
+
+                    return;
                 }
             }
 

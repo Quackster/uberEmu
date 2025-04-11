@@ -1,9 +1,9 @@
-﻿using MySqlConnector;
-using System;
+﻿using System;
 using System.Data;
 using System.Threading;
 
 using Uber.Core;
+using MySqlConnector;
 
 namespace Uber.Storage
 {
@@ -50,22 +50,17 @@ namespace Uber.Storage
 
         public void DestroyClients()
         {
-            lock (this.Clients)
-            {
                 for (int i = 0; i < Clients.Length; i++)
                 {
                     Clients[i].Destroy();
                     Clients[i] = null;
                 }
-            }
         }
 
         public void DestroyDatabaseManager()
         {
             StopClientMonitor();
 
-            lock (this.Clients)
-            {
                 for (int i = 0; i < Clients.Length; i++)
                 {
                     try
@@ -75,7 +70,6 @@ namespace Uber.Storage
                     }
                     catch (NullReferenceException) { }
                 }
-            }
 
             Server = null;
             Database = null;
@@ -119,18 +113,15 @@ namespace Uber.Storage
             {
                 try
                 {
-                    lock (this.Clients)
-                    {
-                        DateTime DT = DateTime.Now;
+                    DateTime DT = DateTime.Now;
 
-                        for (int i = 0; i < Clients.Length; i++)
+                    for (int i = 0; i < Clients.Length; i++)
+                    {
+                        if (Clients[i].State != ConnectionState.Closed)
                         {
-                            if (Clients[i].State != ConnectionState.Closed)
+                            if (Clients[i].InactiveTime >= 60) // Not used in the last %x% seconds
                             {
-                                if (Clients[i].InactiveTime >= 60) // Not used in the last %x% seconds
-                                {
-                                    Clients[i].Disconnect();
-                                }
+                                Clients[i].Disconnect();
                             }
                         }
                     }
@@ -149,110 +140,93 @@ namespace Uber.Storage
 
         public DatabaseClient GetClient()
         {
-            lock (this.Clients)
+            for (uint i = 0; i < Clients.Length; i++)
             {
-                lock (this.AvailableClients)
-                {
-                    for (uint i = 0; i < Clients.Length; i++)
-                    {
-                        if (AvailableClients[i] == true)
-                        {
-                            ClientStarvation = 0;
-
-                            if (Clients[i].State == ConnectionState.Closed)
-                            {
-                                try
-                                {
-                                    Clients[i].Connect();
-                                }
-
-                                catch (Exception e)
-                                {
-                                    UberEnvironment.GetLogging().WriteLine("Could not get database client: " + e.Message, LogLevel.Error);
-                                }
-                            }
-
-                            if (Clients[i].State == ConnectionState.Open)
-                            {
-                                AvailableClients[i] = false;
-
-                                Clients[i].UpdateLastActivity();
-                                return Clients[i];
-                            }
-                        }
-                    }
-                }
-
-                ClientStarvation++;
-
-                if (ClientStarvation >= ((Clients.Length + 1) / 2))
+                if (AvailableClients[i] == true)
                 {
                     ClientStarvation = 0;
-                    SetClientAmount((uint)(Clients.Length + 1 * 1.3f));
-                    return GetClient();
+
+                    if (Clients[i].State == ConnectionState.Closed)
+                    {
+                        try
+                        {
+                            Clients[i].Connect();
+                        }
+
+                        catch (Exception e)
+                        {
+                            UberEnvironment.GetLogging().WriteLine("Could not get database client: " + e.Message, LogLevel.Error);
+                        }
+                    }
+
+                    if (Clients[i].State == ConnectionState.Open)
+                    {
+                        AvailableClients[i] = false;
+
+                        Clients[i].UpdateLastActivity();
+                        return Clients[i];
+                    }
                 }
-
-                DatabaseClient Anonymous = new DatabaseClient(0, this);
-                Anonymous.Connect();
-
-                return Anonymous;
             }
+
+            ClientStarvation++;
+
+            if (ClientStarvation >= ((Clients.Length + 1) / 2))
+            {
+                ClientStarvation = 0;
+                SetClientAmount((uint)(Clients.Length + 1 * 1.3f));
+                return GetClient();
+            }
+
+            DatabaseClient Anonymous = new DatabaseClient(0, this);
+            Anonymous.Connect();
+
+            return Anonymous;
         }
 
         public void SetClientAmount(uint Amount)
         {
-            lock (this.Clients)
+            if (Clients.Length == Amount)
             {
-                lock (this.AvailableClients)
+                return;
+            }
+
+            if (Amount < Clients.Length)
+            {
+                for (uint i = Amount; i < Clients.Length; i++)
                 {
-                    if (Clients.Length == Amount)
-                    {
-                        return;
-                    }
-
-                    if (Amount < Clients.Length)
-                    {
-                        for (uint i = Amount; i < Clients.Length; i++)
-                        {
-                            Clients[i].Destroy();
-                            Clients[i] = null;
-                        }
-                    }
-
-                    DatabaseClient[] _Clients = new DatabaseClient[Amount];
-                    bool[] _AvailableClients = new bool[Amount];
-
-                    for (uint i = 0; i < Amount; i++)
-                    {
-                        if (i < Clients.Length)
-                        {
-                            _Clients[i] = Clients[i];
-                            _AvailableClients[i] = AvailableClients[i];
-                        }
-                        else
-                        {
-                            _Clients[i] = new DatabaseClient((i + 1), this);
-                            _AvailableClients[i] = true;
-                        }
-                    }
-
-                    Clients = _Clients;
-                    AvailableClients = _AvailableClients;
+                    Clients[i].Destroy();
+                    Clients[i] = null;
                 }
             }
+
+            DatabaseClient[] _Clients = new DatabaseClient[Amount];
+            bool[] _AvailableClients = new bool[Amount];
+
+            for (uint i = 0; i < Amount; i++)
+            {
+                if (i < Clients.Length)
+                {
+                    _Clients[i] = Clients[i];
+                    _AvailableClients[i] = AvailableClients[i];
+                }
+                else
+                {
+                    _Clients[i] = new DatabaseClient((i + 1), this);
+                    _AvailableClients[i] = true;
+                }
+            }
+
+            Clients = _Clients;
+            AvailableClients = _AvailableClients;
+
         }
 
         public void ReleaseClient(uint Handle)
         {
-            lock (this.Clients)
+            if (Clients.Length >= (Handle - 1)) // Ensure client exists
             {
-                lock (this.AvailableClients)
-                {
-                    if (Clients.Length >= (Handle - 1)) // Ensure client exists
-                    {
-                        AvailableClients[Handle - 1] = true;
-                    }
-                }
+                AvailableClients[Handle - 1] = true;
             }
         }
     }

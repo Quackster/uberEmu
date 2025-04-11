@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -8,15 +9,15 @@ using Uber.Core;
 
 namespace Uber.Plugins
 {
-    class PluginHandler: IUberPluginHost
+    class PluginHandler : IUberPluginHost
     {
         public Types.AvailablePlugins AvailablePlugins;
-        public Dictionary<int, string> PluginHandlers;
+        public ConcurrentDictionary<int, string> PluginHandlers;
 
         public PluginHandler()
         {
             AvailablePlugins = new Types.AvailablePlugins();
-            PluginHandlers = new Dictionary<int, string>();
+            PluginHandlers = new ConcurrentDictionary<int, string>();
         }
 
         public void LoadPlugins()
@@ -42,13 +43,10 @@ namespace Uber.Plugins
 
         public void UnloadPlugins()
         {
-            lock (AvailablePlugins)
+            foreach (Types.AvailablePlugin Plugin in AvailablePlugins)
             {
-                foreach (Types.AvailablePlugin Plugin in AvailablePlugins)
-                {
-                    Plugin.Instance.Dispose();
-                    Plugin.Instance = null;
-                }
+                Plugin.Instance.Dispose();
+                Plugin.Instance = null;
             }
 
             AvailablePlugins.Clear();
@@ -57,19 +55,16 @@ namespace Uber.Plugins
 
         public Boolean UnloadPlugin(string Name)
         {
-            lock (AvailablePlugins)
+            foreach (Types.AvailablePlugin Plugin in AvailablePlugins)
             {
-                foreach (Types.AvailablePlugin Plugin in AvailablePlugins)
+                if (Plugin.Instance.Name.ToLower() == Name.ToLower())
                 {
-                    if (Plugin.Instance.Name.ToLower() == Name.ToLower())
-                    {
-                        Plugin.Instance.Dispose();
-                        Plugin.Instance = null;
+                    Plugin.Instance.Dispose();
+                    Plugin.Instance = null;
 
-                        AvailablePlugins.Remove(Plugin);
+                    AvailablePlugins.Remove(Plugin);
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -131,14 +126,11 @@ namespace Uber.Plugins
 
         public Types.AvailablePlugin GetPlugin(string Plugin)
         {
-            lock (AvailablePlugins)
+            foreach (Types.AvailablePlugin P in AvailablePlugins)
             {
-                foreach (Types.AvailablePlugin P in AvailablePlugins)
+                if (P.Instance.Name.ToLower() == Plugin.ToLower())
                 {
-                    if (P.Instance.Name.ToLower() == Plugin.ToLower())
-                    {
-                        return P;
-                    }
+                    return P;
                 }
             }
 
@@ -147,7 +139,7 @@ namespace Uber.Plugins
 
         public void UnregisterPacketHandler(string Plugin, int Header)
         {
-            PluginHandlers.Remove(Header);
+            PluginHandlers.TryRemove(Header, out var _);
         }
 
         public Boolean RegisterPacketHandler(string Plugin, int Header)
@@ -157,7 +149,7 @@ namespace Uber.Plugins
                 return false;
             }
 
-            PluginHandlers.Add(Header, Plugin);
+            PluginHandlers.TryAdd(Header, Plugin);
 
             return true;
         }

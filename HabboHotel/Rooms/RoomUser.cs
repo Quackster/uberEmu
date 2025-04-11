@@ -9,6 +9,7 @@ using Uber.HabboHotel.Pathfinding;
 using Uber.HabboHotel.RoomBots;
 using Uber.HabboHotel.Misc;
 using Uber.HabboHotel.Pets;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Rooms
 {
@@ -66,11 +67,11 @@ namespace Uber.HabboHotel.Rooms
         public Boolean UpdateNeeded;
         public Boolean IsAsleep;
 
-        public Dictionary<string, string> Statusses;
+        public ConcurrentDictionary<string, string> Statusses;
 
         public int DanceId;
 
-        public List<Coord> Path;
+        public SynchronizedCollection<Coord> Path;
         public int PathStep;
 
         public bool PathRecalcNeeded;
@@ -155,8 +156,8 @@ namespace Uber.HabboHotel.Rooms
             this.RotHead = 0;
             this.RotBody = 0;
             this.UpdateNeeded = true;
-            this.Statusses = new Dictionary<string, string>();
-            this.Path = new List<Coord>();
+            this.Statusses = new ConcurrentDictionary<string, string>();
+            this.Path = new SynchronizedCollection<Coord>();
             this.PathStep = 0;
             this.TeleDelay = -1;
 
@@ -284,8 +285,8 @@ namespace Uber.HabboHotel.Rooms
         {
             IsWalking = false;
             PathRecalcNeeded = false;
-            Path = new List<Coord>();
-            Statusses.Remove("mv");
+            Path = new SynchronizedCollection<Coord>();
+            Statusses.TryRemove("mv", out var _);
             GoalX = 0;
             GoalY = 0;
             SetStep = false;
@@ -408,13 +409,13 @@ namespace Uber.HabboHotel.Rooms
         {
             if (Statusses.ContainsKey(Key))
             {
-                Statusses.Remove(Key);
+                Statusses.TryRemove(Key, out var _);
             }
         }
 
         public void ResetStatus()
         {
-            Statusses = new Dictionary<string, string>();
+            Statusses = new ConcurrentDictionary<string, string>();
         }
 
         public void Serialize(ServerMessage Message)

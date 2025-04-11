@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 
 using Uber.Messages;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Rooms
 {
@@ -23,7 +24,7 @@ namespace Uber.HabboHotel.Rooms
         public string ModelName;
         public string CCTs;
         public int Score;
-        public List<string> Tags;
+        public SynchronizedCollection<string> Tags;
         public bool AllowPets;
         public bool AllowPetsEating;
         public bool AllowWalkthrough;
@@ -85,7 +86,7 @@ namespace Uber.HabboHotel.Rooms
             this.ModelName = "NO_MODEL";
             this.CCTs = "";
             this.Score = 0;
-            this.Tags = new List<string>();
+            this.Tags = new SynchronizedCollection<string>();
             this.AllowPets = true;
             this.AllowPetsEating = false;
             this.AllowWalkthrough = true;
@@ -94,7 +95,7 @@ namespace Uber.HabboHotel.Rooms
             this.Floor = "0.0";
             this.Landscape = "0.0";
             this.Event = null;
-            this.myIcon = new RoomIcon(1, 1, new Dictionary<int, int>());
+            this.myIcon = new RoomIcon(1, 1, new ConcurrentDictionary<int, int>());
         }
 
         public void Fill(DataRow Row)
@@ -130,7 +131,7 @@ namespace Uber.HabboHotel.Rooms
             this.ModelName = (string)Row["model_name"];
             this.CCTs = (string)Row["public_ccts"];
             this.Score = (int)Row["score"];
-            this.Tags = new List<string>();
+            this.Tags = new SynchronizedCollection<string>();
             this.AllowPets = UberEnvironment.EnumToBool(Row["allow_pets"].ToString());
             this.AllowPetsEating = UberEnvironment.EnumToBool(Row["allow_pets_eat"].ToString());
             this.AllowWalkthrough = UberEnvironment.EnumToBool(Row["allow_walkthrough"].ToString());
@@ -140,13 +141,13 @@ namespace Uber.HabboHotel.Rooms
             this.Landscape = (string)Row["landscape"];
             this.Event = null;
 
-            Dictionary<int, int> IconItems = new Dictionary<int,int>();
+            ConcurrentDictionary<int, int> IconItems = new ConcurrentDictionary<int,int>();
 
             if (Row["icon_items"].ToString() != "")
             {
                 foreach (string Bit in Row["icon_items"].ToString().Split('|'))
                 {
-                    IconItems.Add(int.Parse(Bit.Split(',')[0]), int.Parse(Bit.Split(',')[1]));
+                    IconItems.TryAdd(int.Parse(Bit.Split(',')[0]), int.Parse(Bit.Split(',')[1]));
                 }
             }
 
@@ -207,12 +208,9 @@ namespace Uber.HabboHotel.Rooms
                 Message.AppendStringWithBreak("");
                 Message.AppendInt32(TagCount);
 
-                lock (Tags)
+                foreach (string Tag in Tags)
                 {
-                    foreach (string Tag in Tags)
-                    {
-                        Message.AppendStringWithBreak(Tag);
-                    }
+                    Message.AppendStringWithBreak(Tag);
                 }
             }
             else
@@ -231,12 +229,9 @@ namespace Uber.HabboHotel.Rooms
                 Message.AppendStringWithBreak(Event.StartTime);
                 Message.AppendInt32(Event.Tags.Count);
 
-                lock (Event.Tags)
+                foreach (string Tag in Event.Tags)
                 {
-                    foreach (string Tag in Event.Tags)
-                    {
-                        Message.AppendStringWithBreak(Tag);
-                    }
+                    Message.AppendStringWithBreak(Tag);
                 }
             }
 

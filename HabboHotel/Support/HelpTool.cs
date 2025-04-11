@@ -6,24 +6,25 @@ using System.Data;
 
 using Uber.Storage;
 using Uber.Messages;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Support
 {
     class HelpTool
     {
-        public Dictionary<uint, HelpCategory> Categories;
-        public Dictionary<uint, HelpTopic> Topics;
+        public ConcurrentDictionary<uint, HelpCategory> Categories;
+        public ConcurrentDictionary<uint, HelpTopic> Topics;
 
-        public List<HelpTopic> ImportantTopics;
-        public List<HelpTopic> KnownIssues;
+        public SynchronizedCollection<HelpTopic> ImportantTopics;
+        public SynchronizedCollection<HelpTopic> KnownIssues;
 
         public HelpTool()
         {
-            Categories = new Dictionary<uint, HelpCategory>();
-            Topics = new Dictionary<uint, HelpTopic>();
+            Categories = new ConcurrentDictionary<uint, HelpCategory>();
+            Topics = new ConcurrentDictionary<uint, HelpTopic>();
 
-            ImportantTopics = new List<HelpTopic>();
-            KnownIssues = new List<HelpTopic>();
+            ImportantTopics = new SynchronizedCollection<HelpTopic>();
+            KnownIssues = new SynchronizedCollection<HelpTopic>();
         }
 
         public void LoadCategories()
@@ -43,7 +44,7 @@ namespace Uber.HabboHotel.Support
 
             foreach (DataRow Row in CategoryData.Rows)
             {
-                Categories.Add((uint)Row["id"], new HelpCategory((uint)Row["id"], (string)Row["caption"]));
+                Categories.TryAdd((uint)Row["id"], new HelpCategory((uint)Row["id"], (string)Row["caption"]));
             }
         }
 
@@ -81,7 +82,7 @@ namespace Uber.HabboHotel.Support
             {
                 HelpTopic NewTopic = new HelpTopic((uint)Row["id"], (string)Row["title"], (string)Row["body"], (uint)Row["subject"]);
 
-                Topics.Add((uint)Row["id"], NewTopic);
+                Topics.TryAdd((uint)Row["id"], NewTopic);
 
                 int Importance = int.Parse(Row["known_issue"].ToString());
 
@@ -118,14 +119,11 @@ namespace Uber.HabboHotel.Support
         {
             int i = 0;
 
-            lock (Topics)
+            foreach (HelpTopic Topic in Topics.Values)
             {
-                foreach (HelpTopic Topic in Topics.Values)
+                if (Topic.CategoryId == CategoryId)
                 {
-                    if (Topic.CategoryId == CategoryId)
-                    {
-                        i++;
-                    }
+                    i++;
                 }
             }
 
@@ -137,24 +135,18 @@ namespace Uber.HabboHotel.Support
             ServerMessage Frontpage = new ServerMessage(518);
             Frontpage.AppendInt32(ImportantTopics.Count);
 
-            lock (ImportantTopics)
+            foreach (HelpTopic Topic in ImportantTopics)
             {
-                foreach (HelpTopic Topic in ImportantTopics)
-                {
-                    Frontpage.AppendUInt(Topic.TopicId);
-                    Frontpage.AppendStringWithBreak(Topic.Caption);
-                }
+                Frontpage.AppendUInt(Topic.TopicId);
+                Frontpage.AppendStringWithBreak(Topic.Caption);
             }
 
             Frontpage.AppendInt32(KnownIssues.Count);
 
-            lock (KnownIssues)
+            foreach (HelpTopic Topic in KnownIssues)
             {
-                foreach (HelpTopic Topic in KnownIssues)
-                {
-                    Frontpage.AppendUInt(Topic.TopicId);
-                    Frontpage.AppendStringWithBreak(Topic.Caption);
-                }
+                Frontpage.AppendUInt(Topic.TopicId);
+                Frontpage.AppendStringWithBreak(Topic.Caption);
             }
 
             return Frontpage;
@@ -165,14 +157,11 @@ namespace Uber.HabboHotel.Support
             ServerMessage Index = new ServerMessage(519);
             Index.AppendInt32(Categories.Count);
 
-            lock (Categories)
+            foreach (HelpCategory Category in Categories.Values)
             {
-                foreach (HelpCategory Category in Categories.Values)
-                {
-                    Index.AppendUInt(Category.CategoryId);
-                    Index.AppendStringWithBreak(Category.Caption);
-                    Index.AppendInt32(ArticlesInCategory(Category.CategoryId));
-                }
+                Index.AppendUInt(Category.CategoryId);
+                Index.AppendStringWithBreak(Category.Caption);
+                Index.AppendInt32(ArticlesInCategory(Category.CategoryId));
             }
 
             return Index;
@@ -224,15 +213,12 @@ namespace Uber.HabboHotel.Support
             Cat.AppendStringWithBreak("");
             Cat.AppendInt32(ArticlesInCategory(Category.CategoryId));
 
-            lock (Topics)
+            foreach (HelpTopic Topic in Topics.Values)
             {
-                foreach (HelpTopic Topic in Topics.Values)
+                if (Topic.CategoryId == Category.CategoryId)
                 {
-                    if (Topic.CategoryId == Category.CategoryId)
-                    {
-                        Cat.AppendUInt(Topic.TopicId);
-                        Cat.AppendStringWithBreak(Topic.Caption);
-                    }
+                    Cat.AppendUInt(Topic.TopicId);
+                    Cat.AppendStringWithBreak(Topic.Caption);
                 }
             }
 

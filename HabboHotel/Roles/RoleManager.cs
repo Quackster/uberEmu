@@ -6,20 +6,21 @@ using System.Data;
 
 using Uber.Storage;
 using Uber.HabboHotel.Users;
+using System.Collections.Concurrent;
 
 namespace Uber.HabboHotel.Roles
 {
     class RoleManager
     {
-        private Dictionary<uint, Role> Roles;
-        private Dictionary<string, uint> Rights;
-        private Dictionary<string, string> SubRights;
+        private ConcurrentDictionary<uint, Role> Roles;
+        private ConcurrentDictionary<string, uint> Rights;
+        private ConcurrentDictionary<string, string> SubRights;
 
         public RoleManager()
         {
-            Roles = new Dictionary<uint,Role>();
-            Rights = new Dictionary<string, uint>();
-            SubRights = new Dictionary<string, string>();
+            Roles = new ConcurrentDictionary<uint,Role>();
+            Rights = new ConcurrentDictionary<string, uint>();
+            SubRights = new ConcurrentDictionary<string, string>();
         }
 
         public void LoadRoles()
@@ -37,7 +38,7 @@ namespace Uber.HabboHotel.Roles
             {
                 foreach (DataRow Row in Data.Rows)
                 {
-                    Roles.Add((uint)Row["id"], new Role((uint)Row["id"], (string)Row["name"]));
+                    Roles.TryAdd((uint)Row["id"], new Role((uint)Row["id"], (string)Row["name"]));
                 }
             }
         }
@@ -59,7 +60,7 @@ namespace Uber.HabboHotel.Roles
             {
                 foreach (DataRow Row in Data.Rows)
                 {
-                    Rights.Add((string)Row["fuse"].ToString().ToLower(), (uint)Row["rank"]);
+                    Rights.TryAdd((string)Row["fuse"].ToString().ToLower(), (uint)Row["rank"]);
                 }
             }
 
@@ -67,7 +68,7 @@ namespace Uber.HabboHotel.Roles
             {
                 foreach (DataRow Row in SubData.Rows)
                 {
-                    SubRights.Add((string)Row["fuse"], (string)Row["sub"]);
+                    SubRights.TryAdd((string)Row["fuse"], (string)Row["sub"]);
                 }
             }
         }
@@ -127,14 +128,11 @@ namespace Uber.HabboHotel.Roles
         {
             List<string> UserRights = new List<string>();
 
-            lock (Rights)
+            foreach (KeyValuePair<string, uint> Data in Rights)
             {
-                foreach (KeyValuePair<string, uint> Data in Rights)
+                if (RankId >= Data.Value && !UserRights.Contains(Data.Key))
                 {
-                    if (RankId >= Data.Value && !UserRights.Contains(Data.Key))
-                    {
-                        UserRights.Add(Data.Key);
-                    }
+                    UserRights.Add(Data.Key);
                 }
             }
 
@@ -145,14 +143,11 @@ namespace Uber.HabboHotel.Roles
         {
             List<string> UserRights = new List<string>();
 
-            lock (Rights)
+            foreach (KeyValuePair<string, string> Data in SubRights)
             {
-                foreach (KeyValuePair<string, string> Data in SubRights)
+                if (Data.Value == SubId)
                 {
-                    if (Data.Value == SubId)
-                    {
-                        UserRights.Add(Data.Key);
-                    }
+                    UserRights.Add(Data.Key);
                 }
             }
 

@@ -13,12 +13,12 @@ namespace Uber.HabboHotel.Rooms
         public string Name;
         public string Description;
         public int Category;
-        public List<string> Tags;
+        public SynchronizedCollection<string> Tags;
         public string StartTime;
 
         public uint RoomId;
 
-        public RoomEvent(uint RoomId, string Name, string Description, int Category, List<string> Tags)
+        public RoomEvent(uint RoomId, string Name, string Description, int Category, SynchronizedCollection<string> Tags)
         {
             this.RoomId = RoomId;
             this.Name = Name;
@@ -40,12 +40,9 @@ namespace Uber.HabboHotel.Rooms
             Message.AppendStringWithBreak(StartTime);
             Message.AppendInt32(Tags.Count);
 
-            lock (Tags)
+            foreach (string Tag in Tags)
             {
-                foreach (string Tag in Tags)
-                {
-                    Message.AppendStringWithBreak(Tag);
-                }
+                Message.AppendStringWithBreak(Tag);
             }
 
             return Message;

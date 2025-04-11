@@ -109,14 +109,11 @@ namespace Uber.HabboHotel.RoomBots
 
         public BotResponse GetResponse(string Message)
         {
-            lock (Responses)
+            foreach (BotResponse Response in Responses)
             {
-                foreach (BotResponse Response in Responses)
+                if (Response.KeywordMatched(Message))
                 {
-                    if (Response.KeywordMatched(Message))
-                    {
-                        return Response;
-                    }
+                    return Response;
                 }
             }
 
