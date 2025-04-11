@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `achievements` (
   `pixels_base` int(11) NOT NULL DEFAULT '50',
   `pixels_multiplier` double NOT NULL DEFAULT '1.25',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=12 ;
 
 --
 -- Dumping data for table `achievements`
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `added_date` varchar(50) NOT NULL,
   `appeal_state` enum('0','1','2') NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `bans`
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `bans_appeals` (
   `mail` varchar(120) NOT NULL,
   `plea` text NOT NULL,
   KEY `ban_id` (`ban_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `bans_appeals`
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `bots` (
   `max_y` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `room_id` (`room_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=63 ;
 
 --
 -- Dumping data for table `bots`
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `bots_responses` (
   `serve_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `bot_id` (`bot_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=17 ;
 
 --
 -- Dumping data for table `bots_responses`
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `bots_speech` (
   `text` varchar(200) NOT NULL,
   `shout` enum('0','1') NOT NULL DEFAULT '0',
   KEY `bot_id` (`bot_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `bots_speech`
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS `catalog_items` (
   `cost_pixels` int(11) NOT NULL,
   `amount` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2427 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=2427 ;
 
 --
 -- Dumping data for table `catalog_items`
@@ -2445,7 +2445,7 @@ CREATE TABLE IF NOT EXISTS `catalog_marketplace_offers` (
   `state` enum('1','2') NOT NULL DEFAULT '1',
   `extra_data` text NOT NULL,
   PRIMARY KEY (`offer_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `catalog_marketplace_offers`
@@ -2479,7 +2479,7 @@ CREATE TABLE IF NOT EXISTS `catalog_pages` (
   `page_text_details` text NOT NULL,
   `page_text_teaser` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=145 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=145 ;
 
 --
 -- Dumping data for table `catalog_pages`
@@ -2592,7 +2592,7 @@ CREATE TABLE IF NOT EXISTS `chatlogs` (
   `user_name` varchar(100) NOT NULL DEFAULT 'Unknown User',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`room_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `chatlogs`
@@ -2609,7 +2609,7 @@ CREATE TABLE IF NOT EXISTS `credit_vouchers` (
   `code` varchar(50) NOT NULL,
   `value` int(11) NOT NULL DEFAULT '0',
   KEY `code` (`code`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `credit_vouchers`
@@ -2628,7 +2628,7 @@ CREATE TABLE IF NOT EXISTS `ecotron_rewards` (
   `item_id` int(10) unsigned NOT NULL,
   `reward_level` int(11) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=27 ;
 
 --
 -- Dumping data for table `ecotron_rewards`
@@ -2671,7 +2671,7 @@ INSERT INTO `ecotron_rewards` (`id`, `display_id`, `item_id`, `reward_level`) VA
 CREATE TABLE IF NOT EXISTS `external_texts` (
   `skey` text NOT NULL,
   `sval` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `external_texts`
@@ -2705,7 +2705,7 @@ INSERT INTO `external_texts` (`skey`, `sval`) VALUES
 CREATE TABLE IF NOT EXISTS `external_variables` (
   `skey` text NOT NULL,
   `sval` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `external_variables`
@@ -2752,7 +2752,7 @@ CREATE TABLE IF NOT EXISTS `furniture` (
   `interaction_modes_count` int(11) NOT NULL DEFAULT '1',
   `vending_ids` varchar(100) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20297 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=20297 ;
 
 --
 -- Dumping data for table `furniture`
@@ -4865,7 +4865,7 @@ CREATE TABLE IF NOT EXISTS `fuserights` (
   `rank` int(11) unsigned NOT NULL,
   `fuse` varchar(50) NOT NULL,
   KEY `rank` (`rank`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `fuserights`
@@ -4907,7 +4907,7 @@ CREATE TABLE IF NOT EXISTS `fuserights_subs` (
   `sub` varchar(120) NOT NULL,
   `fuse` text NOT NULL,
   KEY `sub` (`sub`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `fuserights_subs`
@@ -4938,7 +4938,7 @@ CREATE TABLE IF NOT EXISTS `help_subjects` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `caption` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `help_subjects`
@@ -4964,7 +4964,7 @@ CREATE TABLE IF NOT EXISTS `help_topics` (
   `body` text NOT NULL,
   `known_issue` enum('0','1','2') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=14 ;
 
 --
 -- Dumping data for table `help_topics`
@@ -4998,7 +4998,7 @@ CREATE TABLE IF NOT EXISTS `homes` (
   `allow_display` enum('0','1') NOT NULL DEFAULT '1',
   `bgimage` varchar(120) NOT NULL DEFAULT 'b_bg_colour_01',
   PRIMARY KEY (`home_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `homes`
@@ -5021,7 +5021,7 @@ CREATE TABLE IF NOT EXISTS `homes_catalog` (
   `category` int(11) NOT NULL,
   `sorted` enum('1','0') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1294 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1294 ;
 
 --
 -- Dumping data for table `homes_catalog`
@@ -6255,7 +6255,7 @@ CREATE TABLE IF NOT EXISTS `homes_categories` (
   `order_num` int(11) NOT NULL DEFAULT '1',
   `enabled` enum('0','1') NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=39 ;
 
 --
 -- Dumping data for table `homes_categories`
@@ -6300,7 +6300,7 @@ CREATE TABLE IF NOT EXISTS `homes_inventory` (
   `amount` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `homes_inventory`
@@ -6324,7 +6324,7 @@ CREATE TABLE IF NOT EXISTS `homes_items` (
   `skin` text NOT NULL,
   `owner_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `homes_items`
@@ -6346,7 +6346,7 @@ CREATE TABLE IF NOT EXISTS `ipn_requests` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `balance_diff` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `ipn_requests`
@@ -6362,7 +6362,7 @@ CREATE TABLE IF NOT EXISTS `ipn_requests` (
 CREATE TABLE IF NOT EXISTS `item_id_generator` (
   `id_generator` int(10) unsigned NOT NULL,
   KEY `id_generator` (`id_generator`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `item_id_generator`
@@ -6381,7 +6381,7 @@ CREATE TABLE IF NOT EXISTS `messenger_friendships` (
   `user_one_id` int(10) unsigned NOT NULL,
   `user_two_id` int(10) unsigned NOT NULL,
   KEY `user_one_id` (`user_one_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `messenger_friendships`
@@ -6399,7 +6399,7 @@ CREATE TABLE IF NOT EXISTS `messenger_requests` (
   `to_id` int(10) unsigned NOT NULL,
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `messenger_requests`
@@ -6419,7 +6419,7 @@ CREATE TABLE IF NOT EXISTS `moderation_forum_replies` (
   `date` varchar(50) NOT NULL,
   `message` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `moderation_forum_replies`
@@ -6441,7 +6441,7 @@ CREATE TABLE IF NOT EXISTS `moderation_forum_threads` (
   `message` text NOT NULL,
   `locked` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `moderation_forum_threads`
@@ -6460,7 +6460,7 @@ CREATE TABLE IF NOT EXISTS `moderation_presets` (
   `type` enum('message','roommessage') NOT NULL DEFAULT 'message',
   `message` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=17 ;
 
 --
 -- Dumping data for table `moderation_presets`
@@ -6492,7 +6492,7 @@ CREATE TABLE IF NOT EXISTS `moderation_tickets` (
   `room_name` varchar(100) NOT NULL,
   `timestamp` BIGINT NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `moderation_tickets`
@@ -6511,7 +6511,7 @@ CREATE TABLE IF NOT EXISTS `navigator_flatcats` (
   `enabled` enum('0','1') NOT NULL DEFAULT '1',
   `min_rank` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=15 ;
 
 --
 -- Dumping data for table `navigator_flatcats`
@@ -6545,7 +6545,7 @@ CREATE TABLE IF NOT EXISTS `navigator_pubcats` (
   `caption` varchar(100) NOT NULL,
   `enabled` enum('0','1') NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `navigator_pubcats`
@@ -6574,7 +6574,7 @@ CREATE TABLE IF NOT EXISTS `navigator_publics` (
   `category_id` int(11) NOT NULL DEFAULT '0',
   `category_parent_id` int(11) NOT NULL DEFAULT '-1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=9 ;
 
 --
 -- Dumping data for table `navigator_publics`
@@ -6601,7 +6601,7 @@ CREATE TABLE IF NOT EXISTS `notes` (
   `content` varchar(500) NOT NULL,
   `date` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `notes`
@@ -6620,7 +6620,7 @@ CREATE TABLE IF NOT EXISTS `ranks` (
   `prefix` text NOT NULL,
   `suffix` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `ranks`
@@ -6666,7 +6666,7 @@ CREATE TABLE IF NOT EXISTS `rooms` (
   `allow_pets_eat` enum('0','1') NOT NULL DEFAULT '0',
   `allow_walkthrough` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=100 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=100 ;
 
 --
 -- Dumping data for table `rooms`
@@ -6697,7 +6697,7 @@ CREATE TABLE IF NOT EXISTS `room_ads` (
   `views_limit` int(11) NOT NULL DEFAULT '0' COMMENT '0 = unlimited',
   `enabled` enum('0','1') NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `room_ads`
@@ -6721,7 +6721,7 @@ CREATE TABLE IF NOT EXISTS `room_items` (
   `rot` int(11) NOT NULL,
   `wall_pos` varchar(100) NOT NULL,
   KEY `id` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `room_items`
@@ -6742,7 +6742,7 @@ CREATE TABLE IF NOT EXISTS `room_items_moodlight` (
   `preset_two` text NOT NULL,
   `preset_three` text NOT NULL,
   KEY `item_id` (`item_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `room_items_moodlight`
@@ -6765,7 +6765,7 @@ CREATE TABLE IF NOT EXISTS `room_models` (
   `public_items` text NOT NULL,
   `club_only` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `room_models`
@@ -6832,7 +6832,7 @@ CREATE TABLE IF NOT EXISTS `room_rights` (
   `room_id` int(10) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   KEY `room_id` (`room_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `room_rights`
@@ -6851,7 +6851,7 @@ CREATE TABLE IF NOT EXISTS `server_status` (
   `rooms_loaded` int(11) NOT NULL DEFAULT '0',
   `server_ver` text NOT NULL,
   `stamp` double NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `server_status`
@@ -6874,7 +6874,7 @@ CREATE TABLE IF NOT EXISTS `site_app_form` (
   `required` enum('0','1') NOT NULL DEFAULT '1',
   `order_num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `site_app_form`
@@ -6894,7 +6894,7 @@ CREATE TABLE IF NOT EXISTS `site_app_openings` (
   `text_reqs` text NOT NULL,
   `text_duties` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=5 ;
 
 --
 -- Dumping data for table `site_app_openings`
@@ -6909,7 +6909,7 @@ CREATE TABLE IF NOT EXISTS `site_app_openings` (
 
 CREATE TABLE IF NOT EXISTS `site_config` (
   `maintenance` enum('0','1') NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `site_config`
@@ -6932,7 +6932,7 @@ CREATE TABLE IF NOT EXISTS `site_cron` (
   `last_exec` int(11) NOT NULL,
   `exec_every` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `site_cron`
@@ -6960,7 +6960,7 @@ CREATE TABLE IF NOT EXISTS `site_hotcampaigns` (
   `descr` text NOT NULL,
   `url` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `site_hotcampaigns`
@@ -6985,7 +6985,7 @@ CREATE TABLE IF NOT EXISTS `site_minimail` (
   `timestamp` BIGINT NOT NULL,
   `body` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `site_minimail`
@@ -7008,7 +7008,7 @@ CREATE TABLE IF NOT EXISTS `site_navi` (
   `visibility` enum('0','1','2','3') NOT NULL COMMENT '0 = Never, 1 = Always, 2 = Logged in only, 3 = Guests only',
   PRIMARY KEY (`id`),
   KEY `parent_id` (`parent_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=20 ;
 
 --
 -- Dumping data for table `site_navi`
@@ -7051,7 +7051,7 @@ CREATE TABLE IF NOT EXISTS `site_news` (
   `datestr` varchar(50) NOT NULL,
   `timestamp` BIGINT NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `site_news`
@@ -7068,7 +7068,7 @@ CREATE TABLE IF NOT EXISTS `site_news_categories` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `caption` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=12 ;
 
 --
 -- Dumping data for table `site_news_categories`
@@ -7098,7 +7098,7 @@ CREATE TABLE IF NOT EXISTS `tele_links` (
   `tele_one_id` int(10) unsigned NOT NULL,
   `tele_two_id` int(10) unsigned NOT NULL,
   KEY `tele_one_id` (`tele_one_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `tele_links`
@@ -7141,7 +7141,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `mutant_penalty_expire` int(11) NOT NULL DEFAULT '0',
   `block_newfriends` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `users`
@@ -7159,7 +7159,7 @@ CREATE TABLE IF NOT EXISTS `user_achievements` (
   `achievement_id` int(10) unsigned NOT NULL,
   `achievement_level` int(11) NOT NULL,
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_achievements`
@@ -7177,7 +7177,7 @@ CREATE TABLE IF NOT EXISTS `user_badges` (
   `badge_id` varchar(100) NOT NULL,
   `badge_slot` int(11) NOT NULL DEFAULT '0',
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_badges`
@@ -7197,7 +7197,7 @@ CREATE TABLE IF NOT EXISTS `user_effects` (
   `is_activated` enum('0','1') NOT NULL DEFAULT '0',
   `activated_stamp` double NOT NULL DEFAULT '0',
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_effects`
@@ -7214,7 +7214,7 @@ CREATE TABLE IF NOT EXISTS `user_favorites` (
   `user_id` int(10) unsigned NOT NULL,
   `room_id` int(10) unsigned NOT NULL,
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_favorites`
@@ -7231,7 +7231,7 @@ CREATE TABLE IF NOT EXISTS `user_ignores` (
   `user_id` int(10) unsigned NOT NULL,
   `ignore_id` int(10) unsigned NOT NULL,
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_ignores`
@@ -7253,7 +7253,7 @@ CREATE TABLE IF NOT EXISTS `user_info` (
   `cfhs` int(11) NOT NULL DEFAULT '0',
   `cfhs_abusive` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_info`
@@ -7272,7 +7272,7 @@ CREATE TABLE IF NOT EXISTS `user_items` (
   `base_item` int(10) unsigned NOT NULL,
   `extra_data` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_items`
@@ -7303,7 +7303,7 @@ CREATE TABLE IF NOT EXISTS `user_pets` (
   `z` double NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `user_pets`
@@ -7322,7 +7322,7 @@ CREATE TABLE IF NOT EXISTS `user_presents` (
   `amount` int(11) NOT NULL,
   `extra_data` text NOT NULL,
   KEY `item_id` (`item_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_presents`
@@ -7343,7 +7343,7 @@ CREATE TABLE IF NOT EXISTS `user_roomvisits` (
   `hour` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_roomvisits`
@@ -7362,7 +7362,7 @@ CREATE TABLE IF NOT EXISTS `user_subscriptions` (
   `timestamp_activated` BIGINT NOT NULL,
   `timestamp_expire` BIGINT NOT NULL,
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_subscriptions`
@@ -7381,7 +7381,7 @@ CREATE TABLE IF NOT EXISTS `user_tags` (
   `tag` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `user_tags`
@@ -7400,7 +7400,7 @@ CREATE TABLE IF NOT EXISTS `user_wardrobe` (
   `look` varchar(120) NOT NULL,
   `gender` enum('F','M') NOT NULL DEFAULT 'M',
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user_wardrobe`
@@ -7422,7 +7422,7 @@ CREATE TABLE IF NOT EXISTS `vip_items` (
   `image` varchar(120) NOT NULL DEFAULT '',
   `featured` enum('0','1') NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `vip_items`
