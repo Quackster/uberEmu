@@ -509,7 +509,7 @@ namespace Uber.HabboHotel.Misc
                     #endregion
                 }
             }
-            catch (ExecutionEngineException) { }
+            catch { }
 
             return false;
         }
