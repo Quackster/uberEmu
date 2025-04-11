@@ -17,6 +17,9 @@ namespace Uber.Net
         private TcpConnectionManager Manager;
         private TcpConnectionFactory Factory;
 
+        private string ListenerIP;
+        private int ListenerPort;
+
         public Boolean isListening
         {
             get
@@ -35,6 +38,8 @@ namespace Uber.Net
                 UberEnvironment.GetLogging().WriteLine("[TCPListener.Construct]: Could not bind to " + LocalIp + ", binding to " + IPAddress.Loopback.ToString() + " instead.", LogLevel.Error);
             }
 
+            this.ListenerIP = IP.ToString();
+            this.ListenerPort = Port;
             this.Listener = new TcpListener(IP, Port);
             this.ConnectionReqCallback = new AsyncCallback(ConnectionRequest);
             this.Factory = new TcpConnectionFactory();
@@ -50,6 +55,8 @@ namespace Uber.Net
 
             Listener.Start();
             IsListening = true;
+
+            UberEnvironment.GetLogging().WriteLine("Game socket listening on " + this.ListenerIP + ":" + this.ListenerPort.ToString() + ".");
 
             WaitForNextConnection();
         }
