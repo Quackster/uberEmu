@@ -6850,7 +6850,7 @@ CREATE TABLE IF NOT EXISTS `server_status` (
   `users_online` int(11) NOT NULL DEFAULT '0',
   `rooms_loaded` int(11) NOT NULL DEFAULT '0',
   `server_ver` text NOT NULL,
-  `stamp` double NOT NULL
+  `stamp` BIGINT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -7122,7 +7122,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `credits` int(11) NOT NULL DEFAULT '0',
   `vip_points` int(11) NOT NULL DEFAULT '0',
   `activity_points` int(11) NOT NULL DEFAULT '0',
-  `activity_points_lastupdate` double NOT NULL DEFAULT '0',
+  `activity_points_lastupdate` BIGINT NOT NULL DEFAULT '0',
   `look` varchar(100) NOT NULL DEFAULT 'hr-115-42.hd-190-1.ch-215-62.lg-285-91.sh-290-62',
   `gender` enum('M','F') NOT NULL DEFAULT 'M',
   `motto` varchar(50) NOT NULL,
@@ -7195,7 +7195,7 @@ CREATE TABLE IF NOT EXISTS `user_effects` (
   `effect_id` int(11) NOT NULL DEFAULT '1',
   `total_duration` int(11) NOT NULL DEFAULT '3600',
   `is_activated` enum('0','1') NOT NULL DEFAULT '0',
-  `activated_stamp` double NOT NULL DEFAULT '0',
+  `activated_stamp` BIGINT NOT NULL DEFAULT '0',
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
