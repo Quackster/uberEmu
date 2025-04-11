@@ -45,7 +45,7 @@ namespace Uber.HabboHotel.Users.Authenticator
 
         public static Habbo GenerateHabbo(DataRow Data, string AuthTicket)
         {
-            return new Habbo((uint)Data["id"], (string)Data["username"], (string)Data["real_name"], AuthTicket, (uint)Data["rank"], (string)Data["motto"], (string)Data["look"], (string)Data["gender"], (int)Data["credits"], (int)Data["activity_points"], (Double)Data["activity_points_lastupdate"], UberEnvironment.EnumToBool(Data["is_muted"].ToString()), (uint)Data["home_room"], (int)Data["respect"], (int)Data["daily_respect_points"], (int)Data["daily_pet_respect_points"], (int)Data["newbie_status"], (Data["mutant_penalty"].ToString() != "0"), UberEnvironment.EnumToBool(Data["block_newfriends"].ToString()));
+            return new Habbo((uint)Data["id"], (string)Data["username"], (string)Data["real_name"], AuthTicket, (uint)Data["rank"], (string)Data["motto"], (string)Data["look"], (string)Data["gender"], (int)Data["credits"], (int)Data["activity_points"], (long)Data["activity_points_lastupdate"], UberEnvironment.EnumToBool(Data["is_muted"].ToString()), (uint)Data["home_room"], (int)Data["respect"], (int)Data["daily_respect_points"], (int)Data["daily_pet_respect_points"], (int)Data["newbie_status"], (Data["mutant_penalty"].ToString() != "0"), UberEnvironment.EnumToBool(Data["block_newfriends"].ToString()));
         }
     }
 }
