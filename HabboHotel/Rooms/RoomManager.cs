@@ -84,7 +84,7 @@ namespace Uber.HabboHotel.Rooms
 
                 try
                 {
-                    foreach (var kvp in this.Rooms)
+                    /*foreach (var kvp in this.Rooms)
                     {
                         Room Room = kvp.Value;
 
@@ -94,7 +94,7 @@ namespace Uber.HabboHotel.Rooms
                         }
 
                         Room.ProcessRoom();
-                    }
+                    }*/
 
                     foreach (uint RoomId in this.RoomsToUnload)
                     {
@@ -244,6 +244,7 @@ namespace Uber.HabboHotel.Rooms
 
             Room.InitBots();
             Room.InitPets();
+            Room.StartProcessRoutine();
 
             UberEnvironment.GetLogging().WriteLine("[RoomMgr] Loaded room: \"" + Room.Name + "\" (ID: " + Id + ")", Uber.Core.LogLevel.Information);
         }
@@ -256,6 +257,8 @@ namespace Uber.HabboHotel.Rooms
             }
 
             GetRoom(Id).KeepAlive = false;
+            GetRoom(Id).StopProcessRoutine();
+
             RoomsToUnload.Add(Id);
         }
 

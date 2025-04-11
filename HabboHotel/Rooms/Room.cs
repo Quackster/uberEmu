@@ -13,6 +13,7 @@ using Uber.HabboHotel.GameClients;
 using Uber.Messages;
 using Uber.Storage;
 using System.Collections.Concurrent;
+using System.Timers;
 
 namespace Uber.HabboHotel.Rooms
 {
@@ -72,6 +73,8 @@ namespace Uber.HabboHotel.Rooms
         public Coord[,] BedMatrix;
         public double[,] HeightMatrix;
         public double[,] TopStackHeight;
+
+        private System.Timers.Timer Task;
 
         public Boolean HasOngoingEvent
         {
@@ -259,6 +262,31 @@ namespace Uber.HabboHotel.Rooms
             LoadFurniture();
 
             GenerateMaps();
+        }
+
+        public void StartProcessRoutine()
+        {
+            if (Task != null)
+            {
+                return;
+            }
+
+            Task = new System.Timers.Timer();
+            Task.Interval = 500;
+            Task.Elapsed += ProcessRoom;
+            Task.Enabled = true;
+            Task.Start();
+        }
+
+        public void StopProcessRoutine()
+        {
+            if (Task == null)
+            {
+                return;
+            }
+
+            Task.Dispose();
+            Task = null;
         }
 
         public void InitBots()
@@ -696,7 +724,7 @@ namespace Uber.HabboHotel.Rooms
             return true;
         }
 
-        public void ProcessRoom()
+        public void ProcessRoom(object sender, ElapsedEventArgs e)
         {
             int i = 0;
 
@@ -974,10 +1002,10 @@ namespace Uber.HabboHotel.Rooms
 
             RoomUser User = GetRoomUserByHabbo(Session.GetHabbo().Id);
 
-                if (!UserList.Remove(GetRoomUserByHabbo(Session.GetHabbo().Id)))
-                {
-                    return;
-                }
+            if (!UserList.Remove(GetRoomUserByHabbo(Session.GetHabbo().Id)))
+            {
+                return;
+            }
 
             if (NotifyClient)
             {
@@ -994,65 +1022,65 @@ namespace Uber.HabboHotel.Rooms
 
             List<RoomUser> PetsToRemove = new List<RoomUser>();
 
-                if (!User.IsSpectator)
+            if (!User.IsSpectator)
+            {
+                if (User != null)
                 {
-                    if (User != null)
-                    {
-                        UserMatrix[User.X, User.Y] = false;
+                    UserMatrix[User.X, User.Y] = false;
 
-                        ServerMessage LeaveMessage = new ServerMessage(29);
-                        LeaveMessage.AppendRawInt32(User.VirtualId);
-                        SendMessage(LeaveMessage);
-                    }
-
-                    if (Session.GetHabbo() != null)
-                    {
-                        if (HasActiveTrade(Session.GetHabbo().Id))
-                        {
-                            TryStopTrade(Session.GetHabbo().Id);
-                        }
-
-                        if (Session.GetHabbo().Username.ToLower() == Owner.ToLower())
-                        {
-                            if (HasOngoingEvent)
-                            {
-                                Event = null;
-
-                                ServerMessage Message = new ServerMessage(370);
-                                Message.AppendStringWithBreak("-1");
-                                SendMessage(Message);
-                            }
-                        }
-
-                        Session.GetHabbo().OnLeaveRoom();
-                    }
+                    ServerMessage LeaveMessage = new ServerMessage(29);
+                    LeaveMessage.AppendRawInt32(User.VirtualId);
+                    SendMessage(LeaveMessage);
                 }
 
-                if (!User.IsSpectator)
+                if (Session.GetHabbo() != null)
                 {
-                    UpdateUserCount();
-
-                    List<RoomUser> Bots = new List<RoomUser>();
-
-                    foreach (RoomUser Usr in UserList)
+                    if (HasActiveTrade(Session.GetHabbo().Id))
                     {
-                        if (!Usr.IsBot)
-                        {
-                            continue;
-                        }
-
-                        Bots.Add(Usr);
+                        TryStopTrade(Session.GetHabbo().Id);
                     }
 
-                    foreach (RoomUser Bot in Bots)
+                    if (Session.GetHabbo().Username.ToLower() == Owner.ToLower())
                     {
-                        Bot.BotAI.OnUserLeaveRoom(Session);
-
-                        if (Bot.IsPet && Bot.PetData.OwnerId == Session.GetHabbo().Id && !CheckRights(Session, true))
+                        if (HasOngoingEvent)
                         {
-                            PetsToRemove.Add(Bot);
+                            Event = null;
+
+                            ServerMessage Message = new ServerMessage(370);
+                            Message.AppendStringWithBreak("-1");
+                            SendMessage(Message);
                         }
                     }
+
+                    Session.GetHabbo().OnLeaveRoom();
+                }
+            }
+
+            if (!User.IsSpectator)
+            {
+                UpdateUserCount();
+
+                List<RoomUser> Bots = new List<RoomUser>();
+
+                foreach (RoomUser Usr in UserList)
+                {
+                    if (!Usr.IsBot)
+                    {
+                        continue;
+                    }
+
+                    Bots.Add(Usr);
+                }
+
+                foreach (RoomUser Bot in Bots)
+                {
+                    Bot.BotAI.OnUserLeaveRoom(Session);
+
+                    if (Bot.IsPet && Bot.PetData.OwnerId == Session.GetHabbo().Id && !CheckRights(Session, true))
+                    {
+                        PetsToRemove.Add(Bot);
+                    }
+                }
             }
 
             foreach (RoomUser toRemove in PetsToRemove)
@@ -1095,10 +1123,10 @@ namespace Uber.HabboHotel.Rooms
             foreach (RoomUser User in this.UserList)
             {
                 if (User.VirtualId == VirtualId)
-                    {
-                        return User;
-                    }
+                {
+                    return User;
                 }
+            }
 
             return null;
         }
@@ -1108,15 +1136,15 @@ namespace Uber.HabboHotel.Rooms
             foreach (RoomUser User in this.UserList)
             {
                 if (User.IsBot)
-                    {
-                        continue;
-                    }
-
-                    if (User.HabboId == Id)
-                    {
-                        return User;
-                    }
+                {
+                    continue;
                 }
+
+                if (User.HabboId == Id)
+                {
+                    return User;
+                }
+            }
 
             return null;
         }
@@ -1126,15 +1154,15 @@ namespace Uber.HabboHotel.Rooms
             foreach (RoomUser User in this.UserList)
             {
                 if (User.IsBot || User.GetClient().GetHabbo() == null)
-                    {
-                        continue;
-                    }
-                    
-                    if (User.GetClient().GetHabbo().Username.ToLower() == Name.ToLower())
-                    {
-                        return User;
-                    }
+                {
+                    continue;
                 }
+
+                if (User.GetClient().GetHabbo().Username.ToLower() == Name.ToLower())
+                {
+                    return User;
+                }
+            }
 
             return null;
         }
@@ -1148,12 +1176,12 @@ namespace Uber.HabboHotel.Rooms
                 foreach (RoomUser User in this.UserList)
                 {
                     if (User.IsBot || User.GetClient() == null)
-                        {
-                            continue;
-                        }
-
-                        User.GetClient().SendMessage(Message);
+                    {
+                        continue;
                     }
+
+                    User.GetClient().SendMessage(Message);
+                }
             }
             catch (InvalidOperationException) { }
         }
@@ -1163,17 +1191,17 @@ namespace Uber.HabboHotel.Rooms
             foreach (RoomUser User in this.UserList)
             {
                 if (User.IsBot)
-                    {
-                        continue;
-                    }
-
-                    if (!CheckRights(User.GetClient()))
-                    {
-                        continue;
-                    }
-
-                    User.GetClient().SendMessage(Message);
+                {
+                    continue;
                 }
+
+                if (!CheckRights(User.GetClient()))
+                {
+                    continue;
+                }
+
+                User.GetClient().SendMessage(Message);
+            }
         }
         #endregion
 
@@ -1546,7 +1574,7 @@ namespace Uber.HabboHotel.Rooms
 
         public double SqAbsoluteHeight(int X, int Y)
         {
-            List <RoomItem> ItemsOnSquare = GetFurniObjects(X, Y);
+            List<RoomItem> ItemsOnSquare = GetFurniObjects(X, Y);
             double HighestStack = 0;
 
             bool deduct = false;
