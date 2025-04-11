@@ -116,27 +116,6 @@ namespace Uber.HabboHotel.GameClients
                     List<uint> TimedOutClients = new List<uint>();
                     List<GameClient> ToPing = new List<GameClient>();
 
-                    /*
-                    badlock (this.Clients)
-                    {
-                        ConcurrentDictionary<uint, GameClient>.Enumerator eClients = this.Clients.GetEnumerator();                     
-
-                        while (eClients.MoveNext())
-                        {
-                            GameClient Client = eClients.Current.Value;
-
-                            if (Client.PongOK)
-                            {
-                                Client.PongOK = false;
-                                ToPing.Add(Client);
-                            }
-                            else
-                            {
-                                TimedOutClients.Add(Client.ClientId);
-                            }
-                        }
-                    }*/
-
                     foreach (var kvp in this.Clients)
                     {
                         GameClient Client = kvp.Value;

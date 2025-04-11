@@ -87,51 +87,12 @@ namespace Uber.HabboHotel.Users.Messenger
                     return Request;
                 }
             }
-            /*
-            badlock (this.Requests)
-            {
-                ConcurrentDictionary<MessengerRequest>.Enumerator eRequests = this.Requests.GetEnumerator();
-
-                while (eRequests.MoveNext())
-                {
-                    MessengerRequest Request = eRequests.Current;
-
-                    if (Request.RequestId == RequestId)
-                    {
-                        return Request;
-                    }
-                }
-            }*/
 
             return null;
         }
 
         public void OnStatusChanged(bool instantUpdate)
         {
-            /*
-            badlock (this.Buddies)
-            {
-                ConcurrentDictionary<MessengerBuddy>.Enumerator eBuddies = this.Buddies.GetEnumerator();
-
-                while (eBuddies.MoveNext())
-                {
-                    MessengerBuddy Buddy = eBuddies.Current;
-                    GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);
-
-                    if (Client == null || Client.GetHabbo() == null || Client.GetHabbo().GetMessenger() == null)
-                    {
-                        continue;
-                    }
-
-                    Client.GetHabbo().GetMessenger().SetUpdateNeeded(UserId);
-
-                    if (instantUpdate)
-                    {
-                        Client.GetHabbo().GetMessenger().ForceUpdate();
-                    }
-                }
-            }*/
-
             foreach (MessengerBuddy Buddy in this.Buddies)
             {
                 GameClient Client = UberEnvironment.GetGame().GetClientManager().GetClientByHabbo(Buddy.Id);

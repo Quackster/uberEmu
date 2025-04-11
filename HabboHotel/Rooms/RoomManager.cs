@@ -108,18 +108,8 @@ namespace Uber.HabboHotel.Rooms
                     {
                         eTeleActions.Execute();
                     }
-                    /*
-                    badlock (this.TeleActions)
-                    {
-                        ConcurrentDictionary<TeleUserData>.Enumerator eTeleActions = this.TeleActions.GetEnumerator();
 
-                        while (eTeleActions.MoveNext())
-                        {
-                            eTeleActions.Current.Execute();
-                        }
-
-                        this.TeleActions.Clear();
-                    }*/
+                    this.TeleActions.Clear();
                 }
 
                 catch (InvalidOperationException)

@@ -2116,7 +2116,7 @@ namespace Uber.Messages
             RoomItem Item = null;
 
             /*
-            badlock (Room.Items)
+            lock (Room.Items)
             {*/
             foreach (RoomItem I in Room.Items.Values)
             {

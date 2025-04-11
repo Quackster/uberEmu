@@ -125,22 +125,6 @@ namespace Uber.HabboHotel.Users.Inventory
 
         public Pet GetPet(uint Id)
         {
-            /*
-            badlock (this.InventoryPets)
-            {
-                ConcurrentDictionary<Pet>.Enumerator Pets = this.InventoryPets.GetEnumerator();
-
-                while (Pets.MoveNext())
-                {
-                    Pet Pet = Pets.Current;
-
-                    if (Pet.PetId == Id)
-                    {
-                        return Pet;
-                    }
-                }
-            }*/
-
             foreach (var Pet in InventoryPets)
             {
                 if (Pet.PetId == Id)
@@ -154,22 +138,6 @@ namespace Uber.HabboHotel.Users.Inventory
 
         public UserItem GetItem(uint Id)
         {
-            /*
-            badlock (this.InventoryItems)
-            {
-                ConcurrentDictionary<UserItem>.Enumerator Items = this.InventoryItems.GetEnumerator();
-
-                while (Items.MoveNext())
-                {
-                    UserItem Item = Items.Current;
-
-                    if (Item.Id == Id)
-                    {
-                        return Item;
-                    }
-                }
-            }*/
-
             foreach (UserItem Item in this.InventoryItems)
             {
                 if (Item.Id == Id)

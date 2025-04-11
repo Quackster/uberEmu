@@ -328,27 +328,6 @@ namespace Uber.Messages
                 return;
             }
 
-            /*
-            badlock (Room.UserList)
-            {
-                ConcurrentDictionary<RoomUser>.Enumerator Users = Room.UserList.GetEnumerator();
-
-                while (Users.MoveNext())
-                {
-                    RoomUser User = Users.Current;
-
-                    if (User.IsBot && User.BotData.AiType == "guide")
-                    {
-                        Session.GetMessageHandler().GetResponse().Init(33);
-                        Session.GetMessageHandler().GetResponse().AppendInt32(4009);
-                        Session.GetMessageHandler().SendResponse();
-
-                        return;
-                    }
-                }
-            }
-            */
-
             foreach (RoomUser User in Room.UserList)
             {
                 if (User.IsBot && User.BotData.AiType == "guide")
