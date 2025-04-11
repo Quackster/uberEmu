@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 
@@ -228,7 +227,7 @@ namespace Uber.Net
                 return;
             }
 
-            string Message = Encoding.UTF8.GetString(Buffer, 0, rcvBytesCount);
+            string Message = UberEnvironment.GetDefaultEncoding().GetString(Buffer, 0, rcvBytesCount);
 
             UberEnvironment.GetLogging().WriteLine("[" + Id + "] --> " + Message, LogLevel.Debug);
 
