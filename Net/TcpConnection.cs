@@ -237,10 +237,6 @@ namespace Uber.Net
                 return;
             }
 
-            string Message = UberEnvironment.GetDefaultEncoding().GetString(Buffer, 0, rcvBytesCount);
-
-            UberEnvironment.GetLogging().WriteLine("[" + Id + "] --> " + Message, LogLevel.Debug);
-
             byte[] toProcess = ByteUtil.ChompBytes(Buffer, 0, rcvBytesCount);
 
             RouteData(ref toProcess);

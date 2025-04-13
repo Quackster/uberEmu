@@ -5,6 +5,7 @@ using System.Text;
 
 using Uber.Messages;
 using Uber.HabboHotel.GameClients;
+using Uber.Core;
 
 namespace Uber.Messages
 {
@@ -45,7 +46,7 @@ namespace Uber.Messages
 
         public void HandleRequest(ClientMessage Request)
         {
-            //UberEnvironment.GetLogging().WriteLine("[" + Session.ClientId + "] --> " + Request.Header + Request.GetBody(), Uber.Core.LogLevel.Debug);
+            UberEnvironment.GetLogging().WriteLine("[" + Request.Id + "] --> " + Request.GetBody(), LogLevel.Debug);
 
             if (Request.Id < 0 || Request.Id > HIGHEST_MESSAGE_ID)
             {
