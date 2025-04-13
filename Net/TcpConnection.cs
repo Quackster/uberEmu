@@ -157,9 +157,19 @@ namespace Uber.Net
                 return;
             }
 
-            UberEnvironment.GetLogging().WriteLine("[" + Id + "] <-- " + Message.ToString(), LogLevel.Debug);
+            UberEnvironment.GetLogging().WriteLine("[" + Id + "] <-- " + Base64Encoding.DecodeInt32(UberEnvironment.GetDefaultEncoding().GetBytes(Message.Header)) + " / "  + FormatLogMessage(Message.ToString()), LogLevel.Debug);
 
             SendData(Message.GetBytes());
+        }
+
+        private string FormatLogMessage(string message)
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                message = message.Replace((char)i + "", "[" + i + "]");
+            }
+            
+            return message;
         }
 
         private void WaitForData()
