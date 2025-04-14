@@ -1,6 +1,16 @@
 # uberEmu
 The original fork of the 2010 uber Emulator written by Meth0d. Updated to .NET 8 and thread-safety implementations to increase stability.
 
+## What's changed?
+
+- Update to .NET 8
+- All locks removed (no more deadlocking).
+- Thread safety collections implemented where necessary.
+- The "2038 problem" addressed.
+- Newer charset in database.
+- Room creation fixes.
+- Thread pooling for room cycle updates.
+
 ## Download
 
 The latest builds for Linux and Windows are found on the [latest](https://github.com/Quackster/uberEmu/releases/tag/latest) tag.
