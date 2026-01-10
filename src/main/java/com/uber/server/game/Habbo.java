@@ -2,11 +2,11 @@ package com.uber.server.game;
 
 import com.uber.server.messages.ServerMessage;
 import com.uber.server.repository.*;
-import com.uber.server.users.badges.BadgeComponent;
-import com.uber.server.users.inventory.AvatarEffectsInventoryComponent;
-import com.uber.server.users.inventory.InventoryComponent;
-import com.uber.server.users.messenger.HabboMessenger;
-import com.uber.server.users.subscriptions.SubscriptionManager;
+import com.uber.server.game.users.badges.BadgeComponent;
+import com.uber.server.game.users.inventory.AvatarEffectsInventoryComponent;
+import com.uber.server.game.users.inventory.InventoryComponent;
+import com.uber.server.game.users.messenger.HabboMessenger;
+import com.uber.server.game.users.subscriptions.SubscriptionManager;
 import com.uber.server.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +68,54 @@ public class Habbo {
     private boolean isTeleporting;
     private long teleporterId;
     private boolean calledGuideBot;
+    
+    public boolean isCalledGuideBot() { return calledGuideBot; }
+    public void setCalledGuideBot(boolean calledGuideBot) { this.calledGuideBot = calledGuideBot; }
+    
+    /**
+     * Called when the user enters a room.
+     * Ported from HabboHotel/Users/Habbo.cs OnEnterRoom()
+     * @param roomId Room ID
+     */
+    public void onEnterRoom(long roomId) {
+        if (game == null || game.getUserRepository() == null) {
+            return;
+        }
+        
+        long timestamp = com.uber.server.util.TimeUtil.getUnixTimestamp();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int hour = now.getHour();
+        int minute = now.getMinute();
+        
+        game.getUserRepository().logRoomVisit(id, roomId, timestamp, hour, minute);
+        
+        this.currentRoomId = roomId;
+        
+        if (messenger != null) {
+            messenger.onStatusChanged(false);
+        }
+    }
+    
+    /**
+     * Called when the user leaves a room.
+     * Ported from HabboHotel/Users/Habbo.cs OnLeaveRoom()
+     */
+    public void onLeaveRoom() {
+        if (currentRoomId <= 0) {
+            return;
+        }
+        
+        if (game != null && game.getUserRepository() != null) {
+            long timestamp = com.uber.server.util.TimeUtil.getUnixTimestamp();
+            game.getUserRepository().updateRoomVisitExit(id, currentRoomId, timestamp);
+        }
+        
+        this.currentRoomId = 0;
+        
+        if (messenger != null) {
+            messenger.onStatusChanged(false);
+        }
+    }
     
     /**
      * Creates a Habbo instance from user data.
@@ -225,6 +273,7 @@ public class Habbo {
     public int getDailyPetRespectPoints() { return dailyPetRespectPoints; }
     public void setDailyPetRespectPoints(int dailyPetRespectPoints) { this.dailyPetRespectPoints = dailyPetRespectPoints; }
     public int getNewbieStatus() { return newbieStatus; }
+    public void setNewbieStatus(int newbieStatus) { this.newbieStatus = newbieStatus; }
     public boolean isMutantPenalty() { return mutantPenalty; }
     public boolean isBlockNewFriends() { return blockNewFriends; }
     public boolean isInRoom() { return currentRoomId > 0; }
@@ -371,7 +420,7 @@ public class Habbo {
         
         // Remove user from room if in room
         if (isInRoom() && game != null && game.getRoomManager() != null) {
-            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(currentRoomId);
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(currentRoomId);
             if (room != null) {
                 GameClient client = getClient();
                 if (client != null) {

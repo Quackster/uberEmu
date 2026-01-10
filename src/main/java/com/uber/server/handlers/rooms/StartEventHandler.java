@@ -31,7 +31,7 @@ public class StartEventHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
@@ -47,7 +47,7 @@ public class StartEventHandler implements PacketHandler {
         int tagCount = message.popWiredInt32();
         
         // Create event
-        com.uber.server.rooms.RoomEvent event = new com.uber.server.rooms.RoomEvent(
+        com.uber.server.game.rooms.RoomEvent event = new com.uber.server.game.rooms.RoomEvent(
             room.getRoomId(), name, description, category);
         
         // Add tags

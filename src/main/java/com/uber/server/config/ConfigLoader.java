@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +42,7 @@ public class ConfigLoader {
      * Loads configuration from uber-config.conf file in resources.
      */
     private static void loadFromFile(Configuration config) throws ConfigLoadException {
-        try (InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
+        try (InputStream is = new FileInputStream(CONFIG_FILE)) {
             if (is == null) {
                 throw new ConfigLoadException("Configuration file '" + CONFIG_FILE + "' not found in resources");
             }

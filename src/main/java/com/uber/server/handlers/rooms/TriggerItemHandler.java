@@ -3,7 +3,7 @@ package com.uber.server.handlers.rooms;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
-import com.uber.server.items.RoomItem;
+import com.uber.server.game.items.RoomItem;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class TriggerItemHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null) {
             return;
         }
@@ -52,8 +52,8 @@ public class TriggerItemHandler implements PacketHandler {
         boolean hasRights = room.checkRights(client);
         int request = isDiceSpecial ? -1 : message.popWiredInt32();
         
-        // TODO: Call item interactor OnTrigger when FurniInteractor is ported (Phase 11)
-        // item.getInteractor().onTrigger(client, item, request, hasRights);
+        // Call item interactor OnTrigger
+        item.getInteractor().onTrigger(client, item, request, hasRights);
         
         logger.debug("Item {} triggered by user {} (request: {}, hasRights: {})", 
                     itemId, habbo.getId(), request, hasRights);

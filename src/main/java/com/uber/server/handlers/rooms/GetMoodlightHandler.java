@@ -3,7 +3,7 @@ package com.uber.server.handlers.rooms;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
-import com.uber.server.items.MoodlightPreset;
+import com.uber.server.game.items.MoodlightPreset;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
@@ -29,12 +29,12 @@ public class GetMoodlightHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true) || room.getMoodlightData() == null) {
             return;
         }
         
-        com.uber.server.items.MoodlightData moodlight = room.getMoodlightData();
+        com.uber.server.game.items.MoodlightData moodlight = room.getMoodlightData();
         
         ServerMessage response = new ServerMessage(365);
         response.appendInt32(moodlight.getPresets().size());

@@ -27,13 +27,13 @@ public class KickBotHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
         
         int virtualId = message.popWiredInt32();
-        com.uber.server.rooms.RoomUser botUser = room.getRoomUserByVirtualId(virtualId);
+        com.uber.server.game.rooms.RoomUser botUser = room.getRoomUserByVirtualId(virtualId);
         
         if (botUser == null || !botUser.isBot()) {
             return;

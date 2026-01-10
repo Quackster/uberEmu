@@ -29,7 +29,7 @@ public class DeleteRoomHandler implements PacketHandler {
         }
         
         long roomId = message.popWiredUInt();
-        com.uber.server.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
         
         if (data == null || !data.getOwner().toLowerCase().equals(habbo.getUsername().toLowerCase())) {
             return;
@@ -45,14 +45,14 @@ public class DeleteRoomHandler implements PacketHandler {
             game.getUserRepository().updateHomeRoomForRoom(roomId, 0);
             
             // If room is loaded, kick all users and unload
-            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(roomId);
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(roomId);
             if (room != null) {
                 // Send kick message to all users
                 ServerMessage kickMessage = new ServerMessage(18);
                 room.sendMessage(kickMessage);
                 
                 // Remove all users from room
-                for (com.uber.server.rooms.RoomUser user : room.getUsers().values()) {
+                for (com.uber.server.game.rooms.RoomUser user : room.getUsers().values()) {
                     if (user.isBot()) {
                         continue;
                     }

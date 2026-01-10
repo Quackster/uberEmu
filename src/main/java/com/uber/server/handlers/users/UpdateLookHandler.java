@@ -74,9 +74,9 @@ public class UpdateLookHandler implements PacketHandler {
         
         // Update room if user is in a room
         if (habbo.isInRoom() && game.getRoomManager() != null) {
-            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
             if (room != null) {
-                com.uber.server.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
+                com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
                 if (roomUser != null) {
                     ServerMessage roomUpdate = new ServerMessage(266);
                     roomUpdate.appendInt32(roomUser.getVirtualId());

@@ -4,9 +4,9 @@ import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.rooms.Room;
-import com.uber.server.items.RoomItem;
-import com.uber.server.rooms.RoomUser;
+import com.uber.server.game.rooms.Room;
+import com.uber.server.game.items.RoomItem;
+import com.uber.server.game.rooms.RoomUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -123,8 +123,8 @@ public class HandlerInitializer {
     }
     
     private void registerNavigatorHandlers() {
-        // GetFlatCats handler (ID 151)
-        registry.register(151, new com.uber.server.handlers.navigator.GetFlatCatsHandler(game));
+        // GetRoomCategories handler (ID 151)
+        registry.register(151, new com.uber.server.handlers.navigator.GetRoomCategoriesHandler(game));
         
         // GetPubs handler (ID 380)
         registry.register(380, new com.uber.server.handlers.navigator.GetPubsHandler(game));
@@ -157,8 +157,8 @@ public class HandlerInitializer {
         registry.register(56, new com.uber.server.handlers.rooms.ChatHandler(game, 2)); // Whisper
         
         // Enter room handlers
-        registry.register(2, new com.uber.server.handlers.rooms.EnterRoomHandler(game, true)); // OpenPub
-        registry.register(391, new com.uber.server.handlers.rooms.EnterRoomHandler(game, false)); // OpenFlat
+        registry.register(2, new com.uber.server.handlers.rooms.EnterRoomHandler(game, true)); // OpenPublicRoom
+        registry.register(391, new com.uber.server.handlers.rooms.EnterRoomHandler(game, false)); // OpenPrivateRoom
         
         // Room data handlers (room entry sequence)
         registry.register(215, new com.uber.server.handlers.rooms.GetRoomData1Handler(game)); // GetRoomData1
@@ -272,8 +272,8 @@ public class HandlerInitializer {
         registry.register(472, new com.uber.server.handlers.catalog.PurchaseGiftHandler(game)); // PurchaseGift
         registry.register(412, new com.uber.server.handlers.catalog.GetRecyclerRewardsHandler(game)); // GetRecyclerRewards
         registry.register(3030, new com.uber.server.handlers.catalog.CanGiftHandler(game)); // CanGift
-        registry.register(3011, new com.uber.server.handlers.catalog.GetCataData1Handler(game)); // GetCataData1
-        registry.register(473, new com.uber.server.handlers.catalog.GetCataData2Handler(game)); // GetCataData2
+        registry.register(3011, new com.uber.server.handlers.catalog.GetCatalogData1Handler(game)); // GetCatalogData1
+        registry.register(473, new com.uber.server.handlers.catalog.GetCatalogData2Handler(game)); // GetCatalogData2
         registry.register(42, new com.uber.server.handlers.catalog.CheckPetNameHandler(game)); // CheckPetName
         
         // Marketplace handlers
@@ -304,7 +304,7 @@ public class HandlerInitializer {
         
         // Help ticket handlers
         registry.register(453, new com.uber.server.handlers.help.SubmitHelpTicketHandler(game)); // SubmitHelpTicket
-        registry.register(238, new com.uber.server.handlers.help.DeletePendingCFHHandler(game)); // DeletePendingCFH
+        registry.register(238, new com.uber.server.handlers.help.DeletePendingCallForHelpHandler(game)); // DeletePendingCallForHelp
         
         // CallGuideBot handler (ID 440) - placeholder until BotManager is ported
         registry.register(440, new com.uber.server.handlers.help.CallGuideBotHandler(game)); // CallGuideBot

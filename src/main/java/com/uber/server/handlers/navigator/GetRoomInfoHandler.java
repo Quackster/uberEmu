@@ -32,7 +32,7 @@ public class GetRoomInfoHandler implements PacketHandler {
         boolean unk = message.popWiredBoolean(); // Unused
         boolean unk2 = message.popWiredBoolean(); // Unused
         
-        com.uber.server.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
         if (data == null) {
             return;
         }

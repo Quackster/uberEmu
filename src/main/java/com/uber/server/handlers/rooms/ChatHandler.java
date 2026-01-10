@@ -58,9 +58,9 @@ public class ChatHandler implements PacketHandler {
         
         // Send chat message to room
         if (game.getRoomManager() != null) {
-            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
             if (room != null) {
-                com.uber.server.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
+                com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
                 if (roomUser != null) {
                     boolean shout = (chatType == 1); // 1 = shout
                     roomUser.chat(client, chatMessage, shout);

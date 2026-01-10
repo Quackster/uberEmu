@@ -5,8 +5,8 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.rooms.Trade;
-import com.uber.server.users.inventory.UserItem;
+import com.uber.server.game.rooms.Trade;
+import com.uber.server.game.users.inventory.UserItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class OfferTradeItemHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.canTradeInRoom()) {
             return;
         }

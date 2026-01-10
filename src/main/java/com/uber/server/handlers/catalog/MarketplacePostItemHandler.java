@@ -31,7 +31,7 @@ public class MarketplacePostItemHandler implements PacketHandler {
         int junk = message.popWiredInt32(); // Unused
         long itemId = message.popWiredUInt();
         
-        com.uber.server.users.inventory.UserItem item = habbo.getInventoryComponent().getItem(itemId);
+        com.uber.server.game.users.inventory.UserItem item = habbo.getInventoryComponent().getItem(itemId);
         if (item == null || item.getBaseItem() == null || !item.getBaseItem().allowTrade()) {
             return;
         }

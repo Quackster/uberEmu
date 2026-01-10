@@ -3,8 +3,8 @@ package com.uber.server.handlers.rooms;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
-import com.uber.server.items.Item;
-import com.uber.server.items.RoomItem;
+import com.uber.server.game.items.Item;
+import com.uber.server.game.items.RoomItem;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
@@ -30,7 +30,7 @@ public class RedeemExchangeFurniHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }

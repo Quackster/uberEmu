@@ -32,7 +32,7 @@ public class SaveRoomDataHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
@@ -77,8 +77,8 @@ public class SaveRoomDataHandler implements PacketHandler {
         }
         
         // Check category permissions
-        com.uber.server.navigator.FlatCat flatCat = game.getNavigator().getFlatCat(categoryId);
-        if (flatCat != null && flatCat.getMinRank() > habbo.getRank()) {
+        com.uber.server.game.navigator.RoomCategory roomCategory = game.getNavigator().getRoomCategory(categoryId);
+        if (roomCategory != null && roomCategory.getMinRank() > habbo.getRank()) {
             client.sendNotif("You are not allowed to use this category. Your room has been moved to no category instead.");
             categoryId = 0;
         }
@@ -102,8 +102,7 @@ public class SaveRoomDataHandler implements PacketHandler {
             // Send updated room data
             ServerMessage response454 = new ServerMessage(454);
             response454.appendBoolean(false);
-            // TODO: Serialize room data when RoomData.serialize() is implemented
-            // For now, just send the message
+            room.getData().serialize(response454, false);
             client.sendMessage(response454);
         }
     }

@@ -352,4 +352,54 @@ public class RoomItemRepository {
             return false;
         }
     }
+    
+    /**
+     * Gets the linked teleport ID for a teleport.
+     * @param teleId Teleport item ID
+     * @return Linked teleport ID, or null if not found
+     */
+    public Long getLinkedTele(long teleId) {
+        String sql = "SELECT tele_two_id FROM tele_links WHERE tele_one_id = ? LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, teleId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("tele_two_id");
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Failed to get linked tele for {}: {}", teleId, e.getMessage(), e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Gets the room ID for a teleport item.
+     * @param teleId Teleport item ID
+     * @return Room ID, or null if not found
+     */
+    public Long getTeleRoomId(long teleId) {
+        String sql = "SELECT room_id FROM room_items WHERE id = ? LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, teleId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("room_id");
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Failed to get tele room ID for {}: {}", teleId, e.getMessage(), e);
+        }
+        
+        return null;
+    }
 }

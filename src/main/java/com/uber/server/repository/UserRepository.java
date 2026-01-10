@@ -669,4 +669,26 @@ public class UserRepository {
             return false;
         }
     }
+    
+    /**
+     * Updates newbie status for a user.
+     * @param userId User ID
+     * @param newbieStatus New newbie status (0, 1, or 2)
+     * @return True if update was successful
+     */
+    public boolean updateNewbieStatus(long userId, int newbieStatus) {
+        String sql = "UPDATE users SET newbie_status = ? WHERE id = ? LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, newbieStatus);
+            stmt.setLong(2, userId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Failed to update newbie status for user {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
 }

@@ -40,3 +40,6 @@ Havana-Server/META-INF/MANIFEST.MF
 =======
 .DS_Store
 >>>>>>> b3aa6ecb17e8cc84b686d06e487f18dcb3523d4a
+/logs
+uber-config.conf
+/target

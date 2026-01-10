@@ -1,7 +1,7 @@
 package com.uber.server.handlers.catalog;
 
-import com.uber.server.catalog.Catalog;
-import com.uber.server.catalog.CatalogItem;
+import com.uber.server.game.catalog.Catalog;
+import com.uber.server.game.catalog.CatalogItem;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.messages.ClientMessage;
@@ -36,7 +36,7 @@ public class CanGiftHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.items.Item baseItem = item.getBaseItem(this.game.getItemManager());
+        com.uber.server.game.items.Item baseItem = item.getBaseItem(this.game.getItemManager());
         if (baseItem == null) {
             return;
         }

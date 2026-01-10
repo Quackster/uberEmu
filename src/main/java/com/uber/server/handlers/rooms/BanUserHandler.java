@@ -27,13 +27,13 @@ public class BanUserHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return; // Insufficient permissions
         }
         
         long userId = message.popWiredUInt();
-        com.uber.server.rooms.RoomUser user = room.getRoomUserByHabbo(userId);
+        com.uber.server.game.rooms.RoomUser user = room.getRoomUserByHabbo(userId);
         
         if (user == null || user.isBot()) {
             return;

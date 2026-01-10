@@ -23,7 +23,7 @@ public class GetTopicsInCategoryHandler implements PacketHandler {
     public void handle(GameClient client, ClientMessage message) {
         long categoryId = message.popWiredUInt();
         
-        com.uber.server.support.HelpCategory category = game.getHelpTool().getCategory(categoryId);
+        com.uber.server.game.support.HelpCategory category = game.getHelpTool().getCategory(categoryId);
         if (category != null) {
             client.sendMessage(game.getHelpTool().serializeCategory(category));
         }

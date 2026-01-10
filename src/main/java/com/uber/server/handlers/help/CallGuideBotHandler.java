@@ -29,26 +29,58 @@ public class CallGuideBotHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
         
-        // Check if guide bot already exists in room
-        // TODO: Implement when BotManager is ported (Phase 10.5)
-        // For now, send error response
-        ServerMessage response = new ServerMessage(33);
-        response.appendInt32(4009); // Error code: guide bot already exists
-        client.sendMessage(response);
+        // Get guide bot (bot ID 55)
+        com.uber.server.game.bots.RoomBot guideBot = game.getBotManager().getBot(55);
+        if (guideBot == null) {
+            logger.warn("Guide bot (ID 55) not found in database");
+            return;
+        }
         
-        // TODO: When BotManager is ported:
-        // 1. Check if guide bot already exists in room (BotManager.getBot(55) and check users)
-        // 2. If exists, send response with code 4009
-        // 3. Check if user already called guide bot (habbo.getCalledGuideBot())
-        // 4. If called, send response with code 4010
-        // 5. Deploy guide bot (Room.deployBot())
-        // 6. Move bot to room owner position
-        // 7. Unlock achievement 6.1
-        // 8. Set habbo.setCalledGuideBot(true)
+        // Check if guide bot already exists in room
+        for (com.uber.server.game.rooms.RoomUser roomUser : room.getUsers().values()) {
+            if (roomUser.isBot() && roomUser.getBotData() != null && roomUser.getBotData().getBotId() == 55) {
+                ServerMessage response = new ServerMessage(33);
+                response.appendInt32(4009); // Error code: guide bot already exists
+                client.sendMessage(response);
+                return;
+            }
+        }
+        
+        // Check if user already called guide bot
+        if (habbo.isCalledGuideBot()) {
+            ServerMessage response = new ServerMessage(33);
+            response.appendInt32(4010); // Error code: user already called guide bot
+            client.sendMessage(response);
+            return;
+        }
+        
+        // Deploy guide bot
+        com.uber.server.game.rooms.RoomUser botUser = room.deployBot(guideBot);
+        if (botUser == null) {
+            logger.warn("Failed to deploy guide bot in room {}", room.getRoomId());
+            return;
+        }
+        
+        // Move bot to room owner position
+        com.uber.server.game.rooms.RoomUser roomOwner = room.getRoomUserByHabbo(room.getData().getOwner());
+        if (roomOwner != null) {
+            botUser.moveTo(roomOwner.getX(), roomOwner.getY());
+            botUser.setRot(com.uber.server.game.pathfinding.Rotation.calculate(
+                botUser.getX(), botUser.getY(), roomOwner.getX(), roomOwner.getY()));
+            botUser.setUpdateNeeded(true);
+        }
+        
+        // Unlock achievement 6.1
+        if (game.getAchievementManager() != null) {
+            game.getAchievementManager().unlockAchievement(client, 6, 1);
+        }
+        
+        // Set called guide bot flag
+        habbo.setCalledGuideBot(true);
     }
 }

@@ -37,7 +37,7 @@ public class CreateRoomHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.RoomData newRoom = game.getRoomManager().createRoom(client, roomName, modelName);
+        com.uber.server.game.rooms.RoomData newRoom = game.getRoomManager().createRoom(client, roomName, modelName);
         
         if (newRoom != null) {
             ServerMessage response = new ServerMessage(59);

@@ -28,12 +28,12 @@ public class StopTypingHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null) {
             return;
         }
         
-        com.uber.server.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
+        com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
         if (roomUser == null) {
             return;
         }

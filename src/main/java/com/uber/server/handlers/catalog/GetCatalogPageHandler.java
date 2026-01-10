@@ -1,8 +1,8 @@
 package com.uber.server.handlers.catalog;
 
-import com.uber.server.catalog.Catalog;
-import com.uber.server.catalog.CatalogItem;
-import com.uber.server.catalog.CatalogPage;
+import com.uber.server.game.catalog.Catalog;
+import com.uber.server.game.catalog.CatalogItem;
+import com.uber.server.game.catalog.CatalogPage;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -60,20 +60,38 @@ public class GetCatalogPageHandler implements PacketHandler {
         // Serialize items
         for (CatalogItem item : page.getItems()) {
             if (item.isDeal()) {
-                // TODO: Handle deals (multiple items)
-                continue;
+                // Handle deals (multiple items)
+                response.appendUInt(item.getId());
+                response.appendStringWithBreak(item.getName());
+                response.appendInt32(item.getCreditsCost());
+                response.appendInt32(item.getPixelsCost());
+                response.appendInt32(item.getItemIds().size()); // Number of items in deal
+                
+                // Serialize each item in the deal
+                for (Long itemId : item.getItemIds()) {
+                    Item baseItem = game.getItemManager().getItem(itemId);
+                    if (baseItem != null) {
+                        response.appendStringWithBreak(baseItem.getType());
+                        response.appendInt32(baseItem.getSpriteId());
+                    }
+                }
+                
+                response.appendStringWithBreak("");
+                response.appendInt32(item.getAmount());
+                response.appendInt32(-1);
+            } else {
+                // Regular single item
+                response.appendUInt(item.getId());
+                response.appendStringWithBreak(item.getName());
+                response.appendInt32(item.getCreditsCost());
+                response.appendInt32(item.getPixelsCost());
+                response.appendInt32(1); // Unknown
+                response.appendStringWithBreak(item.getBaseItem(game.getItemManager()).getType());
+                response.appendInt32(item.getBaseItem(game.getItemManager()).getSpriteId());
+                response.appendStringWithBreak("");
+                response.appendInt32(item.getAmount());
+                response.appendInt32(-1);
             }
-            
-            response.appendUInt(item.getId());
-            response.appendStringWithBreak(item.getName());
-            response.appendInt32(item.getCreditsCost());
-            response.appendInt32(item.getPixelsCost());
-            response.appendInt32(1); // Unknown
-            response.appendStringWithBreak(item.getBaseItem(game.getItemManager()).getType());
-            response.appendInt32(item.getBaseItem(game.getItemManager()).getSpriteId());
-            response.appendStringWithBreak("");
-            response.appendInt32(item.getAmount());
-            response.appendInt32(-1);
         }
         
         client.sendMessage(response);

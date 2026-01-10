@@ -365,7 +365,7 @@ public class GameClientManager {
             return;
         }
         
-        com.uber.server.misc.PixelManager pixelManager = game.getPixelManager();
+        com.uber.server.game.clients.PixelManager pixelManager = game.getPixelManager();
         
         // Create a copy of keys to iterate safely
         List<Long> clientIds = new ArrayList<>(clients.keySet());
@@ -384,5 +384,9 @@ public class GameClientManager {
                 logger.debug("Error updating pixels for client {}: {}", clientId, e.getMessage());
             }
         }
+    }
+
+    public ConcurrentMap<Long, GameClient> getClients() {
+        return clients;
     }
 }

@@ -29,7 +29,7 @@ public class AddFavoriteHandler implements PacketHandler {
         }
         
         long roomId = message.popWiredUInt();
-        com.uber.server.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
         
         if (data == null || habbo.getFavoriteRooms().size() >= 30 || 
             habbo.getFavoriteRooms().contains(roomId) || data.isPublicRoom()) {

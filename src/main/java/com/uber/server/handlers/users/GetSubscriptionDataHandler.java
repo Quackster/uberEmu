@@ -6,7 +6,7 @@ import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.users.subscriptions.Subscription;
+import com.uber.server.game.users.subscriptions.Subscription;
 import com.uber.server.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

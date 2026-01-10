@@ -5,8 +5,8 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.pets.Pet;
-import com.uber.server.rooms.RoomUser;
+import com.uber.server.game.pets.Pet;
+import com.uber.server.game.rooms.RoomUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class PickUpPetHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || room.isPublicRoom()) {
             return;
         }
@@ -46,7 +46,7 @@ public class PickUpPetHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.pets.Pet pet = petUser.getPetData();
+        com.uber.server.game.pets.Pet pet = petUser.getPetData();
         if (pet == null) {
             return;
         }

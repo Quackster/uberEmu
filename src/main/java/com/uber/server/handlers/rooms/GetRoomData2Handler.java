@@ -6,8 +6,8 @@ import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.rooms.RoomData;
-import com.uber.server.rooms.RoomModel;
+import com.uber.server.game.rooms.RoomData;
+import com.uber.server.game.rooms.RoomModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

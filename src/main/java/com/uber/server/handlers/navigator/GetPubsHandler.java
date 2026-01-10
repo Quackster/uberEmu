@@ -22,7 +22,7 @@ public class GetPubsHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        com.uber.server.navigator.Navigator navigator = game.getNavigator();
+        com.uber.server.game.navigator.Navigator navigator = game.getNavigator();
         if (navigator == null) {
             return;
         }

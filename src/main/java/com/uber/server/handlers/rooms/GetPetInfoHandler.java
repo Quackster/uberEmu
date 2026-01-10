@@ -44,7 +44,7 @@ public class GetPetInfoHandler implements PacketHandler {
         }
         
         // Generate Pet object and serialize info
-        com.uber.server.pets.Pet pet = game.getCatalog().generatePetFromRow(petRow);
+        com.uber.server.game.pets.Pet pet = game.getCatalog().generatePetFromRow(petRow);
         if (pet != null) {
             client.sendMessage(pet.serializeInfo());
         }

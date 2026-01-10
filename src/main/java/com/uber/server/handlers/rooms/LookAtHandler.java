@@ -5,7 +5,7 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.pathfinding.Rotation;
+import com.uber.server.game.pathfinding.Rotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +28,12 @@ public class LookAtHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null) {
             return;
         }
         
-        com.uber.server.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
+        com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
         if (roomUser == null) {
             return;
         }

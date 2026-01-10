@@ -6,15 +6,15 @@ import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.rooms.Room;
-import com.uber.server.rooms.RoomData;
-import com.uber.server.rooms.RoomManager;
-import com.uber.server.rooms.RoomModel;
+import com.uber.server.game.rooms.Room;
+import com.uber.server.game.rooms.RoomData;
+import com.uber.server.game.rooms.RoomManager;
+import com.uber.server.game.rooms.RoomModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handler for entering a room (message IDs 2 = OpenPub, 391 = OpenFlat).
+ * Handler for entering a room (message IDs 2 = OpenPublicRoom, 391 = OpenPrivateRoom).
  * Ported from Messages/Requests/Rooms.cs OpenPub(), OpenFlat()
  */
 public class EnterRoomHandler implements PacketHandler {
@@ -38,12 +38,12 @@ public class EnterRoomHandler implements PacketHandler {
         String password = "";
         
         if (isPublic) {
-            // OpenPub: reads junk, roomId, junk
+            // OpenPublicRoom: reads junk, roomId, junk
             message.popWiredInt32(); // Junk
             roomId = message.popWiredUInt();
             message.popWiredInt32(); // Junk2
         } else {
-            // OpenFlat: reads roomId, password, junk
+            // OpenPrivateRoom: reads roomId, password, junk
             roomId = message.popWiredUInt();
             password = message.popFixedString();
             message.popWiredInt32(); // Junk
@@ -55,8 +55,9 @@ public class EnterRoomHandler implements PacketHandler {
     /**
      * Prepares room for user entry.
      * Ported from Messages/Requests/Rooms.cs PrepareRoomForUser()
+     * Made public so it can be called from FollowBuddyHandler
      */
-    private void prepareRoomForUser(GameClient client, Habbo habbo, long roomId, String password) {
+    public void prepareRoomForUser(GameClient client, Habbo habbo, long roomId, String password) {
         // Clear previous loading
         habbo.setLoadingRoom(0);
         habbo.setLoadingChecksPassed(false);

@@ -70,14 +70,32 @@ public class CommandParser {
                 break;
                 
             case "plugins":
-                // TODO: Implement when PluginHandler is ported
+                com.uber.server.plugins.PluginHandler pluginHandler = environment.getGame().getPluginHandler();
+                if (pluginHandler == null) {
+                    logger.info("Plugin system not initialized.");
+                    break;
+                }
+                
                 logger.info("The following plugins are currently loaded:");
-                logger.info("(Plugin system not yet implemented)");
+                java.util.List<com.uber.server.plugins.PluginHandler.AvailablePlugin> plugins = 
+                    pluginHandler.getAvailablePlugins();
+                if (plugins.isEmpty()) {
+                    logger.info("  (No plugins loaded)");
+                } else {
+                    for (com.uber.server.plugins.PluginHandler.AvailablePlugin plugin : plugins) {
+                        logger.info("  - {} ({})", plugin.getInstance().getName(), plugin.getAssemblyPath());
+                    }
+                }
                 break;
                 
             case "unload_all_plugins":
-                // TODO: Implement when PluginHandler is ported
-                logger.info("All plugins have been unloaded.");
+                pluginHandler = environment.getGame().getPluginHandler();
+                if (pluginHandler != null) {
+                    pluginHandler.unloadPlugins();
+                    logger.info("All plugins have been unloaded.");
+                } else {
+                    logger.warn("Plugin system not initialized.");
+                }
                 break;
                 
             case "unload_plugin":
@@ -86,9 +104,17 @@ public class CommandParser {
                     break;
                 }
                 String pluginName = mergeParams(params, 1);
-                // TODO: Implement when PluginHandler is ported
-                logger.info("Plugin unloaded successfully.");
-                logger.warn("Take note that a plugin may still be running processes even when unloaded.");
+                pluginHandler = environment.getGame().getPluginHandler();
+                if (pluginHandler != null) {
+                    if (pluginHandler.unloadPlugin(pluginName)) {
+                        logger.info("Plugin '{}' unloaded successfully.", pluginName);
+                        logger.warn("Take note that a plugin may still be running processes even when unloaded.");
+                    } else {
+                        logger.warn("Plugin '{}' not found or could not be unloaded.", pluginName);
+                    }
+                } else {
+                    logger.warn("Plugin system not initialized.");
+                }
                 break;
                 
             case "cls":

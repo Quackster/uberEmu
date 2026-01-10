@@ -31,7 +31,7 @@ public class SaveRoomIconHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
@@ -82,7 +82,9 @@ public class SaveRoomIconHandler implements PacketHandler {
         
         // Update room icon in database
         if (game.getRoomRepository().updateRoomIcon(room.getRoomId(), background, topLayer, formattedItems.toString())) {
-            // TODO: Update RoomIcon object when RoomIcon class is ported (Phase 12)
+            // Update RoomIcon object
+            com.uber.server.game.rooms.RoomIcon newIcon = new com.uber.server.game.rooms.RoomIcon(background, topLayer, items);
+            room.getData().setIcon(newIcon);
             
             // Send confirmation messages
             ServerMessage response457 = new ServerMessage(457);
@@ -97,7 +99,7 @@ public class SaveRoomIconHandler implements PacketHandler {
             // Send updated room data
             ServerMessage response454 = new ServerMessage(454);
             response454.appendBoolean(false);
-            // TODO: Serialize room data when RoomData.serialize() is implemented
+            room.getData().serialize(response454, false);
             client.sendMessage(response454);
         }
     }

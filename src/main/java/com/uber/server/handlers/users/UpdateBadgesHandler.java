@@ -6,8 +6,8 @@ import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.users.badges.Badge;
-import com.uber.server.users.badges.BadgeComponent;
+import com.uber.server.game.users.badges.Badge;
+import com.uber.server.game.users.badges.BadgeComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +76,7 @@ public class UpdateBadgesHandler implements PacketHandler {
         
         // Send to room if user is in room, otherwise just to client
         if (habbo.isInRoom() && game.getRoomManager() != null) {
-            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
             if (room != null) {
                 room.sendMessage(response);
             } else {

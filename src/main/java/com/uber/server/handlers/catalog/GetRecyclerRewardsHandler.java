@@ -1,10 +1,10 @@
 package com.uber.server.handlers.catalog;
 
-import com.uber.server.catalog.Catalog;
-import com.uber.server.catalog.EcotronReward;
+import com.uber.server.game.catalog.Catalog;
+import com.uber.server.game.catalog.EcotronReward;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
-import com.uber.server.items.Item;
+import com.uber.server.game.items.Item;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.messages.ServerMessage;

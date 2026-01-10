@@ -30,12 +30,12 @@ public class GiveRightsHandler implements PacketHandler {
         
         long userId = message.popWiredUInt();
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
         
-        com.uber.server.rooms.RoomUser roomUser = room.getRoomUserByHabbo(userId);
+        com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(userId);
         if (roomUser == null || roomUser.isBot()) {
             return;
         }
@@ -65,7 +65,7 @@ public class GiveRightsHandler implements PacketHandler {
             client.sendMessage(response);
             
             // Add status to room user
-            roomUser.addStatus("flatcrtl", "");
+            roomUser.addStatus("roomControl", "");
             roomUser.setUpdateNeeded(true);
             
             // Notify user

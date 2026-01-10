@@ -35,7 +35,7 @@ public class FollowBuddyHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(buddyClient.getHabbo().getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(buddyClient.getHabbo().getCurrentRoomId());
         if (room == null) {
             return;
         }
@@ -47,8 +47,10 @@ public class FollowBuddyHandler implements PacketHandler {
         
         // If not public room, prepare room entry
         if (room.getData() != null && !room.getData().isPublicRoom()) {
-            // TODO: Call PrepareRoomForUser when implemented
-            // This is handled by EnterRoomHandler - client will initiate entry
+            // Use EnterRoomHandler's prepareRoomForUser method
+            com.uber.server.handlers.rooms.EnterRoomHandler enterHandler = 
+                new com.uber.server.handlers.rooms.EnterRoomHandler(game, false);
+            enterHandler.prepareRoomForUser(client, habbo, buddyClient.getHabbo().getCurrentRoomId(), "");
         }
     }
 }

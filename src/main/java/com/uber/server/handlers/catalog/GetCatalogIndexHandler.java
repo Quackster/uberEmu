@@ -1,7 +1,7 @@
 package com.uber.server.handlers.catalog;
 
-import com.uber.server.catalog.Catalog;
-import com.uber.server.catalog.CatalogPage;
+import com.uber.server.game.catalog.Catalog;
+import com.uber.server.game.catalog.CatalogPage;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;

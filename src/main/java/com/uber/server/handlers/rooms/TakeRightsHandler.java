@@ -31,7 +31,7 @@ public class TakeRightsHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
@@ -50,7 +50,7 @@ public class TakeRightsHandler implements PacketHandler {
             userIdsArray[i] = userIdsToRemove.get(i);
             room.removeRight(userIdsArray[i]);
             
-            com.uber.server.rooms.RoomUser user = room.getRoomUserByHabbo(userIdsArray[i]);
+            com.uber.server.game.rooms.RoomUser user = room.getRoomUserByHabbo(userIdsArray[i]);
             if (user != null && !user.isBot()) {
                 GameClient userClient = user.getClient();
                 if (userClient != null) {

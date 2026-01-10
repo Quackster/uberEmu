@@ -82,7 +82,7 @@ public class SSOLoginHandler implements PacketHandler {
                 if (game.getBanManager() != null) {
                     game.getBanManager().checkForBanConflicts(client);
                 }
-            } catch (com.uber.server.support.ModerationBanException e) {
+            } catch (com.uber.server.game.support.ModerationBanException e) {
                 client.sendNotif(e.getMessage());
                 client.disconnect();
                 return;

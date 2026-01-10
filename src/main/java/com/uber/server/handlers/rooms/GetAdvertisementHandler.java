@@ -25,11 +25,22 @@ public class GetAdvertisementHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        // TODO: Implement when AdvertisementManager is ported (Phase 10)
-        // For now, send empty response
+        com.uber.server.game.advertisements.RoomAdvertisement ad = 
+            game.getAdvertisementManager().getRandomRoomAdvertisement();
+        
         ServerMessage response = new ServerMessage(258);
-        response.appendStringWithBreak("");
-        response.appendStringWithBreak("");
+        
+        if (ad == null) {
+            response.appendStringWithBreak("");
+            response.appendStringWithBreak("");
+        } else {
+            response.appendStringWithBreak(ad.getAdImage());
+            response.appendStringWithBreak(ad.getAdLink());
+            
+            // Increment view count
+            ad.onView();
+        }
+        
         client.sendMessage(response);
     }
 }

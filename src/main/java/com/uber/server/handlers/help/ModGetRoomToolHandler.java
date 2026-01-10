@@ -28,7 +28,7 @@ public class ModGetRoomToolHandler implements PacketHandler {
         }
         
         long roomId = message.popWiredUInt();
-        com.uber.server.rooms.RoomData roomData = game != null && game.getRoomManager() != null ?
+        com.uber.server.game.rooms.RoomData roomData = game != null && game.getRoomManager() != null ?
                                                  game.getRoomManager().generateNullableRoomData(roomId) : null;
         
         if (roomData == null) {

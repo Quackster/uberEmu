@@ -5,7 +5,7 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.support.SupportTicket;
+import com.uber.server.game.support.SupportTicket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class ModGetTicketChatlogHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.RoomData roomData = game != null && game.getRoomManager() != null ?
+        com.uber.server.game.rooms.RoomData roomData = game != null && game.getRoomManager() != null ?
                                                  game.getRoomManager().generateNullableRoomData(ticket.getRoomId()) : null;
         
         if (roomData == null) {

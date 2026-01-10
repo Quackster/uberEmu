@@ -35,7 +35,7 @@ public class RequestBuddyHandler implements PacketHandler {
         }
         
         // Use HabboMessenger to handle the request
-        com.uber.server.users.messenger.HabboMessenger messenger = habbo.getMessenger();
+        com.uber.server.game.users.messenger.HabboMessenger messenger = habbo.getMessenger();
         if (messenger != null) {
             messenger.requestBuddy(username);
         }

@@ -48,7 +48,8 @@ public class NavigatorRepository {
     }
     
     /**
-     * Loads all private categories.
+     * Loads all private room categories.
+     * Note: Database table name is navigator_flatcats (legacy name for room categories).
      * @return List of private category data (id, caption, min_rank)
      */
     public List<Map<String, Object>> loadPrivateCategories() {

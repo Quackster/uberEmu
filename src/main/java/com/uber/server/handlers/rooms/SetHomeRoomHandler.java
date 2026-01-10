@@ -29,7 +29,7 @@ public class SetHomeRoomHandler implements PacketHandler {
         }
         
         long roomId = message.popWiredUInt();
-        com.uber.server.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
         
         if (roomId != 0) {
             if (data == null || !data.getOwner().toLowerCase().equals(habbo.getUsername().toLowerCase())) {

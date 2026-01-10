@@ -18,18 +18,19 @@ public class Game {
     private GameClientManager clientManager;
     // Managers will be added as they are ported
     // private ModerationBanManager banManager;
-    private com.uber.server.roles.RoleManager roleManager;
-    private com.uber.server.support.HelpTool helpTool;
-    private com.uber.server.catalog.Catalog catalog;
-    private com.uber.server.navigator.Navigator navigator;
-    private com.uber.server.items.ItemManager itemManager;
-    private com.uber.server.rooms.RoomManager roomManager;
-    // private AdvertisementManager advertisementManager;
-    private com.uber.server.misc.PixelManager pixelManager;
-    private com.uber.server.achievements.AchievementManager achievementManager;
-    private com.uber.server.support.ModerationBanManager banManager;
-    private com.uber.server.support.ModerationTool moderationTool;
-    // private BotManager botManager;
+    private com.uber.server.game.roles.RoleManager roleManager;
+    private com.uber.server.game.support.HelpTool helpTool;
+    private com.uber.server.game.catalog.Catalog catalog;
+    private com.uber.server.game.navigator.Navigator navigator;
+    private com.uber.server.game.items.ItemManager itemManager;
+    private com.uber.server.game.rooms.RoomManager roomManager;
+    private com.uber.server.game.advertisements.AdvertisementManager advertisementManager;
+    private com.uber.server.game.clients.PixelManager pixelManager;
+    private com.uber.server.game.achievements.AchievementManager achievementManager;
+    private com.uber.server.game.support.ModerationBanManager banManager;
+    private com.uber.server.game.support.ModerationTool moderationTool;
+    private com.uber.server.game.bots.BotManager botManager;
+    private com.uber.server.plugins.PluginHandler pluginHandler;
     
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
@@ -129,44 +130,44 @@ public class Game {
         performDatabaseCleanup(1);
         
         // Initialize managers (will be added as they are ported)
-        banManager = new com.uber.server.support.ModerationBanManager(
+        banManager = new com.uber.server.game.support.ModerationBanManager(
             moderationBanRepository, 
             userInfoRepository,
             this);
         banManager.loadBans();
         
-        roleManager = new com.uber.server.roles.RoleManager(roleRepository);
+        roleManager = new com.uber.server.game.roles.RoleManager(roleRepository);
         roleManager.loadRoles();
         roleManager.loadRights();
         
         // ItemManager must be initialized first as other managers depend on it
-        itemManager = new com.uber.server.items.ItemManager(itemRepository);
+        itemManager = new com.uber.server.game.items.ItemManager(itemRepository);
         itemManager.loadItems();
         
-        helpTool = new com.uber.server.support.HelpTool(helpRepository);
+        helpTool = new com.uber.server.game.support.HelpTool(helpRepository);
         helpTool.loadCategories();
         helpTool.loadTopics();
         
-        catalog = new com.uber.server.catalog.Catalog(catalogRepository, ecotronRepository, itemManager,
+        catalog = new com.uber.server.game.catalog.Catalog(catalogRepository, ecotronRepository, itemManager,
                 inventoryRepository, petRepository, userRepository, marketplaceRepository, this);
         catalog.initialize();
         
-        navigator = new com.uber.server.navigator.Navigator(navigatorRepository, this);
+        navigator = new com.uber.server.game.navigator.Navigator(navigatorRepository, this);
         navigator.initialize();
         
-        roomManager = new com.uber.server.rooms.RoomManager(roomRepository, roomItemRepository, this);
+        roomManager = new com.uber.server.game.rooms.RoomManager(roomRepository, roomItemRepository, this);
         roomManager.loadModels();
         
-        // advertisementManager = new AdvertisementManager(advertisementRepository);
-        // advertisementManager.loadRoomAdvertisements();
+        advertisementManager = new com.uber.server.game.advertisements.AdvertisementManager(advertisementRepository);
+        advertisementManager.loadRoomAdvertisements();
         
-        pixelManager = new com.uber.server.misc.PixelManager();
+        pixelManager = new com.uber.server.game.clients.PixelManager();
         pixelManager.start();
         
-        achievementManager = new com.uber.server.achievements.AchievementManager(achievementRepository, this);
+        achievementManager = new com.uber.server.game.achievements.AchievementManager(achievementRepository, this);
         achievementManager.loadAchievements();
         
-        moderationTool = new com.uber.server.support.ModerationTool(
+        moderationTool = new com.uber.server.game.support.ModerationTool(
             moderationRepository,
             userInfoRepository,
             chatLogRepository,
@@ -174,8 +175,11 @@ public class Game {
         moderationTool.loadMessagePresets();
         moderationTool.loadPendingTickets();
         
-        // botManager = new BotManager();
-        // botManager.loadBots();
+        botManager = new com.uber.server.game.bots.BotManager(environment.getBotRepository());
+        botManager.loadBots();
+        
+        pluginHandler = new com.uber.server.plugins.PluginHandler();
+        pluginHandler.loadPlugins();
         
         // Start statistics thread (low priority worker)
         // statisticsThread = new Thread(() -> {
@@ -258,24 +262,25 @@ public class Game {
     }
     
     // Manager getters will be added as managers are ported
-    public com.uber.server.support.ModerationBanManager getBanManager() { 
+    public com.uber.server.game.support.ModerationBanManager getBanManager() { 
         return banManager; 
     }
-    public com.uber.server.roles.RoleManager getRoleManager() { return roleManager; }
-    public com.uber.server.support.HelpTool getHelpTool() { return helpTool; }
-    public com.uber.server.catalog.Catalog getCatalog() { return catalog; }
-    public com.uber.server.navigator.Navigator getNavigator() { return navigator; }
-    public com.uber.server.items.ItemManager getItemManager() { return itemManager; }
-    public com.uber.server.rooms.RoomManager getRoomManager() { return roomManager; }
-    // public AdvertisementManager getAdvertisementManager() { return advertisementManager; }
-    public com.uber.server.misc.PixelManager getPixelManager() { return pixelManager; }
-    public com.uber.server.achievements.AchievementManager getAchievementManager() { 
+    public com.uber.server.game.roles.RoleManager getRoleManager() { return roleManager; }
+    public com.uber.server.game.support.HelpTool getHelpTool() { return helpTool; }
+    public com.uber.server.game.catalog.Catalog getCatalog() { return catalog; }
+    public com.uber.server.game.navigator.Navigator getNavigator() { return navigator; }
+    public com.uber.server.game.items.ItemManager getItemManager() { return itemManager; }
+    public com.uber.server.game.rooms.RoomManager getRoomManager() { return roomManager; }
+    public com.uber.server.game.advertisements.AdvertisementManager getAdvertisementManager() { return advertisementManager; }
+    public com.uber.server.game.clients.PixelManager getPixelManager() { return pixelManager; }
+    public com.uber.server.game.achievements.AchievementManager getAchievementManager() { 
         return achievementManager; 
     }
-    public com.uber.server.support.ModerationTool getModerationTool() { 
+    public com.uber.server.game.support.ModerationTool getModerationTool() { 
         return moderationTool; 
     }
-    // public BotManager getBotManager() { return botManager; }
+    public com.uber.server.game.bots.BotManager getBotManager() { return botManager; }
+    public com.uber.server.plugins.PluginHandler getPluginHandler() { return pluginHandler; }
     
     // Repository getters (for handlers that need direct repository access)
     public UserRepository getUserRepository() { return userRepository; }

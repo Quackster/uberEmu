@@ -27,18 +27,18 @@ public class InitTradeHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null || !room.canTradeInRoom()) {
             return;
         }
         
-        com.uber.server.rooms.RoomUser user = room.getRoomUserByHabbo(habbo.getId());
+        com.uber.server.game.rooms.RoomUser user = room.getRoomUserByHabbo(habbo.getId());
         if (user == null) {
             return;
         }
         
         int virtualId = message.popWiredInt32();
-        com.uber.server.rooms.RoomUser user2 = room.getRoomUserByVirtualId(virtualId);
+        com.uber.server.game.rooms.RoomUser user2 = room.getRoomUserByVirtualId(virtualId);
         
         if (user2 == null) {
             return;

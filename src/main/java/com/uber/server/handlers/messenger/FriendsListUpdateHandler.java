@@ -20,7 +20,7 @@ public class FriendsListUpdateHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.users.messenger.HabboMessenger messenger = habbo.getMessenger();
+        com.uber.server.game.users.messenger.HabboMessenger messenger = habbo.getMessenger();
         if (messenger == null) {
             return;
         }

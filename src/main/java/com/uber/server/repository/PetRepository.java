@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -188,5 +190,47 @@ public class PetRepository {
             logger.error("Failed to delete all pets for user {}: {}", userId, e.getMessage(), e);
             return false;
         }
+    }
+    
+    /**
+     * Loads all pets in a room.
+     * @param roomId Room ID
+     * @return List of pet data maps
+     */
+    public List<Map<String, Object>> loadPetsInRoom(long roomId) {
+        String sql = "SELECT * FROM user_pets WHERE room_id = ?";
+        List<Map<String, Object>> pets = new ArrayList<>();
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, roomId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> pet = new HashMap<>();
+                    pet.put("id", rs.getLong("id"));
+                    pet.put("user_id", rs.getLong("user_id"));
+                    pet.put("name", rs.getString("name"));
+                    pet.put("type", rs.getInt("type"));
+                    pet.put("race", rs.getString("race"));
+                    pet.put("color", rs.getString("color"));
+                    pet.put("expirience", rs.getInt("expirience"));
+                    pet.put("energy", rs.getInt("energy"));
+                    pet.put("nutrition", rs.getInt("nutrition"));
+                    pet.put("respect", rs.getInt("respect"));
+                    pet.put("createstamp", rs.getDouble("createstamp"));
+                    pet.put("room_id", rs.getLong("room_id"));
+                    pet.put("x", rs.getInt("x"));
+                    pet.put("y", rs.getInt("y"));
+                    pet.put("z", rs.getDouble("z"));
+                    pets.add(pet);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Failed to load pets in room {}: {}", roomId, e.getMessage(), e);
+        }
+        
+        return pets;
     }
 }

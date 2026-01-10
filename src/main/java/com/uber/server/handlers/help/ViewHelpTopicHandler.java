@@ -23,7 +23,7 @@ public class ViewHelpTopicHandler implements PacketHandler {
     public void handle(GameClient client, ClientMessage message) {
         long topicId = message.popWiredUInt();
         
-        com.uber.server.support.HelpTopic topic = game.getHelpTool().getTopic(topicId);
+        com.uber.server.game.support.HelpTopic topic = game.getHelpTool().getTopic(topicId);
         if (topic != null) {
             client.sendMessage(game.getHelpTool().serializeTopic(topic));
         }

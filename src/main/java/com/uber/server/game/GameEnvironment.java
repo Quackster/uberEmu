@@ -54,6 +54,7 @@ public class GameEnvironment {
     private WardrobeRepository wardrobeRepository;
     private ItemRepository itemRepository;
     private RoleRepository roleRepository;
+    private BotRepository botRepository;
     
     private GameEnvironment() {
         // Singleton pattern
@@ -240,6 +241,7 @@ public class GameEnvironment {
         wardrobeRepository = new WardrobeRepository(databasePool);
         itemRepository = new com.uber.server.repository.ItemRepository(databasePool);
         roleRepository = new RoleRepository(databasePool);
+        botRepository = new BotRepository(databasePool);
     }
     
     // Repository getters
@@ -268,4 +270,5 @@ public class GameEnvironment {
     public WardrobeRepository getWardrobeRepository() { return wardrobeRepository; }
     public com.uber.server.repository.ItemRepository getItemRepository() { return itemRepository; }
     public RoleRepository getRoleRepository() { return roleRepository; }
+    public BotRepository getBotRepository() { return botRepository; }
 }

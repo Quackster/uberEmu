@@ -5,7 +5,7 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.pets.Pet;
+import com.uber.server.game.pets.Pet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class PlacePetHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null) {
             return;
         }
@@ -54,14 +54,14 @@ public class PlacePetHandler implements PacketHandler {
         }
         
         // Check pet count limit
-        if (room.getPetCount() >= com.uber.server.rooms.RoomManager.MAX_PETS_PER_ROOM) {
+        if (room.getPetCount() >= com.uber.server.game.rooms.RoomManager.MAX_PETS_PER_ROOM) {
             client.sendNotif("There are too many pets in this room. A room may only contain up to " + 
-                           com.uber.server.rooms.RoomManager.MAX_PETS_PER_ROOM + " pets.");
+                           com.uber.server.game.rooms.RoomManager.MAX_PETS_PER_ROOM + " pets.");
             return;
         }
         
         // Deploy pet in room
-        com.uber.server.rooms.RoomUser petUser = room.deployPet(pet, x, y);
+        com.uber.server.game.rooms.RoomUser petUser = room.deployPet(pet, x, y);
         if (petUser == null) {
             return;
         }

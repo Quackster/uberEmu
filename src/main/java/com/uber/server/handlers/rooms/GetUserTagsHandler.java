@@ -28,13 +28,13 @@ public class GetUserTagsHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
         if (room == null) {
             return;
         }
         
         long targetUserId = message.popWiredUInt();
-        com.uber.server.rooms.RoomUser targetUser = room.getRoomUserByHabbo(targetUserId);
+        com.uber.server.game.rooms.RoomUser targetUser = room.getRoomUserByHabbo(targetUserId);
         
         if (targetUser == null || targetUser.isBot()) {
             return;
