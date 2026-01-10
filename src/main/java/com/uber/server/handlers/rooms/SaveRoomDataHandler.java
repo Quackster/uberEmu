@@ -1,0 +1,110 @@
+package com.uber.server.handlers.rooms;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.PacketHandler;
+import com.uber.server.messages.ServerMessage;
+import com.uber.server.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Handler for saving room data (message ID 401).
+ * Ported from Messages/Requests/Rooms.cs SaveRoomData()
+ */
+public class SaveRoomDataHandler implements PacketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(SaveRoomDataHandler.class);
+    private final Game game;
+    
+    public SaveRoomDataHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || !habbo.isInRoom()) {
+            return;
+        }
+        
+        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        if (room == null || !room.checkRights(client, true)) {
+            return;
+        }
+        
+        int id = message.popWiredInt32();
+        String name = StringUtil.filterInjectionChars(message.popFixedString(), true);
+        String description = StringUtil.filterInjectionChars(message.popFixedString(), true);
+        int state = message.popWiredInt32();
+        String password = StringUtil.filterInjectionChars(message.popFixedString(), true);
+        int maxUsers = message.popWiredInt32();
+        int categoryId = message.popWiredInt32();
+        int tagCount = message.popWiredInt32();
+        
+        List<String> tags = new ArrayList<>();
+        for (int i = 0; i < tagCount; i++) {
+            String tag = StringUtil.filterInjectionChars(message.popFixedString(), true).toLowerCase();
+            if (tag != null && !tag.isEmpty()) {
+                tags.add(tag);
+            }
+        }
+        
+        // Read boolean flags (as bytes)
+        int allowPetsByte = message.popWiredInt32();
+        int allowPetsEatByte = message.popWiredInt32();
+        int allowWalkthroughByte = message.popWiredInt32();
+        
+        boolean allowPets = (allowPetsByte == 65); // 65 = 'A' in ASCII
+        boolean allowPetsEating = (allowPetsEatByte == 65);
+        boolean allowWalkthrough = (allowWalkthroughByte == 65);
+        
+        // Validation
+        if (name == null || name.length() < 1) {
+            return;
+        }
+        
+        if (state < 0 || state > 2) {
+            return;
+        }
+        
+        if (maxUsers != 10 && maxUsers != 15 && maxUsers != 20 && maxUsers != 25) {
+            return;
+        }
+        
+        // Check category permissions
+        com.uber.server.navigator.FlatCat flatCat = game.getNavigator().getFlatCat(categoryId);
+        if (flatCat != null && flatCat.getMinRank() > habbo.getRank()) {
+            client.sendNotif("You are not allowed to use this category. Your room has been moved to no category instead.");
+            categoryId = 0;
+        }
+        
+        if (tagCount > 2) {
+            return;
+        }
+        
+        // Update room settings
+        if (room.updateRoomSettings(name, description, state, password, maxUsers, categoryId, tags,
+                                   allowPets, allowPetsEating, allowWalkthrough)) {
+            // Send confirmation messages
+            ServerMessage response467 = new ServerMessage(467);
+            response467.appendUInt(room.getRoomId());
+            client.sendMessage(response467);
+            
+            ServerMessage response456 = new ServerMessage(456);
+            response456.appendUInt(room.getRoomId());
+            client.sendMessage(response456);
+            
+            // Send updated room data
+            ServerMessage response454 = new ServerMessage(454);
+            response454.appendBoolean(false);
+            // TODO: Serialize room data when RoomData.serialize() is implemented
+            // For now, just send the message
+            client.sendMessage(response454);
+        }
+    }
+}

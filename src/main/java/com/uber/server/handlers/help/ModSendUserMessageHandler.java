@@ -1,0 +1,35 @@
+package com.uber.server.handlers.help;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.PacketHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for sending user message (message ID 462).
+ * Ported from Messages/Requests/Help.cs ModSendUserMessage()
+ */
+public class ModSendUserMessageHandler implements PacketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ModSendUserMessageHandler.class);
+    private final Game game;
+    
+    public ModSendUserMessageHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || !habbo.hasFuse("fuse_alert")) {
+            return;
+        }
+        
+        long userId = message.popWiredUInt();
+        String alertMessage = message.popFixedString();
+        
+        game.getModerationTool().alertUser(client, userId, alertMessage, false); // false = message, not caution
+    }
+}

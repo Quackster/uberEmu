@@ -1,0 +1,43 @@
+package com.uber.server.handlers.rooms;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.PacketHandler;
+import com.uber.server.rooms.Trade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for accepting a trade (message ID 69).
+ * Ported from Messages/Requests/Rooms.cs AcceptTrade()
+ */
+public class AcceptTradeHandler implements PacketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(AcceptTradeHandler.class);
+    private final Game game;
+    
+    public AcceptTradeHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || !habbo.isInRoom()) {
+            return;
+        }
+        
+        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        if (room == null || !room.canTradeInRoom()) {
+            return;
+        }
+        
+        Trade trade = room.getUserTrade(habbo.getId());
+        if (trade == null) {
+            return;
+        }
+        
+        trade.accept(habbo.getId());
+    }
+}
