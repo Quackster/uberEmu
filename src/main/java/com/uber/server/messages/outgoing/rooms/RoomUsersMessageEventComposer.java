@@ -5,8 +5,7 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for RoomUsersMessageEvent (ID 28).
- * Sends users in the room to the client.
- * Note: This message is complex and built incrementally, so we wrap the pre-built message.
+ * Wraps a pre-built ServerMessage containing users data.
  */
 public class RoomUsersMessageEventComposer extends OutgoingMessageComposer {
     private final ServerMessage usersMessage;
@@ -17,6 +16,6 @@ public class RoomUsersMessageEventComposer extends OutgoingMessageComposer {
     
     @Override
     public ServerMessage compose() {
-        return usersMessage; // Already built with ID 28
+        return usersMessage;
     }
 }

@@ -41,7 +41,7 @@ public class WaveMessageComposerHandler implements IncomingMessageHandler {
         roomUser.setDanceId(0); // Stop dancing when waving
         
         // Send WaveMessageEvent (outgoing ID 481 from _events[481])
-        var waveComposer = new com.uber.server.messages.outgoing.rooms.WaveMessageEventComposer(
+        var waveComposer = new com.uber.server.messages.outgoing.rooms.WaveMessageComposer(
             roomUser.getVirtualId());
         room.sendMessage(waveComposer.compose());
     }

@@ -25,7 +25,7 @@ public class GetRoomData1MessageComposerHandler implements IncomingMessageHandle
         }
         
         // Send empty response
-        var composer = new com.uber.server.messages.outgoing.rooms.GetRoomData1ResponseMessageEventComposer(0);
+        var composer = new com.uber.server.messages.outgoing.rooms.FurnitureAliasesComposer(0);
         client.sendMessage(composer.compose());
     }
 }

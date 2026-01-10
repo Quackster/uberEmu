@@ -41,7 +41,7 @@ public class SetHomeRoomMessageComposerHandler implements IncomingMessageHandler
         game.getUserRepository().updateHomeRoom(habbo.getId(), roomId);
         
         // Send confirmation
-        var homeRoomComposer = new com.uber.server.messages.outgoing.rooms.HomeRoomMessageEventComposer(roomId);
+        var homeRoomComposer = new com.uber.server.messages.outgoing.rooms.NavigatorSettingsComposer(roomId);
         client.sendMessage(homeRoomComposer.compose());
     }
 }

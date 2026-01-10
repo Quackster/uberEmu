@@ -53,12 +53,12 @@ public class TakeRightsMessageComposerHandler implements IncomingMessageHandler 
             if (user != null && !user.isBot()) {
                 GameClient userClient = user.getClient();
                 if (userClient != null) {
-                    var rightsRemovedComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsRemovedFromUserMessageEventComposer();
+                    var rightsRemovedComposer = new com.uber.server.messages.outgoing.rooms.YouAreNotControllerComposer();
                     userClient.sendMessage(rightsRemovedComposer.compose());
                 }
             }
             
-            var rightsRemovedComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsRemovedMessageEventComposer(room.getRoomId(), userIdsArray[i]);
+            var rightsRemovedComposer = new com.uber.server.messages.outgoing.rooms.FlatControllerRemovedComposer(room.getRoomId(), userIdsArray[i]);
             client.sendMessage(rightsRemovedComposer.compose());
         }
         

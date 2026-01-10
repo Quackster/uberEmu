@@ -292,7 +292,7 @@ public class HabboMessenger {
         // Send update to client
         GameClient client = getClient();
         if (client != null) {
-            var updateComposer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateEventComposer(0, 1, friendId);
+            var updateComposer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateComposer(0, 1, friendId);
             ServerMessage response = updateComposer.compose();
             client.sendMessage(response);
         }
@@ -502,7 +502,7 @@ public class HabboMessenger {
         }
         
         // Return wrapped in composer for consistency
-        var composer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateEventComposer(updates);
+        var composer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateComposer(updates);
         return composer.compose();
     }
     

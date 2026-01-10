@@ -30,7 +30,7 @@ public class GetInventoryHandler implements PacketHandler {
             return;
         }
         
-        var furniInventoryComposer = new com.uber.server.messages.outgoing.users.FurniInventoryMessageEventComposer(
+        var furniInventoryComposer = new com.uber.server.messages.outgoing.users.FurniListComposer(
             habbo.getInventoryComponent().serializeItemInventory());
         client.sendMessage(furniInventoryComposer.compose());
     }

@@ -188,7 +188,7 @@ public class GameClientManager {
         // Use shared thread pool instead of dedicated executor
         ScheduledExecutorService executor = GameThreadPool.getInstance().getGameExecutor();
         
-        var pingComposer = new com.uber.server.messages.outgoing.global.PingMessageEventComposer();
+        var pingComposer = new com.uber.server.messages.outgoing.global.PingComposer();
         ServerMessage pingMessage = pingComposer.compose();
         
         executor.scheduleWithFixedDelay(() -> {

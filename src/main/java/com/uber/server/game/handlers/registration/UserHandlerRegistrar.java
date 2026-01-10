@@ -50,6 +50,12 @@ public class UserHandlerRegistrar {
         // GetAchievements handler (ID 370)
         registry.register(370, new com.uber.server.messages.incoming.users.GetAchievementsComposerHandler(game)); // GetAchievementsComposer (ID 370)
         
+        // GetWardrobe handler (ID 375)
+        registry.register(375, new com.uber.server.handlers.users.GetWardrobeHandler(game)); // GetWardrobe (ID 375)
+        
+        // SaveWardrobe handler (ID 376)
+        registry.register(376, new com.uber.server.handlers.users.SaveWardrobeHandler(game)); // SaveWardrobe (ID 376)
+        
         logger.debug("Registered user handlers");
     }
 }

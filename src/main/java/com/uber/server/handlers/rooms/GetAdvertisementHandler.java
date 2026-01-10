@@ -35,7 +35,7 @@ public class GetAdvertisementHandler implements PacketHandler {
             ad.onView();
         }
         
-        var composer = new com.uber.server.messages.outgoing.rooms.RoomAdvertisementEventComposer(adImage, adLink);
+        var composer = new com.uber.server.messages.outgoing.rooms.InterstitialComposer(adImage, adLink);
         client.sendMessage(composer.compose());
     }
 }

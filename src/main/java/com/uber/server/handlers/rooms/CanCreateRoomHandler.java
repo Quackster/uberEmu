@@ -23,7 +23,7 @@ public class CanCreateRoomHandler implements PacketHandler {
     public void handle(GameClient client, ClientMessage message) {
         // TODO: Implement room limit check when room limit system is added
         // For now, always allow (return false = no error, 99999 = unlimited)
-        var composer = new com.uber.server.messages.outgoing.navigator.CanCreateRoomEventEventComposer(false, 99999);
+        var composer = new com.uber.server.messages.outgoing.navigator.CanCreateRoomComposer(false, 99999);
         client.sendMessage(composer.compose());
     }
 }

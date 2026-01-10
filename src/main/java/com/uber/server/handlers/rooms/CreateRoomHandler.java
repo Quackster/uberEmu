@@ -39,7 +39,7 @@ public class CreateRoomHandler implements PacketHandler {
         com.uber.server.game.rooms.RoomData newRoom = game.getRoomManager().createRoom(client, roomName, modelName);
         
         if (newRoom != null) {
-            var composer = new com.uber.server.messages.outgoing.navigator.FlatCreatedEventComposer(
+            var composer = new com.uber.server.messages.outgoing.navigator.FlatCreatedComposer(
                 newRoom.getId(), newRoom.getName());
             client.sendMessage(composer.compose());
         }

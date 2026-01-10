@@ -3,7 +3,6 @@ package com.uber.server.encoding.wire;
 /**
  * Wire encoding utilities for Habbo protocol variable-length integers.
  * Uses a custom encoding scheme for efficient integer representation.
- * Moved from com.uber.server.util.WireEncoding
  */
 public final class WireEncoding {
     public static final byte NEGATIVE = 72;

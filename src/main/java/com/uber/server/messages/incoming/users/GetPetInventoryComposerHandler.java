@@ -31,7 +31,7 @@ public class GetPetInventoryComposerHandler implements IncomingMessageHandler {
             return;
         }
         
-        var petInventoryComposer = new com.uber.server.messages.outgoing.users.PetInventoryMessageEventComposer(
+        var petInventoryComposer = new com.uber.server.messages.outgoing.users.PetInventoryComposer(
             habbo.getInventoryComponent().serializePetInventory());
         client.sendMessage(petInventoryComposer.compose());
     }

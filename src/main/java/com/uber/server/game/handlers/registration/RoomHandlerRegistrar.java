@@ -114,6 +114,10 @@ public class RoomHandlerRegistrar {
         registry.register(230, new com.uber.server.handlers.rooms.GetGroupBadgesHandler(game)); // GetGroupBadges
         registry.register(59, new com.uber.server.handlers.rooms.ReqLoadRoomForUserHandler(game)); // ReqLoadRoomForUser
         
+        // Public room handlers
+        registry.register(388, new com.uber.server.handlers.rooms.GetPubHandler(game)); // GetPub (ID 388)
+        registry.register(2, new com.uber.server.handlers.rooms.OpenPubHandler(game)); // OpenPub (ID 2)
+        
         // Pet handlers
         registry.register(3002, new com.uber.server.handlers.rooms.PlacePetHandler(game)); // PlacePet
         registry.register(3001, new com.uber.server.handlers.rooms.GetPetInfoHandler(game)); // GetPetInfo

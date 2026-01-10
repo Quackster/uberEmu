@@ -41,7 +41,7 @@ public class CallGuideBotHandler implements PacketHandler {
         // Check if guide bot already exists in room
         for (com.uber.server.game.rooms.RoomUser roomUser : room.getUsers().values()) {
             if (roomUser.isBot() && roomUser.getBotData() != null && roomUser.getBotData().getBotId() == 55) {
-                var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(4009); // Error code: guide bot already exists
+                var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorComposer(4009); // Error code: guide bot already exists
                 client.sendMessage(errorComposer.compose());
                 return;
             }
@@ -49,7 +49,7 @@ public class CallGuideBotHandler implements PacketHandler {
         
         // Check if user already called guide bot
         if (habbo.isCalledGuideBot()) {
-            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(4010);
+            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorComposer(4010);
             client.sendMessage(errorComposer.compose());
             return;
         }

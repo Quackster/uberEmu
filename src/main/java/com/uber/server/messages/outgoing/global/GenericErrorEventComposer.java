@@ -5,7 +5,7 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for GenericErrorEvent (ID 33).
- * Sends a generic error message to the client.
+ * Sent for generic error messages.
  */
 public class GenericErrorEventComposer extends OutgoingMessageComposer {
     private final int errorCode;
@@ -16,7 +16,7 @@ public class GenericErrorEventComposer extends OutgoingMessageComposer {
     
     @Override
     public ServerMessage compose() {
-        ServerMessage msg = new ServerMessage(33); // _events[33] = GenericErrorEvent
+        ServerMessage msg = new ServerMessage(33);
         msg.appendInt32(errorCode);
         return msg;
     }

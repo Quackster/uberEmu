@@ -73,7 +73,7 @@ public class SetActivatedBadgesComposerHandler implements IncomingMessageHandler
             }
         }
         
-        var badgesComposer = new com.uber.server.messages.outgoing.users.BadgesEventComposer(response);
+        var badgesComposer = new com.uber.server.messages.outgoing.users.HabboUserBadgesComposer(response);
         
         // Send to room if user is in room, otherwise just to client
         if (habbo.isInRoom() && game.getRoomManager() != null) {

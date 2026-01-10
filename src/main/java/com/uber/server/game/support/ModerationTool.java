@@ -350,7 +350,7 @@ public class ModerationTool {
         
         // Send result message to sender
         if (senderClient != null) {
-            var composer = new com.uber.server.messages.outgoing.support.ModerationActionResultMessageEventComposer(resultCode);
+            var composer = new com.uber.server.messages.outgoing.support.IssueCloseNotificationComposer(resultCode);
             senderClient.sendMessage(composer.compose());
         }
         

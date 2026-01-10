@@ -135,14 +135,14 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
             if (!canEnter && !habbo.isTeleporting()) {
                 if (data.getState() == 1) { // Locked
                     if (room.getUserCount() == 0) {
-                        var lockedComposer = new com.uber.server.messages.outgoing.rooms.FlatAccessDeniedMessageEventComposer();
+                        var lockedComposer = new com.uber.server.messages.outgoing.rooms.FlatAccessDeniedComposer();
                         client.sendMessage(lockedComposer.compose());
                     } else {
-                        var ringComposer = new com.uber.server.messages.outgoing.rooms.DoorbellMessageEventComposer("");
+                        var ringComposer = new com.uber.server.messages.outgoing.rooms.DoorbellComposer("");
                         client.sendMessage(ringComposer.compose());
                         
                         // Ring doorbell to room owners
-                        var ringToOwnersComposer = new com.uber.server.messages.outgoing.rooms.DoorbellMessageEventComposer(habbo.getUsername());
+                        var ringToOwnersComposer = new com.uber.server.messages.outgoing.rooms.DoorbellComposer(habbo.getUsername());
                         room.sendMessageToUsersWithRights(ringToOwnersComposer.compose());
                     }
                     habbo.setLoadingRoom(0);
@@ -161,7 +161,7 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
             }
             
             // Send private room entry
-            var privateEntryComposer = new com.uber.server.messages.outgoing.rooms.OpenFlatConnectionMessageEventComposer(
+            var privateEntryComposer = new com.uber.server.messages.outgoing.rooms.OpenFlatConnectionComposer(
                 "/client/private/" + roomId + "/id");
             client.sendMessage(privateEntryComposer.compose());
         }
@@ -187,18 +187,18 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
         }
         
         // Send group badges
-        var groupBadgesComposer = new com.uber.server.messages.outgoing.rooms.GroupBadgesMessageEventComposer(
+        var groupBadgesComposer = new com.uber.server.messages.outgoing.rooms.HabboGroupBadgesComposer(
             "IcIrDs43103s19014d5a1dc291574a508bc80a64663e61a00");
         client.sendMessage(groupBadgesComposer.compose());
         
         // Send model name and room ID
-        var modelComposer = new com.uber.server.messages.outgoing.rooms.RoomModelNameMessageEventComposer(
+        var modelComposer = new com.uber.server.messages.outgoing.rooms.RoomReadyComposer(
             data.getModelName(), room.getRoomId());
         client.sendMessage(modelComposer.compose());
         
         // Send spectator mode check if spectator
         if (habbo.isSpectatorMode()) {
-            var spectatorComposer = new com.uber.server.messages.outgoing.rooms.SpectatorModeMessageEventComposer();
+            var spectatorComposer = new com.uber.server.messages.outgoing.rooms.YouAreSpectatorComposer();
             client.sendMessage(spectatorComposer.compose());
         }
         
@@ -207,19 +207,19 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
             // Send wallpaper if not "0.0"
             String wallpaper = data.getWallpaper();
             if (wallpaper != null && !wallpaper.equals("0.0")) {
-                var wallpaperComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer("wallpaper", wallpaper);
+                var wallpaperComposer = new com.uber.server.messages.outgoing.rooms.RoomPropertyComposer("wallpaper", wallpaper);
                 client.sendMessage(wallpaperComposer.compose());
             }
             
             // Send floor if not "0.0"
             String floor = data.getFloor();
             if (floor != null && !floor.equals("0.0")) {
-                var floorComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer("floor", floor);
+                var floorComposer = new com.uber.server.messages.outgoing.rooms.RoomPropertyComposer("floor", floor);
                 client.sendMessage(floorComposer.compose());
             }
             
             // Send landscape - always sent (no check for "0.0")
-            var landscapeComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer(
+            var landscapeComposer = new com.uber.server.messages.outgoing.rooms.RoomPropertyComposer(
                 "landscape", data.getLandscape() != null ? data.getLandscape() : "0.0");
             client.sendMessage(landscapeComposer.compose());
             
@@ -229,7 +229,7 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
                 var rightsComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsLevelMessageEventComposer();
                 client.sendMessage(rightsComposer.compose());
                 
-                var ownerComposer = new com.uber.server.messages.outgoing.rooms.RoomOwnerMessageEventComposer();
+                var ownerComposer = new com.uber.server.messages.outgoing.rooms.YouAreOwnerComposer();
                 client.sendMessage(ownerComposer.compose());
             } else if (room.checkRights(client, false)) {
                 // Has rights but not owner - only rights message
@@ -240,7 +240,7 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
             // Send room score (ID 345)
             int scoreToSend = (habbo.getRatedRooms().contains(room.getRoomId()) || room.checkRights(client, true)) 
                 ? data.getScore() : -1;
-            var scoreComposer = new com.uber.server.messages.outgoing.rooms.RoomRatingEventComposer(scoreToSend);
+            var scoreComposer = new com.uber.server.messages.outgoing.rooms.RoomRatingComposer(scoreToSend);
             client.sendMessage(scoreComposer.compose());
             
             // Send event (ID 370) - always send for private rooms

@@ -40,7 +40,7 @@ public class CreateFlatMessageComposerHandler implements IncomingMessageHandler 
         
         if (newRoom != null) {
             // Send FlatCreatedEvent (outgoing ID 59 from _events[59])
-            var composer = new com.uber.server.messages.outgoing.navigator.FlatCreatedEventComposer(
+            var composer = new com.uber.server.messages.outgoing.navigator.FlatCreatedComposer(
                 newRoom.getId(), newRoom.getName());
             client.sendMessage(composer.compose());
         }

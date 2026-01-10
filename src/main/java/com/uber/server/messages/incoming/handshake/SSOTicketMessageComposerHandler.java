@@ -29,7 +29,7 @@ public class SSOTicketMessageComposerHandler implements IncomingMessageHandler {
     public void handle(GameClient client, ClientMessage message) {
         // Check if already logged in
         if (client.getHabbo() != null) {
-            var alreadyLoggedInComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKMessageEventComposer("You are already logged in!");
+            var alreadyLoggedInComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKComposer("You are already logged in!");
             client.sendMessage(alreadyLoggedInComposer.compose());
             return;
         }
@@ -113,18 +113,18 @@ public class SSOTicketMessageComposerHandler implements IncomingMessageHandler {
             var availabilityComposer = new com.uber.server.messages.outgoing.users.AvailabilityStatusMessageEventComposer(true, false);
             client.sendMessage(availabilityComposer.compose());
             
-            var authOKComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKMessageEventComposer("");
+            var authOKComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKComposer("");
             client.sendMessage(authOKComposer.compose());
             
-            var infoFeedComposer = new com.uber.server.messages.outgoing.handshake.InfoFeedEnableMessageEventComposer(true);
+            var infoFeedComposer = new com.uber.server.messages.outgoing.handshake.InfoFeedEnableComposer(true);
             client.sendMessage(infoFeedComposer.compose());
             
             // Send home room
-            var navigatorComposer = new com.uber.server.messages.outgoing.navigator.NavigatorSettingsEventComposer(habbo.getHomeRoom());
+            var navigatorComposer = new com.uber.server.messages.outgoing.navigator.NavigatorSettingsComposer(habbo.getHomeRoom());
             client.sendMessage(navigatorComposer.compose());
             
             // Send favorite rooms
-            var favouritesComposer = new com.uber.server.messages.outgoing.navigator.FavouritesEventComposer(30, habbo.getFavoriteRooms());
+            var favouritesComposer = new com.uber.server.messages.outgoing.navigator.FavouritesComposer(30, habbo.getFavoriteRooms());
             client.sendMessage(favouritesComposer.compose());
             
             // Send welcome notification (packet 161)
@@ -144,7 +144,7 @@ public class SSOTicketMessageComposerHandler implements IncomingMessageHandler {
     }
     
     private void sendLoginError(GameClient client, String message) {
-        var errorComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKMessageEventComposer(message);
+        var errorComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKComposer(message);
         client.sendMessage(errorComposer.compose());
     }
 }

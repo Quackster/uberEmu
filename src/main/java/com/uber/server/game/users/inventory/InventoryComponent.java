@@ -196,7 +196,7 @@ public class InventoryComponent {
             } else {
                 message.appendUInt(petId);
             }
-            var composer = new com.uber.server.messages.outgoing.users.PetAddedToInventoryMessageEventComposer(message);
+            var composer = new com.uber.server.messages.outgoing.users.PetAddedToInventoryComposer(message);
             client.sendMessage(composer.compose());
         }
     }
@@ -247,7 +247,7 @@ public class InventoryComponent {
         // Send remove message to client
         GameClient client = getClient();
         if (client != null) {
-            var composer = new com.uber.server.messages.outgoing.users.PetRemovedFromInventoryMessageEventComposer(petId);
+            var composer = new com.uber.server.messages.outgoing.users.PetRemovedFromInventoryComposer(petId);
             client.sendMessage(composer.compose());
         }
         
@@ -283,7 +283,7 @@ public class InventoryComponent {
         // Send remove message to client
         GameClient client = getClient();
         if (client != null) {
-            var composer = new com.uber.server.messages.outgoing.users.FurniRemovedFromInventoryMessageEventComposer(itemId);
+            var composer = new com.uber.server.messages.outgoing.users.FurniListRemoveComposer(itemId);
             client.sendMessage(composer.compose());
         }
         

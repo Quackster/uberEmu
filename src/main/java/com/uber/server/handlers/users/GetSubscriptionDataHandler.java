@@ -69,7 +69,7 @@ public class GetSubscriptionDataHandler implements PacketHandler {
             response.appendInt32(0);
         }
         
-        var composer = new com.uber.server.messages.outgoing.users.SubscriptionDataMessageEventComposer(response);
+        var composer = new com.uber.server.messages.outgoing.users.ScrSendUserInfoComposer(response);
         client.sendMessage(composer.compose());
     }
 }

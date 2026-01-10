@@ -5,22 +5,22 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for GiftWrappingErrorMessageEvent (ID 76).
- * Sends gift wrapping error/status message to the client.
+ * Sent when a gift purchase fails due to invalid recipient.
  */
 public class GiftWrappingErrorMessageEventComposer extends OutgoingMessageComposer {
-    private final boolean success;
-    private final String username;
+    private final boolean isGift;
+    private final String giftUser;
     
-    public GiftWrappingErrorMessageEventComposer(boolean success, String username) {
-        this.success = success;
-        this.username = username;
+    public GiftWrappingErrorMessageEventComposer(boolean isGift, String giftUser) {
+        this.isGift = isGift;
+        this.giftUser = giftUser;
     }
     
     @Override
     public ServerMessage compose() {
-        ServerMessage msg = new ServerMessage(76); // _events[76] = GiftWrappingErrorMessageEvent
-        msg.appendBoolean(success);
-        msg.appendStringWithBreak(username);
+        ServerMessage msg = new ServerMessage(76);
+        msg.appendBoolean(isGift);
+        msg.appendStringWithBreak(giftUser);
         return msg;
     }
 }

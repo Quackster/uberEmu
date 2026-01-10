@@ -40,7 +40,7 @@ public class CanCreateRoomEventHandler implements PacketHandler {
             errorCode = 3;
         }
         
-        var composer = new com.uber.server.messages.outgoing.rooms.CanCreateRoomEventResponseMessageEventComposer(allow, errorCode);
+        var composer = new com.uber.server.messages.outgoing.rooms.CanCreateRoomEventComposer(allow, errorCode);
         client.sendMessage(composer.compose());
     }
 }

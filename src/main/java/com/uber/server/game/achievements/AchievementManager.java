@@ -85,7 +85,7 @@ public class AchievementManager {
     public ServerMessage serializeAchievementList(GameClient session) {
         if (session == null || session.getHabbo() == null) {
             ServerMessage emptyMsg = new ServerMessage(436); // Empty message
-            var composer = new com.uber.server.messages.outgoing.users.AchievementsListMessageEventComposer(emptyMsg);
+            var composer = new com.uber.server.messages.outgoing.users.AchievementsComposer(emptyMsg);
             return composer.compose();
         }
         
@@ -123,7 +123,7 @@ public class AchievementManager {
         }
         
         // Wrap in composer
-        var composer = new com.uber.server.messages.outgoing.users.AchievementsListMessageEventComposer(message);
+        var composer = new com.uber.server.messages.outgoing.users.AchievementsComposer(message);
         return composer.compose();
     }
     
@@ -195,7 +195,7 @@ public class AchievementManager {
             response.appendStringWithBreak("");
         }
         
-        var composer = new com.uber.server.messages.outgoing.users.AchievementProgressMessageEventComposer(response);
+        var composer = new com.uber.server.messages.outgoing.users.HabboAchievementNotificationComposer(response);
         session.sendMessage(composer.compose());
         
         // Give the user the pixels

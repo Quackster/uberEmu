@@ -50,9 +50,9 @@ public class GetRoomData2MessageComposerHandler implements IncomingMessageHandle
         }
         
         // Send heightmap and relative heightmap
-        var heightmapComposer = new com.uber.server.messages.outgoing.rooms.RoomHeightmapMessageEventComposer(model.serializeHeightmap());
+        var heightmapComposer = new com.uber.server.messages.outgoing.rooms.HeightMapComposer(model.serializeHeightmap());
         client.sendMessage(heightmapComposer.compose());
-        var relativeHeightmapComposer = new com.uber.server.messages.outgoing.rooms.RoomRelativeHeightmapMessageEventComposer(model.serializeRelativeHeightmap());
+        var relativeHeightmapComposer = new com.uber.server.messages.outgoing.rooms.FloorHeightMapComposer(model.serializeRelativeHeightmap());
         client.sendMessage(relativeHeightmapComposer.compose());
     }
 }

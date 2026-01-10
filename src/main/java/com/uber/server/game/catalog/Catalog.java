@@ -393,7 +393,7 @@ public class Catalog {
         response.appendInt32(1);
         response.appendInt32(-1);
         response.appendStringWithBreak("");
-        var composer = new com.uber.server.messages.outgoing.catalog.PurchaseConfirmationMessageEventComposer(response);
+        var composer = new com.uber.server.messages.outgoing.catalog.PurchaseOKComposer(response);
         client.sendMessage(composer.compose());
 
         if (isGift) {
@@ -646,14 +646,14 @@ public class Catalog {
                     subResponse.appendBoolean(false);
                     subResponse.appendInt32(0);
                 }
-                var subscriptionComposer = new com.uber.server.messages.outgoing.users.SubscriptionDataMessageEventComposer(subResponse);
+                var subscriptionComposer = new com.uber.server.messages.outgoing.users.ScrSendUserInfoComposer(subResponse);
                 client.sendMessage(subscriptionComposer.compose());
 
                 // Send rights update
                 Game game = Game.getInstance();
                 if (game.getRoleManager() != null) {
                     List<String> rights = game.getRoleManager().getRightsForHabbo(habbo);
-                    var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsMessageEventComposer(rights);
+                    var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsComposer(rights);
                     client.sendMessage(rightsComposer.compose());
                 }
                 break;

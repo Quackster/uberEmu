@@ -55,7 +55,7 @@ public class DanceMessageComposerHandler implements IncomingMessageHandler {
         roomUser.setDanceId(danceId);
         
         // Send DanceMessageEvent (outgoing ID 480 from _events[480])
-        var danceComposer = new com.uber.server.messages.outgoing.rooms.DanceMessageEventComposer(
+        var danceComposer = new com.uber.server.messages.outgoing.rooms.DanceMessageComposer(
             roomUser.getVirtualId(), danceId);
         room.sendMessage(danceComposer.compose());
     }

@@ -56,7 +56,7 @@ public class RateRoomHandler implements PacketHandler {
         habbo.addRatedRoom(room.getRoomId());
         
         // Send updated score
-        var composer = new com.uber.server.messages.outgoing.rooms.RoomRatingEventComposer(newScore);
+        var composer = new com.uber.server.messages.outgoing.rooms.RoomRatingComposer(newScore);
         client.sendMessage(composer.compose());
     }
 }

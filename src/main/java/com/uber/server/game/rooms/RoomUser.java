@@ -515,7 +515,7 @@ public class RoomUser {
             // Send sleep update message
             Room room = getRoom();
             if (room != null) {
-                var sleepComposer = new com.uber.server.messages.outgoing.rooms.UserSleepingMessageEventComposer(virtualId, false);
+                var sleepComposer = new com.uber.server.messages.outgoing.rooms.SleepComposer(virtualId, false);
                 room.sendMessage(sleepComposer.compose());
             }
         }

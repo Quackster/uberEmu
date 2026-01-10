@@ -56,7 +56,7 @@ public class GetUserBadgesHandler implements PacketHandler {
             }
         }
         
-        var badgesComposer = new com.uber.server.messages.outgoing.users.BadgesEventComposer(response);
+        var badgesComposer = new com.uber.server.messages.outgoing.users.HabboUserBadgesComposer(response);
         client.sendMessage(badgesComposer.compose());
     }
 }

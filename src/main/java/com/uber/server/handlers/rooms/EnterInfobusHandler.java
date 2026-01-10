@@ -28,7 +28,7 @@ public class EnterInfobusHandler implements PacketHandler {
         }
         
         // Infobus is currently closed
-        var composer = new com.uber.server.messages.outgoing.rooms.InfobusErrorMessageEventComposer(
+        var composer = new com.uber.server.messages.outgoing.rooms.ParkBusCannotEnterComposer(
             "The Uber Infobus is not yet in use.");
         client.sendMessage(composer.compose());
     }

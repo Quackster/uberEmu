@@ -95,7 +95,7 @@ public class SSOLoginHandler implements PacketHandler {
             // Send rights
             List<String> rights = game.getRoleManager() != null ? 
                 game.getRoleManager().getRightsForHabbo(habbo) : new ArrayList<>();
-            var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsMessageEventComposer(rights);
+            var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsComposer(rights);
             client.sendMessage(rightsComposer.compose());
             
             // Send moderation tool (if user has fuse_mod)

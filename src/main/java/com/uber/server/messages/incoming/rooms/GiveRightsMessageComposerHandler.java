@@ -57,7 +57,7 @@ public class GiveRightsMessageComposerHandler implements IncomingMessageHandler 
                 }
             }
             
-            var rightsGivenComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsGivenMessageEventComposer(room.getRoomId(), userId, username);
+            var rightsGivenComposer = new com.uber.server.messages.outgoing.rooms.FlatControllerAddedComposer(room.getRoomId(), userId, username);
             client.sendMessage(rightsGivenComposer.compose());
             
             // Add status to room user

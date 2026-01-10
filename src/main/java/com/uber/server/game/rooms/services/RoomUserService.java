@@ -113,7 +113,7 @@ public class RoomUserService {
         
         if (notifyClient) {
             if (notifyKick) {
-                var kickComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(4008);
+                var kickComposer = new com.uber.server.messages.outgoing.global.GenericErrorComposer(4008);
                 ServerMessage kickMessage = kickComposer.compose();
                 session.sendMessage(kickMessage);
             }

@@ -66,7 +66,7 @@ public class PlaceItemMessageComposerHandler implements IncomingMessageHandler {
                 String wallPos = room.wallPositionCheck(":" + placementData.split(":")[1]);
                 
                 if (wallPos == null) {
-                    var errorComposer = new com.uber.server.messages.outgoing.rooms.PlaceItemErrorMessageEventComposer(11);
+                    var errorComposer = new com.uber.server.messages.outgoing.rooms.PlaceObjectErrorComposer(11);
                     client.sendMessage(errorComposer.compose());
                     return;
                 }

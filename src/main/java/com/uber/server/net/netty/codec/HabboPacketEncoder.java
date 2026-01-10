@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * Netty encoder for Habbo protocol packets.
  * Encodes ServerMessage to bytes in format: [2 bytes: Base64 ID][body][1 byte: terminator 0x01]
- * Moved from com.uber.server.net.HabboPacketEncoder
  */
 public class HabboPacketEncoder extends MessageToByteEncoder<Object> {
     private static final Logger logger = LoggerFactory.getLogger(HabboPacketEncoder.class);

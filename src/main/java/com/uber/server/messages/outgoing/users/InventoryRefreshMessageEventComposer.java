@@ -5,13 +5,16 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for InventoryRefreshMessageEvent (ID 101).
- * Notifies client to refresh inventory.
+ * Sent to refresh the user's inventory.
  */
 public class InventoryRefreshMessageEventComposer extends OutgoingMessageComposer {
+    
+    public InventoryRefreshMessageEventComposer() {
+    }
+    
     @Override
     public ServerMessage compose() {
-        ServerMessage msg = new ServerMessage(101); // _events[101] = InventoryRefreshMessageEvent
-        // Empty message body
+        ServerMessage msg = new ServerMessage(101);
         return msg;
     }
 }

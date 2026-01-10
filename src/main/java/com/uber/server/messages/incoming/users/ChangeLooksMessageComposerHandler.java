@@ -64,7 +64,7 @@ public class ChangeLooksMessageComposerHandler implements IncomingMessageHandler
         }
         
         // Send response
-        var figureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+        var figureComposer = new com.uber.server.messages.outgoing.users.UserChangeComposer(
             -1, habbo.getLook(), habbo.getGender(), habbo.getMotto());
         client.sendMessage(figureComposer.compose());
         
@@ -74,7 +74,7 @@ public class ChangeLooksMessageComposerHandler implements IncomingMessageHandler
             if (room != null) {
                 com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
                 if (roomUser != null) {
-                    var roomFigureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+                    var roomFigureComposer = new com.uber.server.messages.outgoing.users.UserChangeComposer(
                         roomUser.getVirtualId(), habbo.getLook(), habbo.getGender(), habbo.getMotto());
                     room.sendMessage(roomFigureComposer.compose());
                 }

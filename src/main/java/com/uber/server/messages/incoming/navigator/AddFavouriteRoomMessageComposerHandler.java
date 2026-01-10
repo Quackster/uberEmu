@@ -33,7 +33,7 @@ public class AddFavouriteRoomMessageComposerHandler implements IncomingMessageHa
         
         if (data == null || habbo.getFavoriteRooms().size() >= 30 || 
             habbo.getFavoriteRooms().contains(roomId) || data.isPublicRoom()) {
-            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(-9001);
+            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorComposer(-9001);
             client.sendMessage(errorComposer.compose());
             return;
         }
@@ -42,7 +42,7 @@ public class AddFavouriteRoomMessageComposerHandler implements IncomingMessageHa
         if (game.getUserRepository().addFavorite(habbo.getId(), roomId)) {
             habbo.addFavoriteRoom(roomId);
             
-            var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedEventComposer(roomId, true);
+            var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedComposer(roomId, true);
             client.sendMessage(composer.compose());
         }
     }

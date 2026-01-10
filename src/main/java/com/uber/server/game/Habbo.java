@@ -445,7 +445,7 @@ public class Habbo {
         // Send credits update message to client
         GameClient client = getClient();
         if (client != null) {
-            var composer = new com.uber.server.messages.outgoing.users.CreditsMessageEventComposer(credits);
+            var composer = new com.uber.server.messages.outgoing.users.CreditBalanceComposer(credits);
             client.sendMessage(composer.compose());
         }
         
@@ -458,7 +458,7 @@ public class Habbo {
                 credits = dbCredits;
                 // Send updated credits to client
                 if (client != null) {
-                    var composer = new com.uber.server.messages.outgoing.users.CreditsMessageEventComposer(credits);
+                    var composer = new com.uber.server.messages.outgoing.users.CreditBalanceComposer(credits);
                     client.sendMessage(composer.compose());
                 }
             }
@@ -502,7 +502,7 @@ public class Habbo {
         if (sendUpdate) {
             GameClient client = getClient();
             if (client != null) {
-                var composer = new com.uber.server.messages.outgoing.users.ActivityPointsMessageEventComposer(activityPoints, notifAmount);
+                var composer = new com.uber.server.messages.outgoing.users.HabboActivityPointNotificationComposer(activityPoints, notifAmount);
                 client.sendMessage(composer.compose());
             }
         }

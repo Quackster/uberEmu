@@ -5,8 +5,7 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for RoomWallItemsMessageEvent (ID 45).
- * Sends wall items in the room to the client.
- * Note: This message is complex and built incrementally, so we wrap the pre-built message.
+ * Wraps a pre-built ServerMessage containing wall items data.
  */
 public class RoomWallItemsMessageEventComposer extends OutgoingMessageComposer {
     private final ServerMessage wallItemsMessage;
@@ -17,6 +16,6 @@ public class RoomWallItemsMessageEventComposer extends OutgoingMessageComposer {
     
     @Override
     public ServerMessage compose() {
-        return wallItemsMessage; // Already built with ID 45
+        return wallItemsMessage;
     }
 }

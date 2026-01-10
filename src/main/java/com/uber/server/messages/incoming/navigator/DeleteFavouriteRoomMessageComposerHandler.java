@@ -36,7 +36,7 @@ public class DeleteFavouriteRoomMessageComposerHandler implements IncomingMessag
         // Remove from database
         game.getUserRepository().removeFavorite(habbo.getId(), roomId);
         
-        var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedEventComposer(roomId, false);
+        var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedComposer(roomId, false);
         client.sendMessage(composer.compose());
     }
 }

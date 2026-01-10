@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Netty channel handler for Habbo protocol.
  * Routes ClientMessage to GameClient for processing.
- * Moved from com.uber.server.net.HabboChannelHandler
  */
 public class HabboChannelHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(HabboChannelHandler.class);

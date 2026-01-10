@@ -40,7 +40,7 @@ public class FollowFriendMessageComposerHandler implements IncomingMessageHandle
             return;
         }
         
-        var composer = new com.uber.server.messages.outgoing.navigator.RoomForwardMessageEventComposer(
+        var composer = new com.uber.server.messages.outgoing.navigator.RoomForwardComposer(
             room.getData() != null && room.getData().isPublicRoom(),
             buddyClient.getHabbo().getCurrentRoomId());
         client.sendMessage(composer.compose());

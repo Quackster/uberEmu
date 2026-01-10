@@ -37,7 +37,7 @@ public class StartTypingHandler implements PacketHandler {
             return;
         }
         
-        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageEventComposer(
+        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageComposer(
             roomUser.getVirtualId(), true);
         room.sendMessage(composer.compose());
     }

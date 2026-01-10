@@ -49,7 +49,7 @@ public class Trade {
         }
         
         // Send trade start message
-        var composer = new com.uber.server.messages.outgoing.rooms.TradeStartEventComposer(
+        var composer = new com.uber.server.messages.outgoing.rooms.TradingOpenComposer(
             userOneId, true, userTwoId, true);
         sendMessageToUsers(composer.compose());
     }
@@ -138,11 +138,11 @@ public class Trade {
         
         tradeUser.setAccepted(true);
         
-        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradeAcceptEventComposer(userId, true);
+        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradingAcceptComposer(userId, true);
         sendMessageToUsers(acceptComposer.compose());
         
         if (isAllUsersAccepted()) {
-            var confirmComposer = new com.uber.server.messages.outgoing.rooms.TradeConfirmationEventComposer();
+            var confirmComposer = new com.uber.server.messages.outgoing.rooms.TradingConfirmationComposer();
             sendMessageToUsers(confirmComposer.compose());
             tradeStage = 2;
             clearAccepted();
@@ -181,7 +181,7 @@ public class Trade {
         
         tradeUser.setAccepted(true);
         
-        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradeAcceptEventComposer(userId, true);
+        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradingAcceptComposer(userId, true);
         sendMessageToUsers(acceptComposer.compose());
         
         if (isAllUsersAccepted()) {
@@ -332,7 +332,7 @@ public class Trade {
             }
         }
         
-        var closedComposer = new com.uber.server.messages.outgoing.rooms.TradeClosedEventComposer(userId);
+        var closedComposer = new com.uber.server.messages.outgoing.rooms.TradingCloseComposer(userId);
         sendMessageToUsers(closedComposer.compose());
     }
     

@@ -37,7 +37,7 @@ public class StopTypingMessageComposerHandler implements IncomingMessageHandler 
             return;
         }
         
-        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageEventComposer(
+        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageComposer(
             roomUser.getVirtualId(), false);
         room.sendMessage(composer.compose());
     }

@@ -42,7 +42,6 @@ public class Main {
             String line;
             while (!isShuttingDown && (line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
-                    // Process command (CommandParser.Parse equivalent)
                     processCommand(line.trim());
                 }
             }

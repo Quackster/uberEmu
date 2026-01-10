@@ -87,17 +87,17 @@ public class SaveRoomIconMessageComposerHandler implements IncomingMessageHandle
             room.getData().setIcon(newIcon);
             
             // Send confirmation messages
-            var iconSavedComposer = new com.uber.server.messages.outgoing.rooms.RoomIconSavedMessageEventComposer(room.getRoomId(), true);
+            var iconSavedComposer = new com.uber.server.messages.outgoing.rooms.RoomThumbnailUpdateResultComposer(room.getRoomId(), true);
             client.sendMessage(iconSavedComposer.compose());
             
-            var updatedComposer = new com.uber.server.messages.outgoing.rooms.RoomSettingsUpdatedMessageEventComposer(room.getRoomId());
+            var updatedComposer = new com.uber.server.messages.outgoing.rooms.RoomInfoUpdatedComposer(room.getRoomId());
             client.sendMessage(updatedComposer.compose());
             
             // Send updated room data
             ServerMessage response454 = new ServerMessage(454);
             response454.appendBoolean(false);
             room.getData().serialize(response454, false);
-            var roomDataComposer = new com.uber.server.messages.outgoing.rooms.RoomDataMessageEventComposer(response454);
+            var roomDataComposer = new com.uber.server.messages.outgoing.rooms.GetGuestRoomResultComposer(response454);
             client.sendMessage(roomDataComposer.compose());
         }
     }

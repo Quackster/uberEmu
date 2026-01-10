@@ -202,7 +202,7 @@ public class GameClient {
      * @param message Notification message
      */
     public void sendNotif(String message) {
-        var composer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKMessageEventComposer(message);
+        var composer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKComposer(message);
         sendMessage(composer.compose());
     }
     

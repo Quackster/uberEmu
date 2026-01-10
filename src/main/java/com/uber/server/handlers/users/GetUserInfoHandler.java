@@ -21,7 +21,7 @@ public class GetUserInfoHandler implements PacketHandler {
             return;
         }
         
-        var composer = new com.uber.server.messages.outgoing.users.UserObjectEventComposer(
+        var composer = new com.uber.server.messages.outgoing.users.UserObjectComposer(
             habbo.getId(), habbo.getUsername(), habbo.getLook(), habbo.getGender(),
             habbo.getMotto(), habbo.getRealName(), habbo.getRespect(),
             habbo.getDailyRespectPoints(), habbo.getDailyPetRespectPoints());

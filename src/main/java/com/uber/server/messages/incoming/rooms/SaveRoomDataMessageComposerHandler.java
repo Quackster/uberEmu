@@ -91,17 +91,17 @@ public class SaveRoomDataMessageComposerHandler implements IncomingMessageHandle
         if (room.updateRoomSettings(name, description, state, password, maxUsers, categoryId, tags,
                                    allowPets, allowPetsEating, allowWalkthrough)) {
             // Send confirmation messages
-            var savedComposer = new com.uber.server.messages.outgoing.rooms.RoomSettingsSavedMessageEventComposer(room.getRoomId());
+            var savedComposer = new com.uber.server.messages.outgoing.rooms.RoomSettingsSavedComposer(room.getRoomId());
             client.sendMessage(savedComposer.compose());
             
-            var updatedComposer = new com.uber.server.messages.outgoing.rooms.RoomSettingsUpdatedMessageEventComposer(room.getRoomId());
+            var updatedComposer = new com.uber.server.messages.outgoing.rooms.RoomInfoUpdatedComposer(room.getRoomId());
             client.sendMessage(updatedComposer.compose());
             
             // Send updated room data
             ServerMessage response454 = new ServerMessage(454);
             response454.appendBoolean(false);
             room.getData().serialize(response454, false);
-            var roomDataComposer = new com.uber.server.messages.outgoing.rooms.RoomDataMessageEventComposer(response454);
+            var roomDataComposer = new com.uber.server.messages.outgoing.rooms.GetGuestRoomResultComposer(response454);
             client.sendMessage(roomDataComposer.compose());
         }
     }

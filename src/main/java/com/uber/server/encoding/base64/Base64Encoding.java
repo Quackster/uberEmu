@@ -3,7 +3,6 @@ package com.uber.server.encoding.base64;
 /**
  * Base64-like encoding utilities for Habbo protocol.
  * Encodes integers into Base64-like byte sequences.
- * Moved from com.uber.server.util.Base64Encoding
  */
 public final class Base64Encoding {
     public static final byte NEGATIVE = 64;

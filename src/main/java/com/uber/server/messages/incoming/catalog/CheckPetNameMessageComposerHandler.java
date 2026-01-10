@@ -30,7 +30,7 @@ public class CheckPetNameMessageComposerHandler implements IncomingMessageHandle
         String petName = message.popFixedString();
         boolean isValid = catalog.checkPetName(petName);
         
-        var composer = new com.uber.server.messages.outgoing.catalog.CheckPetNameResponseMessageEventComposer(isValid);
+        var composer = new com.uber.server.messages.outgoing.catalog.ApproveNameComposer(isValid);
         client.sendMessage(composer.compose());
     }
 }

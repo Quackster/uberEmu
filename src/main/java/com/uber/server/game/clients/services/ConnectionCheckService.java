@@ -50,7 +50,7 @@ public class ConnectionCheckService {
             return t;
         });
         
-        var pingComposer = new com.uber.server.messages.outgoing.global.PingMessageEventComposer();
+        var pingComposer = new com.uber.server.messages.outgoing.global.PingComposer();
         ServerMessage pingMessage = pingComposer.compose();
         
         connectionChecker.scheduleWithFixedDelay(() -> {

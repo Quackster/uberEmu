@@ -62,7 +62,7 @@ public class RateFlatMessageComposerHandler implements IncomingMessageHandler {
         // Mark room as rated
         habbo.addRatedRoom(room.getRoomId());
         
-        var composer = new com.uber.server.messages.outgoing.rooms.RoomRatingEventComposer(newScore);
+        var composer = new com.uber.server.messages.outgoing.rooms.RoomRatingComposer(newScore);
         client.sendMessage(composer.compose());
     }
 }

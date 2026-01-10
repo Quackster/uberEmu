@@ -38,7 +38,7 @@ public class SendSessionParametersMessageComposerHandler implements IncomingMess
         response.appendInt32(9);
         response.appendBoolean(false);
         
-        var composer = new com.uber.server.messages.outgoing.handshake.SessionParametersMessageEventComposer(response);
+        var composer = new com.uber.server.messages.outgoing.handshake.SessionParamsComposer(response);
         client.sendMessage(composer.compose());
     }
 }

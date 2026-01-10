@@ -5,7 +5,7 @@ import com.uber.server.messages.outgoing.OutgoingMessageComposer;
 
 /**
  * Composer for PurchaseErrorMessageEvent (ID 68).
- * Sends purchase error message (credits/pixels insufficient) to the client.
+ * Sent when a purchase fails due to insufficient credits or pixels.
  */
 public class PurchaseErrorMessageEventComposer extends OutgoingMessageComposer {
     private final boolean creditsError;
@@ -18,7 +18,7 @@ public class PurchaseErrorMessageEventComposer extends OutgoingMessageComposer {
     
     @Override
     public ServerMessage compose() {
-        ServerMessage msg = new ServerMessage(68); // _events[68] = PurchaseErrorMessageEvent
+        ServerMessage msg = new ServerMessage(68);
         msg.appendBoolean(creditsError);
         msg.appendBoolean(pixelError);
         return msg;

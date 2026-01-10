@@ -32,7 +32,7 @@ public class RequestFurniInventoryComposerHandler implements IncomingMessageHand
         }
         
         // TODO: Replace with FurniListEventComposer (ID 140)
-        var furniInventoryComposer = new com.uber.server.messages.outgoing.users.FurniInventoryMessageEventComposer(
+        var furniInventoryComposer = new com.uber.server.messages.outgoing.users.FurniListComposer(
             habbo.getInventoryComponent().serializeItemInventory());
         client.sendMessage(furniInventoryComposer.compose());
     }
