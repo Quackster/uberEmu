@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Handler for editing a room event (message ID 348).
- * Ported from Messages/Requests/Rooms.cs EditEvent()
  */
 public class EditEventHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(EditEventHandler.class);

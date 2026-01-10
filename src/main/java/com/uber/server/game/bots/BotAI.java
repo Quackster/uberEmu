@@ -6,7 +6,6 @@ import com.uber.server.game.rooms.RoomUser;
 
 /**
  * Abstract base class for bot AI implementations.
- * Ported from HabboHotel/RoomBots/BotAI.cs
  */
 public abstract class BotAI {
     protected int baseId;

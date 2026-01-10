@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting topics in a category (message ID 420).
- * Ported from Messages/Requests/Help.cs GetTopicsInCategory()
  */
 public class GetTopicsInCategoryHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetTopicsInCategoryHandler.class);

@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Manages plugins.
- * Ported from Plugins/PluginHandler.cs
- * Note: Java implementation uses URLClassLoader instead of C# Assembly loading
+ * Manages plugins using URLClassLoader for dynamic loading.
  */
 public class PluginHandler implements IUberPluginHost {
     private static final Logger logger = LoggerFactory.getLogger(PluginHandler.class);
@@ -29,7 +27,6 @@ public class PluginHandler implements IUberPluginHost {
     
     /**
      * Loads plugins from the plugins directory.
-     * Ported from PluginHandler.cs LoadPlugins()
      */
     public void loadPlugins() {
         loadPlugins("plugins");
@@ -63,7 +60,6 @@ public class PluginHandler implements IUberPluginHost {
     
     /**
      * Unloads all plugins.
-     * Ported from PluginHandler.cs UnloadPlugins()
      */
     public void unloadPlugins() {
         for (AvailablePlugin plugin : availablePlugins) {
@@ -80,7 +76,6 @@ public class PluginHandler implements IUberPluginHost {
     
     /**
      * Unloads a specific plugin.
-     * Ported from PluginHandler.cs UnloadPlugin()
      * @param name Plugin name
      * @return True if plugin was found and unloaded
      */
@@ -107,7 +102,6 @@ public class PluginHandler implements IUberPluginHost {
     
     /**
      * Initializes a plugin from a JAR file.
-     * Ported from PluginHandler.cs InitPlugin()
      * @param fileName Path to JAR file
      */
     private void initPlugin(String fileName) {

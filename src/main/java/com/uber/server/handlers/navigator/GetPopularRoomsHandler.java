@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting popular rooms (message ID 430).
- * Ported from Messages/Requests/Navigator.cs GetPopularRooms()
  */
 public class GetPopularRoomsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetPopularRoomsHandler.class);

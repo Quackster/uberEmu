@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages moderation bans.
- * Ported from HabboHotel/Support/ModerationBanManager.cs
  */
 public class ModerationBanManager {
     private static final Logger logger = LoggerFactory.getLogger(ModerationBanManager.class);

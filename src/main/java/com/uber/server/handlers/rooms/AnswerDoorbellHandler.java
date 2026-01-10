@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for answering doorbell (message ID 98).
- * Ported from Messages/Requests/Rooms.cs AnswerDoorbell()
  */
 public class AnswerDoorbellHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AnswerDoorbellHandler.class);

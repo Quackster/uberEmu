@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Handler for purchasing from marketplace (message ID 3014).
- * Ported from Messages/Requests/Catalog.cs MarketplacePurchase()
  */
 public class MarketplacePurchaseHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplacePurchaseHandler.class);

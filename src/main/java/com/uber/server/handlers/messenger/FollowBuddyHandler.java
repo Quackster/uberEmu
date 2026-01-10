@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for following a buddy (message ID 262).
- * Ported from Messages/Requests/Messenger.cs FollowBuddy()
  */
 public class FollowBuddyHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(FollowBuddyHandler.class);
@@ -47,9 +46,8 @@ public class FollowBuddyHandler implements PacketHandler {
         
         // If not public room, prepare room entry
         if (room.getData() != null && !room.getData().isPublicRoom()) {
-            // Use EnterRoomHandler's prepareRoomForUser method
-            com.uber.server.handlers.rooms.EnterRoomHandler enterHandler = 
-                new com.uber.server.handlers.rooms.EnterRoomHandler(game, false);
+            // Use OpenConnectionMessageComposerHandler's prepareRoomForUser method
+            var enterHandler = new com.uber.server.messages.incoming.rooms.OpenConnectionMessageComposerHandler(game);
             enterHandler.prepareRoomForUser(client, habbo, buddyClient.getHabbo().getCurrentRoomId(), "");
         }
     }

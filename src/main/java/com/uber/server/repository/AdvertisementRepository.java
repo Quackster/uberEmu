@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for advertisement database operations.
- * Migrated from AdvertisementManager.cs
  */
 public class AdvertisementRepository {
     private static final Logger logger = LoggerFactory.getLogger(AdvertisementRepository.class);

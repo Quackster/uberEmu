@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for checking if user can create a room (message ID 387).
- * Ported from Messages/Requests/Rooms.cs CanCreateRoom()
  */
 public class CanCreateRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CanCreateRoomHandler.class);
@@ -24,9 +23,7 @@ public class CanCreateRoomHandler implements PacketHandler {
     public void handle(GameClient client, ClientMessage message) {
         // TODO: Implement room limit check when room limit system is added
         // For now, always allow (return false = no error, 99999 = unlimited)
-        ServerMessage response = new ServerMessage(512);
-        response.appendBoolean(false); // true = show error with number below
-        response.appendInt32(99999); // Room limit (99999 = unlimited)
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.navigator.CanCreateRoomEventEventComposer(false, 99999);
+        client.sendMessage(composer.compose());
     }
 }

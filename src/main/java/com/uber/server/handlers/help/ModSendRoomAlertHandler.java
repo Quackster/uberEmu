@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for sending room alert (message ID 200).
- * Ported from Messages/Requests/Help.cs ModSendRoomAlert()
  */
 public class ModSendRoomAlertHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModSendRoomAlertHandler.class);

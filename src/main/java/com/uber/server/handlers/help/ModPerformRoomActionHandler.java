@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for performing room action (message ID 460).
- * Ported from Messages/Requests/Help.cs ModPerformRoomAction()
  */
 public class ModPerformRoomActionHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModPerformRoomActionHandler.class);

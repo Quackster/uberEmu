@@ -16,7 +16,6 @@ import java.util.Map;
 
 /**
  * Manages the marketplace system.
- * Ported from HabboHotel/Catalogs/Marketplace.cs
  */
 public class Marketplace {
     private static final Logger logger = LoggerFactory.getLogger(Marketplace.class);
@@ -33,7 +32,6 @@ public class Marketplace {
     
     /**
      * Checks if an item can be sold on the marketplace.
-     * Ported from HabboHotel/Catalogs/Marketplace.cs CanSellItem()
      * @param item UserItem to check
      * @return True if item can be sold
      */
@@ -47,7 +45,6 @@ public class Marketplace {
     
     /**
      * Calculates commission price for a selling price.
-     * Ported from HabboHotel/Catalogs/Marketplace.cs CalculateComissionPrice()
      * @param sellingPrice Selling price
      * @return Commission amount
      */
@@ -57,7 +54,6 @@ public class Marketplace {
     
     /**
      * Gets the minimum timestamp for valid offers (current time - 2 days).
-     * Ported from HabboHotel/Catalogs/Marketplace.cs FormatTimestamp()
      * @return Minimum timestamp
      */
     public long formatTimestamp() {
@@ -66,7 +62,6 @@ public class Marketplace {
     
     /**
      * Sells an item on the marketplace.
-     * Ported from HabboHotel/Catalogs/Marketplace.cs SellItem()
      * @param client GameClient selling the item
      * @param itemId Item ID
      * @param sellingPrice Selling price
@@ -110,7 +105,6 @@ public class Marketplace {
     
     /**
      * Serializes marketplace offers with filters.
-     * Ported from HabboHotel/Catalogs/Marketplace.cs SerializeOffers()
      * @param minCost Minimum cost filter (-1 to ignore)
      * @param maxCost Maximum cost filter (-1 to ignore)
      * @param searchQuery Search query (empty to ignore)
@@ -143,7 +137,6 @@ public class Marketplace {
     
     /**
      * Serializes user's own marketplace offers.
-     * Ported from HabboHotel/Catalogs/Marketplace.cs SerializeOwnOffers()
      * @param habboId User ID
      * @return ServerMessage with user's offers (ID 616)
      */

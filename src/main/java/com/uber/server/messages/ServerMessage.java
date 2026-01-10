@@ -1,7 +1,8 @@
 package com.uber.server.messages;
 
-import com.uber.server.util.Base64Encoding;
-import com.uber.server.util.WireEncoding;
+import com.uber.server.encoding.base64.Base64Encoding;
+import com.uber.server.encoding.server.ServerMessageEncoder;
+import com.uber.server.encoding.wire.WireEncoding;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class ServerMessage {
     private long messageId;
     private final List<Byte> body;
     private static final Charset DEFAULT_ENCODING = Charset.defaultCharset();
+    private ServerMessageEncoder encoder;
     
     public ServerMessage() {
         this.body = new ArrayList<>();
@@ -33,6 +35,18 @@ public class ServerMessage {
     public String getHeader() {
         byte[] headerBytes = Base64Encoding.encodeUInt32(messageId, 2);
         return new String(headerBytes, DEFAULT_ENCODING);
+    }
+    
+    /**
+     * Gets a body byte at the specified index.
+     * @param index Index in body
+     * @return Byte value
+     */
+    public byte getBodyByte(int index) {
+        if (index >= 0 && index < body.size()) {
+            return body.get(index);
+        }
+        return 0;
     }
     
     public int getLength() {
@@ -107,22 +121,14 @@ public class ServerMessage {
     
     /**
      * Converts the message to byte array format: [2 bytes: Base64 ID][body][1 byte: terminator]
+     * Delegates to ServerMessageEncoder.
      * @return Byte array ready to send over TCP
      */
     public byte[] getBytes() {
-        byte[] header = Base64Encoding.encodeUInt32(messageId, 2);
-        byte[] data = new byte[getLength() + 3];
-        
-        data[0] = header[0];
-        data[1] = header[1];
-        
-        for (int i = 0; i < getLength(); i++) {
-            data[i + 2] = body.get(i);
+        if (encoder == null) {
+            encoder = new ServerMessageEncoder(this);
         }
-        
-        data[data.length - 1] = 1; // Terminator
-        
-        return data;
+        return encoder.encode();
     }
     
     public String toBodyString() {

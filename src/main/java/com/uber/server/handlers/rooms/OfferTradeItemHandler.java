@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for offering an item in trade (message ID 72).
- * Ported from Messages/Requests/Rooms.cs OfferTradeItem()
  */
 public class OfferTradeItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(OfferTradeItemHandler.class);

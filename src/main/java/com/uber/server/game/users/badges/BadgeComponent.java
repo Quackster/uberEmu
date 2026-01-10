@@ -12,7 +12,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages user badges.
- * Ported from HabboHotel/Users/Badges/BadgeComponent.cs
  */
 public class BadgeComponent {
     private static final Logger logger = LoggerFactory.getLogger(BadgeComponent.class);
@@ -182,7 +181,6 @@ public class BadgeComponent {
     
     /**
      * Serializes badges to a ServerMessage.
-     * Ported from BadgeComponent.cs Serialize()
      * @return ServerMessage with badge data (ID 229)
      */
     public ServerMessage serialize() {

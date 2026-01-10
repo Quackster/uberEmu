@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages achievements.
- * Ported from HabboHotel/Achievements/AchievementManager.cs
  */
 public class AchievementManager {
     private static final Logger logger = LoggerFactory.getLogger(AchievementManager.class);
@@ -85,7 +84,9 @@ public class AchievementManager {
      */
     public ServerMessage serializeAchievementList(GameClient session) {
         if (session == null || session.getHabbo() == null) {
-            return new ServerMessage(436); // Empty message
+            ServerMessage emptyMsg = new ServerMessage(436); // Empty message
+            var composer = new com.uber.server.messages.outgoing.users.AchievementsListMessageEventComposer(emptyMsg);
+            return composer.compose();
         }
         
         Habbo habbo = session.getHabbo();
@@ -121,7 +122,9 @@ public class AchievementManager {
                                                           achievement.isDynamicBadgeLevel()));
         }
         
-        return message;
+        // Wrap in composer
+        var composer = new com.uber.server.messages.outgoing.users.AchievementsListMessageEventComposer(message);
+        return composer.compose();
     }
     
     /**
@@ -192,7 +195,8 @@ public class AchievementManager {
             response.appendStringWithBreak("");
         }
         
-        session.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.users.AchievementProgressMessageEventComposer(response);
+        session.sendMessage(composer.compose());
         
         // Give the user the pixels
         habbo.setActivityPoints(habbo.getActivityPoints() + value);

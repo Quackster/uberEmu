@@ -18,7 +18,6 @@ import java.util.List;
 
 /**
  * Handler for GetRoomData3 (message ID 126).
- * Ported from Messages/Requests/Rooms.cs GetRoomData3()
  * This completes the room entry sequence and adds the user to the room.
  */
 public class GetRoomData3Handler implements PacketHandler {
@@ -54,42 +53,39 @@ public class GetRoomData3Handler implements PacketHandler {
             return;
         }
         
-        // Send static furni map (ID 30)
-        ServerMessage staticFurniMsg = new ServerMessage(30);
+        // Send static furni map
         String staticFurniMap = model.getPublicItems();
-        if (staticFurniMap != null && !staticFurniMap.isEmpty()) {
-            staticFurniMsg.appendStringWithBreak(staticFurniMap);
-        } else {
-            staticFurniMsg.appendInt32(0);
-        }
-        client.sendMessage(staticFurniMsg);
+        var staticFurniComposer = new com.uber.server.messages.outgoing.rooms.RoomStaticFurniMessageEventComposer(staticFurniMap);
+        client.sendMessage(staticFurniComposer.compose());
         
         // Send floor and wall items if private room
         if (!room.isPublicRoom()) {
             List<RoomItem> floorItems = room.getFloorItems();
             List<RoomItem> wallItems = room.getWallItems();
             
-            // Send floor items (ID 32)
+            // Send floor items
             ServerMessage floorItemsMsg = new ServerMessage(32);
             floorItemsMsg.appendInt32(floorItems.size());
             for (RoomItem item : floorItems) {
                 item.serialize(floorItemsMsg);
             }
-            client.sendMessage(floorItemsMsg);
+            var floorItemsComposer = new com.uber.server.messages.outgoing.rooms.RoomFloorItemsMessageEventComposer(floorItemsMsg);
+            client.sendMessage(floorItemsComposer.compose());
             
-            // Send wall items (ID 45)
+            // Send wall items
             ServerMessage wallItemsMsg = new ServerMessage(45);
             wallItemsMsg.appendInt32(wallItems.size());
             for (RoomItem item : wallItems) {
                 item.serialize(wallItemsMsg);
             }
-            client.sendMessage(wallItemsMsg);
+            var wallItemsComposer = new com.uber.server.messages.outgoing.rooms.RoomWallItemsMessageEventComposer(wallItemsMsg);
+            client.sendMessage(wallItemsComposer.compose());
         }
         
         // Add user to room
         room.addUserToRoom(client, habbo.isSpectatorMode());
         
-        // Send users in room (ID 28)
+        // Send users in room
         List<RoomUser> usersToDisplay = new ArrayList<>();
         for (RoomUser user : room.getUsers().values()) {
             if (!user.isSpectator()) {
@@ -102,22 +98,18 @@ public class GetRoomData3Handler implements PacketHandler {
         for (RoomUser user : usersToDisplay) {
             user.serialize(usersMsg);
         }
-        client.sendMessage(usersMsg);
+        var usersComposer = new com.uber.server.messages.outgoing.rooms.RoomUsersMessageEventComposer(usersMsg);
+        client.sendMessage(usersComposer.compose());
         
-        // Send room info (ID 471)
-        ServerMessage roomInfoMsg = new ServerMessage(471);
-        if (room.isPublicRoom()) {
-            roomInfoMsg.appendBoolean(false);
-            roomInfoMsg.appendStringWithBreak(room.getData().getModelName());
-            roomInfoMsg.appendBoolean(false);
-        } else {
-            roomInfoMsg.appendBoolean(true);
-            roomInfoMsg.appendUInt(room.getRoomId());
-            roomInfoMsg.appendBoolean(room.checkRights(client, true));
-        }
-        client.sendMessage(roomInfoMsg);
+        // Send room info
+        var roomInfoComposer = new com.uber.server.messages.outgoing.rooms.RoomInfoMessageEventComposer(
+            !room.isPublicRoom(),
+            room.getData().getModelName(),
+            room.getRoomId(),
+            room.checkRights(client, true));
+        client.sendMessage(roomInfoComposer.compose());
         
-        // Send room data (ID 454) for private rooms
+        // Send room data for private rooms
         if (!room.isPublicRoom()) {
             ServerMessage roomDataMsg = new ServerMessage(454);
             roomDataMsg.appendInt32(1);
@@ -127,7 +119,7 @@ public class GetRoomData3Handler implements PacketHandler {
             roomDataMsg.appendStringWithBreak(room.getData().getOwner());
             roomDataMsg.appendInt32(room.getData().getState());
             roomDataMsg.appendInt32(0); // Room type specific value (0 = normal room)
-            roomDataMsg.appendInt32(room.getData().getUsersMax());
+            roomDataMsg.appendInt32(25); // Users max (hardcoded limit)
             roomDataMsg.appendStringWithBreak(room.getData().getDescription());
             roomDataMsg.appendInt32(0); // Score display (0 = disabled)
             roomDataMsg.appendInt32(1); // Category display (1 = enabled)
@@ -138,15 +130,68 @@ public class GetRoomData3Handler implements PacketHandler {
             for (String tag : room.getData().getTags()) {
                 roomDataMsg.appendStringWithBreak(tag);
             }
-            client.sendMessage(roomDataMsg);
+            room.getData().getIcon().serialize(roomDataMsg);
+            roomDataMsg.appendBoolean(false);
+            var roomDataComposer = new com.uber.server.messages.outgoing.rooms.RoomDataMessageEventComposer(roomDataMsg);
+            // client.sendMessage(roomDataComposer.compose());
             
-            // Send room event if exists
+            // Send room event (ID 370) - always send for private rooms
             if (room.hasOngoingEvent()) {
                 client.sendMessage(room.getEvent().serialize(client));
             } else {
-                ServerMessage noEventMsg = new ServerMessage(370);
-                noEventMsg.appendStringWithBreak("-1");
-                client.sendMessage(noEventMsg);
+                var noEventComposer = new com.uber.server.messages.outgoing.rooms.RoomEventComposer();
+                ServerMessage noEventMsg = noEventComposer.compose();
+                // client.sendMessage(noEventMsg);
+            }
+        }
+        
+        // Send status updates (for all rooms)
+        ServerMessage statusUpdates = room.serializeStatusUpdates(true);
+        if (statusUpdates != null) {
+          //  client.sendMessage(statusUpdates);
+        }
+        
+        // Send individual user status updates (dancing, sleeping, carrying items, effects) - for all rooms
+        for (RoomUser user : room.getUsers().values()) {
+            if (user.isSpectator()) {
+                continue;
+            }
+            
+            // Send dancing status using DanceMessageEventComposer (ID 480)
+            if (user.isDancing()) {
+                var danceComposer = new com.uber.server.messages.outgoing.rooms.DanceMessageEventComposer(
+                    user.getVirtualId(), user.getDanceId());
+                client.sendMessage(danceComposer.compose());
+            }
+            
+            // Send sleeping status
+            if (user.isAsleep()) {
+                var sleepComposer = new com.uber.server.messages.outgoing.rooms.UserSleepingMessageEventComposer(
+                    user.getVirtualId(), true);
+                client.sendMessage(sleepComposer.compose());
+            }
+            
+            // Send carrying item status
+            if (user.getCarryItemId() > 0 && user.getCarryTimer() > 0) {
+                var carryComposer = new com.uber.server.messages.outgoing.rooms.UserCarryItemMessageEventComposer(
+                    user.getVirtualId(), user.getCarryTimer());
+                client.sendMessage(carryComposer.compose());
+            }
+            
+            // Send avatar effect status - only for non-bot users
+            if (!user.isBot()) {
+                GameClient userClient = user.getClient();
+                if (userClient != null && userClient.getHabbo() != null) {
+                    com.uber.server.game.Habbo userHabbo = userClient.getHabbo();
+                    if (userHabbo.getAvatarEffectsInventoryComponent() != null) {
+                        int currentEffect = userHabbo.getAvatarEffectsInventoryComponent().getCurrentEffect();
+                        if (currentEffect >= 1) {
+                            var effectComposer = new com.uber.server.messages.outgoing.rooms.UserAvatarEffectMessageEventComposer(
+                                user.getVirtualId(), currentEffect);
+                            client.sendMessage(effectComposer.compose());
+                        }
+                    }
+                }
             }
         }
         

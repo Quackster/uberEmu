@@ -10,7 +10,6 @@ import com.uber.server.messages.ServerMessage;
 
 /**
  * Interactor for teleport items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorTeleport
  */
 public class InteractorTeleport extends FurniInteractor {
     @Override

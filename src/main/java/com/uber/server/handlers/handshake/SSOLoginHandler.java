@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Handler for SSO login (message ID 415).
- * Ported from Messages/Requests/Handshake.cs SSOLogin()
  */
 public class SSOLoginHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SSOLoginHandler.class);
@@ -96,12 +95,19 @@ public class SSOLoginHandler implements PacketHandler {
             // Send rights
             List<String> rights = game.getRoleManager() != null ? 
                 game.getRoleManager().getRightsForHabbo(habbo) : new ArrayList<>();
-            ServerMessage rightsResponse = new ServerMessage(2);
-            rightsResponse.appendInt32(rights.size());
-            for (String right : rights) {
-                rightsResponse.appendStringWithBreak(right);
+            var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsMessageEventComposer(rights);
+            client.sendMessage(rightsComposer.compose());
+            
+            // Send moderation tool (if user has fuse_mod)
+            if (habbo.hasFuse("fuse_mod") && game.getModerationTool() != null) {
+                client.sendMessage(game.getModerationTool().serializeTool());
+                game.getModerationTool().sendOpenTickets(client);
             }
-            client.sendMessage(rightsResponse);
+            
+            // Send avatar effects inventory
+            if (habbo.getAvatarEffectsInventoryComponent() != null) {
+                client.sendMessage(habbo.getAvatarEffectsInventoryComponent().serialize());
+            }
             
             // Send other login responses
             ServerMessage response290 = new ServerMessage(290);
@@ -115,6 +121,28 @@ public class SSOLoginHandler implements PacketHandler {
             ServerMessage response517 = new ServerMessage(517);
             response517.appendBoolean(true);
             client.sendMessage(response517);
+            
+            // Send home room (packet 455)
+            ServerMessage response455 = new ServerMessage(455);
+            response455.appendUInt(habbo.getHomeRoom());
+            client.sendMessage(response455);
+            
+            // Send favorite rooms (packet 458)
+            ServerMessage response458 = new ServerMessage(458);
+            response458.appendInt32(30);
+            List<Long> favoriteRooms = habbo.getFavoriteRooms();
+            response458.appendInt32(favoriteRooms.size());
+            for (Long roomId : favoriteRooms) {
+                response458.appendUInt(roomId);
+            }
+            client.sendMessage(response458);
+            
+            // Send welcome notification (packet 161)
+            client.sendNotif("Thank you for helping us test the new Uber. Please submit feedback to the UserVoice forum:",
+                             "http://uber.uservoice.com/forums/45577-general");
+            
+            // Send activity points balance (packet 438)
+            habbo.updateActivityPointsBalance(false);
             
             logger.info("User {} logged in successfully", habbo.getUsername());
             

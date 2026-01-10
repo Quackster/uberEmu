@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Factory for creating TCP connections with unique IDs.
- * Ported from C# TcpConnectionFactory.cs
  */
 public class TcpConnectionFactory {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnectionFactory.class);

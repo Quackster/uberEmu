@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for updating badge slots (message ID 158).
- * Ported from Messages/Requests/Users.cs UpdateBadges()
  */
 public class UpdateBadgesHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(UpdateBadgesHandler.class);

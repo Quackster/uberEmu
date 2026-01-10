@@ -7,7 +7,6 @@ import com.uber.server.game.rooms.RoomUser;
 
 /**
  * Interactor for dice items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorDice
  */
 public class InteractorDice extends FurniInteractor {
     @Override
@@ -36,7 +35,7 @@ public class InteractorDice extends FurniInteractor {
             if (!"-1".equals(item.getExtraData())) {
                 if (request == -1) {
                     item.setExtraData("0");
-                    item.updateState();
+                    item.updateState(false, true);
                 } else {
                     item.setExtraData("-1");
                     item.updateState(false, true);

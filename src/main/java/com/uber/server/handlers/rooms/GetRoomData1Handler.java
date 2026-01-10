@@ -5,11 +5,9 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 
 /**
  * Handler for GetRoomData1 (message ID 215).
- * Ported from Messages/Requests/Rooms.cs GetRoomData1()
  */
 public class GetRoomData1Handler implements PacketHandler {
     private final Game game;
@@ -25,9 +23,8 @@ public class GetRoomData1Handler implements PacketHandler {
             return;
         }
         
-        // Send empty response (ID 297)
-        ServerMessage response = new ServerMessage(297);
-        response.appendInt32(0);
-        client.sendMessage(response);
+        // Send empty response
+        var composer = new com.uber.server.messages.outgoing.rooms.GetRoomData1ResponseMessageEventComposer(0);
+        client.sendMessage(composer.compose());
     }
 }

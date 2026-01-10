@@ -11,7 +11,6 @@ import java.util.Random;
 
 /**
  * Represents a bot in a room.
- * Ported from HabboHotel/RoomBots/RoomBot.cs
  */
 public class RoomBot {
     private static final Logger logger = LoggerFactory.getLogger(RoomBot.class);
@@ -141,17 +140,11 @@ public class RoomBot {
     public BotAI generateBotAI(int virtualId) {
         String lowerAiType = aiType != null ? aiType.toLowerCase() : "generic";
         
-        switch (lowerAiType) {
-            case "guide":
-                return new GuideBot();
-                
-            case "pet":
-                return new PetBot(virtualId);
-                
-            case "generic":
-            default:
-                return new GenericBot(virtualId);
-        }
+        return switch (lowerAiType) {
+            case "guide" -> new GuideBot();
+            case "pet" -> new PetBot(virtualId);
+            default -> new GenericBot(virtualId);
+        };
     }
     
     public boolean isPet() {

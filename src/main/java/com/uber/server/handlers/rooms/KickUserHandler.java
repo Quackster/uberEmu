@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for kicking a user from a room (message ID 95).
- * Ported from Messages/Requests/Rooms.cs KickUser()
  */
 public class KickUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(KickUserHandler.class);

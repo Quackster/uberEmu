@@ -15,7 +15,7 @@ public class PongHandler implements PacketHandler {
     @Override
     public void handle(GameClient client, ClientMessage message) {
         // Set PongOK flag to indicate client responded
-        // This will be implemented in GameClient class
-        logger.debug("Received pong from client {}", client);
+        client.setPongOK(true);
+        logger.debug("Received pong from client {}", client.getClientId());
     }
 }

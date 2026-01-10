@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * Repository for user info database operations.
- * Migrated from ModerationTool.cs and related classes.
  */
 public class UserInfoRepository {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoRepository.class);

@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Handler for starting a room event (message ID 346).
- * Ported from Messages/Requests/Rooms.cs StartEvent()
  */
 public class StartEventHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(StartEventHandler.class);

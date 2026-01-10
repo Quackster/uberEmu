@@ -5,7 +5,6 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 import com.uber.server.util.AntiMutant;
 import com.uber.server.util.StringUtil;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for updating user look (message ID 44).
- * Ported from Messages/Requests/Users.cs ChangeLook()
  */
 public class UpdateLookHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(UpdateLookHandler.class);
@@ -65,12 +63,9 @@ public class UpdateLookHandler implements PacketHandler {
         }
         
         // Send response
-        ServerMessage response = new ServerMessage(266);
-        response.appendInt32(-1);
-        response.appendStringWithBreak(habbo.getLook());
-        response.appendStringWithBreak(habbo.getGender());
-        response.appendStringWithBreak(habbo.getMotto());
-        client.sendMessage(response);
+        var figureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+            -1, habbo.getLook(), habbo.getGender(), habbo.getMotto());
+        client.sendMessage(figureComposer.compose());
         
         // Update room if user is in a room
         if (habbo.isInRoom() && game.getRoomManager() != null) {
@@ -78,12 +73,9 @@ public class UpdateLookHandler implements PacketHandler {
             if (room != null) {
                 com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
                 if (roomUser != null) {
-                    ServerMessage roomUpdate = new ServerMessage(266);
-                    roomUpdate.appendInt32(roomUser.getVirtualId());
-                    roomUpdate.appendStringWithBreak(habbo.getLook());
-                    roomUpdate.appendStringWithBreak(habbo.getGender());
-                    roomUpdate.appendStringWithBreak(habbo.getMotto());
-                    room.sendMessage(roomUpdate);
+                    var roomFigureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+                        roomUser.getVirtualId(), habbo.getLook(), habbo.getGender(), habbo.getMotto());
+                    room.sendMessage(roomFigureComposer.compose());
                 }
             }
         }

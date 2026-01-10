@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room advertisement (message ID 182).
- * Ported from Messages/Requests/Rooms.cs GetAdvertisement()
- * 
- * Note: AdvertisementManager not yet ported - placeholder implementation
  */
 public class GetAdvertisementHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetAdvertisementHandler.class);
@@ -28,19 +25,17 @@ public class GetAdvertisementHandler implements PacketHandler {
         com.uber.server.game.advertisements.RoomAdvertisement ad = 
             game.getAdvertisementManager().getRandomRoomAdvertisement();
         
-        ServerMessage response = new ServerMessage(258);
+        String adImage = "";
+        String adLink = "";
         
-        if (ad == null) {
-            response.appendStringWithBreak("");
-            response.appendStringWithBreak("");
-        } else {
-            response.appendStringWithBreak(ad.getAdImage());
-            response.appendStringWithBreak(ad.getAdLink());
-            
+        if (ad != null) {
+            adImage = ad.getAdImage();
+            adLink = ad.getAdLink();
             // Increment view count
             ad.onView();
         }
         
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.rooms.RoomAdvertisementEventComposer(adImage, adLink);
+        client.sendMessage(composer.compose());
     }
 }

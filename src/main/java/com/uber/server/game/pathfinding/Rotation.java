@@ -2,7 +2,6 @@ package com.uber.server.game.pathfinding;
 
 /**
  * Calculates rotation values for pathfinding.
- * Ported from HabboHotel/Pathfinding/Rotation.cs
  */
 public class Rotation {
     /**

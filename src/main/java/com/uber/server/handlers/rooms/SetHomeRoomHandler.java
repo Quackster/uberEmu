@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for setting home room (message ID 384).
- * Ported from Messages/Requests/Rooms.cs SetHomeRoom()
  */
 public class SetHomeRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SetHomeRoomHandler.class);

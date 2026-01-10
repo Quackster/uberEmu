@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for entering an inquired room (message ID 233).
- * Ported from Messages/Requests/Navigator.cs EnterInquiredRoom()
- * 
- * Note: This method is empty in the original C# code - implementation may be deferred
  */
 public class EnterInquiredRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnterInquiredRoomHandler.class);
@@ -23,7 +20,7 @@ public class EnterInquiredRoomHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        // Original C# implementation is empty - placeholder for future implementation
+        // TODO: Implement room inquiry entry functionality
         logger.debug("EnterInquiredRoom called by user {}", 
                     client.getHabbo() != null ? client.getHabbo().getId() : 0);
     }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user chat log (message ID 455).
- * Ported from Messages/Requests/Help.cs ModGetUserChatlog()
  */
 public class ModGetUserChatlogHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModGetUserChatlogHandler.class);

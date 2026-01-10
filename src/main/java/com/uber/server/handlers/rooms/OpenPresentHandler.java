@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Handler for opening a present (message ID 78).
- * Ported from Messages/Requests/Rooms.cs OpenPresent()
  */
 public class OpenPresentHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(OpenPresentHandler.class);

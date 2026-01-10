@@ -13,7 +13,6 @@ import java.sql.SQLException;
 
 /**
  * Game environment that initializes and manages all server components.
- * Replaces UberEnvironment from C# version.
  */
 public class GameEnvironment {
     private static final Logger logger = LoggerFactory.getLogger(GameEnvironment.class);
@@ -173,6 +172,13 @@ public class GameEnvironment {
             logger.info("Destroying connection manager...");
             connectionManager.getListener().stop();
             connectionManager.destroyManager();
+        }
+        
+        // Shutdown shared thread pool
+        try {
+            com.uber.server.game.threading.GameThreadPool.getInstance().shutdown();
+        } catch (Exception e) {
+            logger.warn("Error shutting down GameThreadPool: {}", e.getMessage());
         }
         
         if (databasePool != null) {

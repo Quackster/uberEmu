@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Handler for getting pet info (message ID 3001).
- * Ported from Messages/Requests/Rooms.cs GetPetInfo()
  */
 public class GetPetInfoHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetPetInfoHandler.class);

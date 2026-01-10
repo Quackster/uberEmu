@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for completing a trade (message ID 402).
- * Ported from Messages/Requests/Rooms.cs CompleteTrade()
  */
 public class CompleteTradeHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CompleteTradeHandler.class);

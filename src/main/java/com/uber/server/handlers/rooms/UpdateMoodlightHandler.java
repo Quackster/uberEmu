@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for updating moodlight settings (message ID 342).
- * Ported from Messages/Requests/Rooms.cs UpdateMoodlight()
  */
 public class UpdateMoodlightHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(UpdateMoodlightHandler.class);

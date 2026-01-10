@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Handler for taking room rights (message ID 97).
- * Ported from Messages/Requests/Rooms.cs TakeRights()
  */
 public class TakeRightsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(TakeRightsHandler.class);

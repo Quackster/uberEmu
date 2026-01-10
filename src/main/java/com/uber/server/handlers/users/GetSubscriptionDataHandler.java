@@ -5,15 +5,14 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 import com.uber.server.game.users.subscriptions.Subscription;
+import com.uber.server.messages.ServerMessage;
 import com.uber.server.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting subscription data (message ID 26).
- * Ported from Messages/Requests/Users.cs GetSubscriptionData()
  */
 public class GetSubscriptionDataHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetSubscriptionDataHandler.class);
@@ -70,6 +69,7 @@ public class GetSubscriptionDataHandler implements PacketHandler {
             response.appendInt32(0);
         }
         
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.users.SubscriptionDataMessageEventComposer(response);
+        client.sendMessage(composer.compose());
     }
 }

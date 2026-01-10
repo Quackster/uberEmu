@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for viewing a help topic (message ID 418).
- * Ported from Messages/Requests/Help.cs ViewHelpTopic()
  */
 public class ViewHelpTopicHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ViewHelpTopicHandler.class);

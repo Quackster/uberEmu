@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting help categories (message ID 417).
- * Ported from Messages/Requests/Help.cs GetHelpCategories()
  */
 public class GetHelpCategoriesHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetHelpCategoriesHandler.class);

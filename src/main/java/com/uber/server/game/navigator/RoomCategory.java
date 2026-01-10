@@ -2,7 +2,6 @@ package com.uber.server.game.navigator;
 
 /**
  * Represents a private room category in the navigator.
- * Ported from HabboHotel/Navigators/FlatCat.cs (renamed from FlatCat to RoomCategory)
  */
 public class RoomCategory {
     private final int id;

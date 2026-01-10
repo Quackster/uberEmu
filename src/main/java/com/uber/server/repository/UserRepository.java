@@ -27,7 +27,11 @@ public class UserRepository {
      * @return User data as Map, or null if not found
      */
     public Map<String, Object> authenticateUser(String authTicket) {
-        String sql = "SELECT * FROM users WHERE auth_ticket = ? LIMIT 1";
+        String sql = """
+            SELECT * FROM users
+            WHERE auth_ticket = ?
+            LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -73,7 +77,12 @@ public class UserRepository {
      * @return True if update was successful
      */
     public boolean updateLook(long userId, String look, String gender) {
-        String sql = "UPDATE users SET look = ?, gender = ? WHERE id = ? LIMIT 1";
+        String sql = """
+            UPDATE users
+            SET look = ?, gender = ?
+            WHERE id = ?
+            LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -251,15 +260,13 @@ public class UserRepository {
     }
     
     /**
-=======
->>>>>>> b3aa6ecb17e8cc84b686d06e487f18dcb3523d4a
      * Updates server status for all users (clears auth tickets and sets online status).
      * Used during server startup/shutdown cleanup.
      * @param onlineStatus Online status to set (1 = online, 0 = offline)
      * @return Number of rows updated
      */
     public int updateServerStatus(int onlineStatus) {
-        String sql = "UPDATE users SET auth_ticket = '', online = ?";
+        String sql = "UPDATE users SET online = ?";
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -269,6 +276,58 @@ public class UserRepository {
         } catch (SQLException e) {
             logger.error("Failed to update server status: {}", e.getMessage(), e);
             return 0;
+        }
+    }
+    
+    /**
+     * Logs a room visit entry.
+     * @param userId User ID
+     * @param roomId Room ID
+     * @param timestamp Entry timestamp (Unix timestamp)
+     * @param hour Hour (0-23)
+     * @param minute Minute (0-59)
+     * @return True if successful
+     */
+    public boolean logRoomVisit(long userId, long roomId, long timestamp, int hour, int minute) {
+        String sql = "INSERT INTO user_roomvisits (user_id, room_id, entry_timestamp, hour, minute, exit_timestamp) VALUES (?, ?, ?, ?, ?, 0)";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, userId);
+            stmt.setLong(2, roomId);
+            stmt.setLong(3, timestamp);
+            stmt.setInt(4, hour);
+            stmt.setInt(5, minute);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Failed to log room visit: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * Updates room visit exit timestamp for a specific user and room.
+     * @param userId User ID
+     * @param roomId Room ID
+     * @param timestamp Exit timestamp (Unix timestamp)
+     * @return True if successful
+     */
+    public boolean updateRoomVisitExit(long userId, long roomId, long timestamp) {
+        String sql = "UPDATE user_roomvisits SET exit_timestamp = ? WHERE user_id = ? AND room_id = ? AND exit_timestamp <= 0 ORDER BY entry_timestamp DESC LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, timestamp);
+            stmt.setLong(2, userId);
+            stmt.setLong(3, roomId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Failed to update room visit exit: {}", e.getMessage(), e);
+            return false;
         }
     }
     

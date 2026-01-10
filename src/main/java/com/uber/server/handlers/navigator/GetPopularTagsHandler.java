@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting popular tags (message ID 382).
- * Ported from Messages/Requests/Navigator.cs GetPopularTags()
  */
 public class GetPopularTagsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetPopularTagsHandler.class);

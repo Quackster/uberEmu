@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for applying an effect (message ID 372).
- * Ported from Messages/Requests/Rooms.cs ApplyEffect()
  */
 public class ApplyEffectHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ApplyEffectHandler.class);

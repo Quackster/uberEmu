@@ -2,13 +2,13 @@ package com.uber.server.game.catalog;
 
 import com.uber.server.game.items.Item;
 import com.uber.server.game.items.ItemManager;
+import com.uber.server.messages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a catalog item.
- * Ported from HabboHotel/Catalogs/CatalogItem.cs
  */
 public class CatalogItem {
     private final long id;
@@ -58,4 +58,48 @@ public class CatalogItem {
     public int getCreditsCost() { return creditsCost; }
     public int getPixelsCost() { return pixelsCost; }
     public int getAmount() { return amount; }
+    
+    /**
+     * Serializes this catalog item.
+     * @param message ServerMessage to append to
+     * @param itemManager ItemManager to get base item info
+     */
+    public void serialize(ServerMessage message, ItemManager itemManager) {
+        if (isDeal()) {
+            // Deals with multiple items are not fully supported yet
+            // Multi-item deals are not yet fully supported
+            // For now, we'll serialize as a regular item using the first item ID
+            Item baseItem = itemManager.getItem(itemIds.get(0));
+            if (baseItem == null) {
+                return;
+            }
+            
+            message.appendUInt(id);
+            message.appendStringWithBreak(name);
+            message.appendInt32(creditsCost);
+            message.appendInt32(pixelsCost);
+            message.appendInt32(1);
+            message.appendStringWithBreak(baseItem.getType());
+            message.appendInt32(baseItem.getSpriteId());
+            message.appendStringWithBreak("");
+            message.appendInt32(amount);
+            message.appendInt32(-1);
+        } else {
+            Item baseItem = getBaseItem(itemManager);
+            if (baseItem == null) {
+                return;
+            }
+            
+            message.appendUInt(id);
+            message.appendStringWithBreak(name);
+            message.appendInt32(creditsCost);
+            message.appendInt32(pixelsCost);
+            message.appendInt32(1);
+            message.appendStringWithBreak(baseItem.getType());
+            message.appendInt32(baseItem.getSpriteId());
+            message.appendStringWithBreak("");
+            message.appendInt32(amount);
+            message.appendInt32(-1);
+        }
+    }
 }

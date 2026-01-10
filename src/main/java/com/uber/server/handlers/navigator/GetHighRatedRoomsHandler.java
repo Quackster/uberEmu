@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting high rated rooms (message ID 431).
- * Ported from Messages/Requests/Navigator.cs GetHighRatedRooms()
  */
 public class GetHighRatedRoomsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetHighRatedRoomsHandler.class);

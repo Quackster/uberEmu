@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a support ticket.
- * Ported from HabboHotel/Support/SupportTicket.cs
  */
 public class SupportTicket {
     private static final Logger logger = LoggerFactory.getLogger(SupportTicket.class);

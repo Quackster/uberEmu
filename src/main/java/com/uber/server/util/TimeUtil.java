@@ -4,7 +4,6 @@ import java.time.Instant;
 
 /**
  * Time utility functions.
- * Ported from UberEnvironment.cs GetUnixTimestamp()
  */
 public class TimeUtil {
     /**

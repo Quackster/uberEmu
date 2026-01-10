@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the navigator system.
- * Ported from HabboHotel/Navigators/Navigator.cs
  */
 public class Navigator {
     private static final Logger logger = LoggerFactory.getLogger(Navigator.class);
@@ -113,7 +112,6 @@ public class Navigator {
     
     /**
      * Serializes room categories to a ServerMessage.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeFlatCategories() (renamed from Flat to Room)
      * @return ServerMessage with room categories (ID 221)
      */
     public com.uber.server.messages.ServerMessage serializeRoomCategories() {
@@ -136,7 +134,6 @@ public class Navigator {
     
     /**
      * Serializes public rooms to a ServerMessage.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializePublicRooms()
      * @return ServerMessage with public rooms (ID 450)
      */
     public com.uber.server.messages.ServerMessage serializePublicRooms() {
@@ -154,7 +151,6 @@ public class Navigator {
     
     /**
      * Serializes favorite rooms for a session.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeFavoriteRooms()
      * @param session GameClient session
      * @return ServerMessage with favorite rooms (ID 451)
      */
@@ -183,7 +179,6 @@ public class Navigator {
     
     /**
      * Serializes recent rooms for a session.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeRecentRooms()
      * @param session GameClient session
      * @return ServerMessage with recent rooms (ID 451)
      */
@@ -224,7 +219,6 @@ public class Navigator {
     
     /**
      * Serializes popular room tags.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializePopularRoomTags()
      * @return ServerMessage with popular tags (ID 452)
      */
     public com.uber.server.messages.ServerMessage serializePopularRoomTags() {
@@ -263,7 +257,6 @@ public class Navigator {
     
     /**
      * Serializes search results.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeSearchResults()
      * @param searchQuery Search query string
      * @return ServerMessage with search results (ID 451)
      */
@@ -301,7 +294,6 @@ public class Navigator {
     
     /**
      * Serializes room listing for a specific mode.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeRoomListing()
      * @param session GameClient session
      * @param mode Mode (-5=rooms with friends, -4=friends' rooms, -3=own rooms, -2=high rated, -1=popular, >=0=category)
      * @return ServerMessage with room listing (ID 451)
@@ -396,8 +388,6 @@ public class Navigator {
     
     /**
      * Serializes event listing for a category.
-     * Ported from HabboHotel/Navigators/Navigator.cs SerializeEventListing()
-     * TODO: Implement fully when RoomEvent is ported (Phase 10)
      * @param session GameClient session
      * @param categoryId Category ID (0 for all)
      * @return ServerMessage with event listing (ID 451)

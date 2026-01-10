@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for sending an instant message (message ID 33).
- * Ported from Messages/Requests/Messenger.cs SendInstantMessenger()
  */
 public class SendInstantMessengerHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SendInstantMessengerHandler.class);

@@ -1,0 +1,54 @@
+package com.uber.server.messages.incoming.rooms;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.incoming.IncomingMessageHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for BanUserMessageComposer (ID 320).
+ * Processes user ban requests from the client.
+ */
+public class BanUserMessageComposerHandler implements IncomingMessageHandler {
+    private static final Logger logger = LoggerFactory.getLogger(BanUserMessageComposerHandler.class);
+    private final Game game;
+    
+    public BanUserMessageComposerHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || !habbo.isInRoom()) {
+            return;
+        }
+        
+        com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        if (room == null || !room.checkRights(client, true)) {
+            return; // Insufficient permissions
+        }
+        
+        long userId = message.popWiredUInt();
+        com.uber.server.game.rooms.RoomUser user = room.getRoomUserByHabbo(userId);
+        
+        if (user == null || user.isBot()) {
+            return;
+        }
+        
+        // Can't ban mods
+        GameClient userClient = user.getClient();
+        if (userClient != null && userClient.getHabbo() != null) {
+            if (userClient.getHabbo().hasFuse("fuse_mod")) {
+                return;
+            }
+            
+            // Add ban and remove user
+            room.addBan(userId);
+            room.removeUserFromRoom(userClient, true, true);
+        }
+    }
+}

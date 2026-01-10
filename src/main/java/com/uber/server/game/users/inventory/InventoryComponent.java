@@ -15,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages user inventory (items and pets).
- * Ported from HabboHotel/Users/Inventory/InventoryComponent.cs
  */
 public class InventoryComponent {
     private static final Logger logger = LoggerFactory.getLogger(InventoryComponent.class);
@@ -90,8 +89,8 @@ public class InventoryComponent {
         
         GameClient client = getClient();
         if (client != null) {
-            ServerMessage response = new ServerMessage(101);
-            client.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.users.InventoryRefreshMessageEventComposer();
+            client.sendMessage(composer.compose());
         }
     }
     
@@ -197,7 +196,8 @@ public class InventoryComponent {
             } else {
                 message.appendUInt(petId);
             }
-            client.sendMessage(message);
+            var composer = new com.uber.server.messages.outgoing.users.PetAddedToInventoryMessageEventComposer(message);
+            client.sendMessage(composer.compose());
         }
     }
     
@@ -247,9 +247,8 @@ public class InventoryComponent {
         // Send remove message to client
         GameClient client = getClient();
         if (client != null) {
-            ServerMessage message = new ServerMessage(604);
-            message.appendUInt(petId);
-            client.sendMessage(message);
+            var composer = new com.uber.server.messages.outgoing.users.PetRemovedFromInventoryMessageEventComposer(petId);
+            client.sendMessage(composer.compose());
         }
         
         // Note: We don't update the database here - movePetToRoom handles that
@@ -284,9 +283,8 @@ public class InventoryComponent {
         // Send remove message to client
         GameClient client = getClient();
         if (client != null) {
-            ServerMessage response = new ServerMessage(99);
-            response.appendUInt(itemId);
-            client.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.users.FurniRemovedFromInventoryMessageEventComposer(itemId);
+            client.sendMessage(composer.compose());
         }
         
         inventoryItems.remove(item);
@@ -299,7 +297,6 @@ public class InventoryComponent {
     
     /**
      * Serializes item inventory to a ServerMessage.
-     * Ported from InventoryComponent.cs SerializeItemInventory()
      * @return ServerMessage with inventory data (ID 140)
      */
     public ServerMessage serializeItemInventory() {
@@ -316,7 +313,6 @@ public class InventoryComponent {
     
     /**
      * Serializes pet inventory to a ServerMessage.
-     * Ported from InventoryComponent.cs SerializePetInventory()
      * @return ServerMessage with pet inventory data (ID 600)
      */
     public ServerMessage serializePetInventory() {

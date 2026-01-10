@@ -8,75 +8,54 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service for managing room bans.
- * Extracted from Room class to improve separation of concerns.
- * Room bans are temporary (15 minutes) and in-memory only.
+ * Room bans are temporary (15 minute expiry) and stored in memory only.
  */
 public class RoomBanService {
     private static final Logger logger = LoggerFactory.getLogger(RoomBanService.class);
-    private static final long BAN_DURATION_MS = 15 * 60 * 1000; // 15 minutes
     
     private final Room room;
     private final ConcurrentHashMap<Long, Long> bans; // User ID -> Ban timestamp
     
-    public RoomBanService(Room room) {
+    public RoomBanService(Room room, ConcurrentHashMap<Long, Long> bans) {
         this.room = room;
-        this.bans = new ConcurrentHashMap<>();
+        this.bans = bans;
     }
     
     /**
      * Checks if a user is banned from the room.
-     * @param userId User ID
-     * @return True if user is banned and ban hasn't expired
      */
     public boolean userIsBanned(long userId) {
-        if (!bans.containsKey(userId)) {
-            return false;
-        }
-        
-        // Check if ban has expired
-        if (hasBanExpired(userId)) {
-            removeBan(userId);
-            return false;
-        }
-        
-        return true;
+        return bans.containsKey(userId);
     }
     
     /**
-     * Checks if a ban has expired.
-     * @param userId User ID
-     * @return True if ban has expired
+     * Checks if a user's ban has expired.
+     * Room bans expire after 15 minutes (900 seconds).
      */
     public boolean hasBanExpired(long userId) {
-        Long banTimestamp = bans.get(userId);
-        if (banTimestamp == null) {
+        if (!userIsBanned(userId)) {
             return true;
         }
         
-        long now = System.currentTimeMillis();
-        return (now - banTimestamp) > BAN_DURATION_MS;
+        long banTimestamp = bans.get(userId);
+        long diff = com.uber.server.util.TimeUtil.getUnixTimestamp() - banTimestamp;
+        
+        // Bans expire after 900 seconds (15 minutes)
+        return diff > 900;
     }
     
     /**
-     * Removes a ban for a user.
-     * @param userId User ID
+     * Removes a ban from a user.
      */
     public void removeBan(long userId) {
         bans.remove(userId);
     }
     
     /**
-     * Adds a ban for a user.
-     * @param userId User ID
+     * Adds a ban to a user.
+     * Room bans are temporary (15 minute expiry) and stored in memory only.
      */
     public void addBan(long userId) {
-        bans.put(userId, System.currentTimeMillis());
-    }
-    
-    /**
-     * Clears all bans.
-     */
-    public void clear() {
-        bans.clear();
+        bans.put(userId, com.uber.server.util.TimeUtil.getUnixTimestamp());
     }
 }

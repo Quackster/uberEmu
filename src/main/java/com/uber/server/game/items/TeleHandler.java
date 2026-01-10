@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for handling teleport links.
- * Ported from HabboHotel/Items/TeleHandler.cs
  */
 public class TeleHandler {
     private static final Logger logger = LoggerFactory.getLogger(TeleHandler.class);

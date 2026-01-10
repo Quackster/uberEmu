@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting own marketplace offers (message ID 3019).
- * Ported from Messages/Requests/Catalog.cs MarketplaceGetOwnOffers()
  */
 public class MarketplaceGetOwnOffersHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceGetOwnOffersHandler.class);

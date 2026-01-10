@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for sending user message (message ID 462).
- * Ported from Messages/Requests/Help.cs ModSendUserMessage()
  */
 public class ModSendUserMessageHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModSendUserMessageHandler.class);

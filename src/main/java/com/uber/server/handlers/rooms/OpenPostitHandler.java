@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for opening a postit (message ID 83).
- * Ported from Messages/Requests/Rooms.cs OpenPostit()
  */
 public class OpenPostitHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(OpenPostitHandler.class);
@@ -46,9 +45,8 @@ public class OpenPostitHandler implements PacketHandler {
             return;
         }
         
-        ServerMessage response = new ServerMessage(48);
-        response.appendStringWithBreak(String.valueOf(item.getId()));
-        response.appendStringWithBreak(item.getExtraData() != null ? item.getExtraData() : "");
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.rooms.PostItMessageEventComposer(
+            item.getId(), item.getExtraData());
+        client.sendMessage(composer.compose());
     }
 }

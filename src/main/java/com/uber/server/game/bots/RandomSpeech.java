@@ -2,7 +2,6 @@ package com.uber.server.game.bots;
 
 /**
  * Represents a random speech entry for a bot.
- * Ported from HabboHotel/RoomBots/RandomSpeech.cs
  */
 public class RandomSpeech {
     private final String message;

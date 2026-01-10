@@ -4,7 +4,6 @@ import com.uber.server.util.TimeUtil;
 
 /**
  * Represents a moderation ban.
- * Ported from HabboHotel/Support/ModerationBan.cs
  */
 public class ModerationBan {
     private final ModerationBanType type;

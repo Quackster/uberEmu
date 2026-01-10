@@ -10,9 +10,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting catalog data 1 (message ID 3011).
- * Ported from Messages/Requests/Catalog.cs GetCataData1()
  * 
- * Note: This appears to be a hardcoded response in the original C# code
+ * Note: This appears to be a hardcoded response
  */
 public class GetCatalogData1Handler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetCatalogData1Handler.class);
@@ -25,7 +24,7 @@ public class GetCatalogData1Handler implements PacketHandler {
     @Override
     public void handle(GameClient client, ClientMessage message) {
         ServerMessage response = new ServerMessage(612);
-        // Hardcoded values from original C# code
+        // Hardcoded values
         response.appendInt32(1);
         response.appendInt32(1);
         response.appendInt32(1);

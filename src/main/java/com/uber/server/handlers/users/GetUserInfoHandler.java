@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user info (message ID 7).
- * Ported from Messages/Requests/Users.cs GetUserInfo()
  */
 public class GetUserInfoHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetUserInfoHandler.class);
@@ -22,21 +21,10 @@ public class GetUserInfoHandler implements PacketHandler {
             return;
         }
         
-        ServerMessage response = new ServerMessage(5);
-        response.appendStringWithBreak(String.valueOf(habbo.getId()));
-        response.appendStringWithBreak(habbo.getUsername());
-        response.appendStringWithBreak(habbo.getLook());
-        response.appendStringWithBreak(habbo.getGender().toUpperCase());
-        response.appendStringWithBreak(habbo.getMotto());
-        response.appendStringWithBreak(habbo.getRealName());
-        response.appendInt32(0);
-        response.appendStringWithBreak("");
-        response.appendInt32(0);
-        response.appendInt32(0);
-        response.appendInt32(habbo.getRespect());
-        response.appendInt32(habbo.getDailyRespectPoints());
-        response.appendInt32(habbo.getDailyPetRespectPoints());
-        
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.users.UserObjectEventComposer(
+            habbo.getId(), habbo.getUsername(), habbo.getLook(), habbo.getGender(),
+            habbo.getMotto(), habbo.getRealName(), habbo.getRespect(),
+            habbo.getDailyRespectPoints(), habbo.getDailyPetRespectPoints());
+        client.sendMessage(composer.compose());
     }
 }

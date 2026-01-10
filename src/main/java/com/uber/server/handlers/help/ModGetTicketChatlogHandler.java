@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting ticket chat log (message ID 457).
- * Ported from Messages/Requests/Help.cs ModGetTicketChatlog()
  */
 public class ModGetTicketChatlogHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModGetTicketChatlogHandler.class);

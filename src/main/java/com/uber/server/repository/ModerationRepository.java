@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for moderation database operations.
- * Migrated from ModerationTool.cs
  */
 public class ModerationRepository {
     private static final Logger logger = LoggerFactory.getLogger(ModerationRepository.class);
@@ -58,9 +57,11 @@ public class ModerationRepository {
      * @return List of ticket data
      */
     public List<Map<String, Object>> loadPendingTickets() {
-        String sql = "SELECT id, score, type, status, sender_id, reported_id, moderator_id, " +
-                    "message, room_id, room_name, timestamp FROM moderation_tickets " +
-                    "WHERE status = 'open' OR status = 'picked'";
+        String sql = """
+            SELECT id, score, type, status, sender_id, reported_id, moderator_id, message, room_id, room_name, timestamp
+            FROM moderation_tickets
+            WHERE status = 'open' OR status = 'picked'
+            """;
         List<Map<String, Object>> tickets = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -103,9 +104,10 @@ public class ModerationRepository {
      */
     public long createTicket(int score, int category, long senderId, long reportedId, 
                             String message, long roomId, String roomName, long timestamp) {
-        String sql = "INSERT INTO moderation_tickets (score, type, status, sender_id, reported_id, " +
-                    "moderator_id, message, room_id, room_name, timestamp) " +
-                    "VALUES (?, ?, 'open', ?, ?, 0, ?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO moderation_tickets (score, type, status, sender_id, reported_id, moderator_id, message, room_id, room_name, timestamp)
+            VALUES (?, ?, 'open', ?, ?, 0, ?, ?, ?, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -210,8 +212,10 @@ public class ModerationRepository {
      * @return List of room visit data with entry/exit timestamps
      */
     public List<Map<String, Object>> getUserRoomVisits(long userId, int limit) {
-        String sql = "SELECT room_id, entry_timestamp, exit_timestamp, hour, minute " +
-                    "FROM user_roomvisits WHERE user_id = ? ORDER BY entry_timestamp DESC LIMIT ?";
+        String sql = """
+            SELECT room_id, entry_timestamp, exit_timestamp, hour, minute
+            FROM user_roomvisits WHERE user_id = ? ORDER BY entry_timestamp DESC LIMIT ?
+            """;
         List<Map<String, Object>> visits = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();

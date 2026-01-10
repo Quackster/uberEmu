@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for giving room rights (message ID 96).
- * Ported from Messages/Requests/Rooms.cs GiveRights()
  */
 public class GiveRightsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GiveRightsHandler.class);

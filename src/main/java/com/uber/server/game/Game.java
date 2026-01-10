@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Main game manager that initializes and manages all game components.
- * Ported from HabboHotel/Game.cs
  */
 public class Game {
     private static final Logger logger = LoggerFactory.getLogger(Game.class);
@@ -16,8 +15,6 @@ public class Game {
     private static Game instance;
     
     private GameClientManager clientManager;
-    // Managers will be added as they are ported
-    // private ModerationBanManager banManager;
     private com.uber.server.game.roles.RoleManager roleManager;
     private com.uber.server.game.support.HelpTool helpTool;
     private com.uber.server.game.catalog.Catalog catalog;
@@ -57,6 +54,7 @@ public class Game {
     private final WardrobeRepository wardrobeRepository;
     private final com.uber.server.repository.ItemRepository itemRepository;
     private final RoleRepository roleRepository;
+    private final BotRepository botRepository;
     
     private Thread statisticsThread;
     
@@ -92,6 +90,7 @@ public class Game {
         this.wardrobeRepository = environment.getWardrobeRepository();
         this.itemRepository = environment.getItemRepository();
         this.roleRepository = environment.getRoleRepository();
+        this.botRepository = environment.getBotRepository();
         
         // Get additional repositories needed by managers
         // (repositories are already set above)
@@ -129,7 +128,7 @@ public class Game {
         // Perform database cleanup
         performDatabaseCleanup(1);
         
-        // Initialize managers (will be added as they are ported)
+        // Initialize managers
         banManager = new com.uber.server.game.support.ModerationBanManager(
             moderationBanRepository, 
             userInfoRepository,
@@ -175,7 +174,7 @@ public class Game {
         moderationTool.loadMessagePresets();
         moderationTool.loadPendingTickets();
         
-        botManager = new com.uber.server.game.bots.BotManager(environment.getBotRepository());
+        botManager = new com.uber.server.game.bots.BotManager(botRepository);
         botManager.loadBots();
         
         pluginHandler = new com.uber.server.plugins.PluginHandler();
@@ -194,7 +193,6 @@ public class Game {
     
     /**
      * Performs database cleanup on startup/shutdown.
-     * Ported from HabboHotel/Game.cs DatabaseCleanup()
      * @param serverStatus Server status (1 = online, 0 = offline)
      */
     private void performDatabaseCleanup(int serverStatus) {
@@ -261,7 +259,7 @@ public class Game {
         return clientManager;
     }
     
-    // Manager getters will be added as managers are ported
+    // Manager getters
     public com.uber.server.game.support.ModerationBanManager getBanManager() { 
         return banManager; 
     }

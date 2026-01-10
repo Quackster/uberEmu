@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for generic switch items with multiple modes.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorGenericSwitch
  */
 public class InteractorGenericSwitch extends FurniInteractor {
     private final int modes;
@@ -51,6 +50,6 @@ public class InteractorGenericSwitch extends FurniInteractor {
         }
         
         item.setExtraData(String.valueOf(newMode));
-        item.updateState();
+        item.updateState(false, true);
     }
 }

@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the help system.
- * Ported from HabboHotel/Support/HelpTool.cs
  */
 public class HelpTool {
     private static final Logger logger = LoggerFactory.getLogger(HelpTool.class);

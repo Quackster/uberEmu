@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a room icon.
- * Ported from HabboHotel/Rooms/RoomIcon.cs
  */
 public class RoomIcon {
     private int backgroundImage;
@@ -51,7 +50,6 @@ public class RoomIcon {
     
     /**
      * Serializes the room icon to a ServerMessage.
-     * Ported from HabboHotel/Rooms/RoomIcon.cs Serialize()
      * @param message ServerMessage to append to
      */
     public void serialize(ServerMessage message) {

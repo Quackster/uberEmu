@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents an item placed in a room.
- * Ported from HabboHotel/Items/RoomItem.cs
  */
 public class RoomItem {
     private static final Logger logger = LoggerFactory.getLogger(RoomItem.class);
@@ -198,7 +197,6 @@ public class RoomItem {
     
     /**
      * Gets the appropriate interactor for this item.
-     * Ported from HabboHotel/Items/RoomItem.cs Interactor property
      * @return FurniInteractor instance
      */
     public com.uber.server.game.items.interactors.FurniInteractor getInteractor() {
@@ -214,71 +212,23 @@ public class RoomItem {
         
         String lowerType = interactionType.toLowerCase();
         
-        switch (lowerType) {
-            case "teleport":
-                return new com.uber.server.game.items.interactors.InteractorTeleport();
-                
-            case "bottle":
-                return new com.uber.server.game.items.interactors.InteractorSpinningBottle();
-                
-            case "dice":
-                return new com.uber.server.game.items.interactors.InteractorDice();
-                
-            case "habbowheel":
-                return new com.uber.server.game.items.interactors.InteractorHabboWheel();
-                
-            case "loveshuffler":
-                return new com.uber.server.game.items.interactors.InteractorLoveShuffler();
-                
-            case "onewaygate":
-                return new com.uber.server.game.items.interactors.InteractorOneWayGate();
-                
-            case "alert":
-                return new com.uber.server.game.items.interactors.InteractorAlert();
-                
-            case "vendingmachine":
-                return new com.uber.server.game.items.interactors.InteractorVendor();
-                
-            case "gate":
-                return new com.uber.server.game.items.interactors.InteractorGate(base.getInteractionModesCount());
-                
-            case "scoreboard":
-                return new com.uber.server.game.items.interactors.InteractorScoreboard();
-                
-            case "default":
-            default:
-                return new com.uber.server.game.items.interactors.InteractorGenericSwitch(base.getInteractionModesCount());
-        }
-    }
-    
-    /**
-     * Gets the coordinate square behind the item (based on rotation).
-     * @return Coord behind
-     */
-    public Coord getSquareBehind() {
-        Coord sq = new Coord(x, y);
-        
-        switch (rot) {
-            case 0: // North
-                sq.setY(sq.getY() + 1);
-                break;
-            case 2: // East
-                sq.setX(sq.getX() - 1);
-                break;
-            case 4: // South
-                sq.setY(sq.getY() - 1);
-                break;
-            case 6: // West
-                sq.setX(sq.getX() + 1);
-                break;
-        }
-        
-        return sq;
+        return switch (lowerType) {
+            case "teleport" -> new com.uber.server.game.items.interactors.InteractorTeleport();
+            case "bottle" -> new com.uber.server.game.items.interactors.InteractorSpinningBottle();
+            case "dice" -> new com.uber.server.game.items.interactors.InteractorDice();
+            case "habbowheel" -> new com.uber.server.game.items.interactors.InteractorHabboWheel();
+            case "loveshuffler" -> new com.uber.server.game.items.interactors.InteractorLoveShuffler();
+            case "onewaygate" -> new com.uber.server.game.items.interactors.InteractorOneWayGate();
+            case "alert" -> new com.uber.server.game.items.interactors.InteractorAlert();
+            case "vendingmachine" -> new com.uber.server.game.items.interactors.InteractorVendor();
+            case "gate" -> new com.uber.server.game.items.interactors.InteractorGate(base.getInteractionModesCount());
+            case "scoreboard" -> new com.uber.server.game.items.interactors.InteractorScoreboard();
+            default -> new com.uber.server.game.items.interactors.InteractorGenericSwitch(base.getInteractionModesCount());
+        };
     }
     
     /**
      * Serializes the item to a ServerMessage.
-     * Ported from RoomItem.cs Serialize()
      * @param message ServerMessage to append to
      */
     public void serialize(ServerMessage message) {
@@ -288,17 +238,33 @@ public class RoomItem {
             return;
         }
         
-        message.appendUInt(id);
-        message.appendInt32(base.getSpriteId());
-        message.appendInt32(x);
-        message.appendInt32(y);
-        message.appendInt32(rot);
-        message.appendStringWithBreak(String.format("%.2f", z));
-        message.appendStringWithBreak(base.getType().toUpperCase());
-        message.appendStringWithBreak(extraData != null ? extraData : "");
-        message.appendInt32(-1); // Item state
-        message.appendInt32(1); // Usage policy
-        message.appendUInt(id);
+        if (isFloorItem()) {
+            // Floor item serialization
+            message.appendUInt(id);
+            message.appendInt32(base.getSpriteId());
+            message.appendInt32(x);
+            message.appendInt32(y);
+            message.appendInt32(rot);
+            message.appendStringWithBreak(String.format("%.2f", z).replace(',', '.'));
+            message.appendInt32(0);
+            message.appendStringWithBreak(extraData != null ? extraData : "");
+            message.appendInt32(-1);
+        } else if (isWallItem()) {
+            // Wall item serialization
+            message.appendStringWithBreak(String.valueOf(id));
+            message.appendInt32(base.getSpriteId());
+            message.appendStringWithBreak(wallPos != null ? wallPos : "");
+            
+            // Handle postit items specially
+            String interactionType = base.getInteractionType() != null ? base.getInteractionType().toLowerCase() : "";
+            if ("postit".equals(interactionType) && extraData != null && !extraData.isEmpty()) {
+                // Postit extra data format: "color text" - we only send the color part
+                String[] parts = extraData.split(" ", 2);
+                message.appendStringWithBreak(parts.length > 0 ? parts[0] : "");
+            } else {
+                message.appendStringWithBreak(extraData != null ? extraData : "");
+            }
+        }
     }
     
     /**
@@ -335,7 +301,6 @@ public class RoomItem {
     
     /**
      * Processes item updates (called every 500ms by room processor).
-     * Ported from HabboHotel/Items/RoomItem.cs ProcessUpdates()
      */
     public void processUpdates() {
         this.updateCounter--;
@@ -411,7 +376,6 @@ public class RoomItem {
     
     /**
      * Requests an update after a certain number of cycles.
-     * Ported from HabboHotel/Items/RoomItem.cs ReqUpdate()
      * @param cycles Number of cycles (500ms each) to wait before processing
      */
     public void reqUpdate(int cycles) {

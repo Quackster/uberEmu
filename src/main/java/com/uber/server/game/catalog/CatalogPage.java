@@ -1,6 +1,8 @@
 package com.uber.server.game.catalog;
 
+import com.uber.server.game.GameClient;
 import com.uber.server.game.items.ItemManager;
+import com.uber.server.messages.ServerMessage;
 import com.uber.server.repository.CatalogRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +13,6 @@ import java.util.Map;
 
 /**
  * Represents a catalog page.
- * Ported from HabboHotel/Catalogs/CatalogPage.cs
  */
 public class CatalogPage {
     private static final Logger logger = LoggerFactory.getLogger(CatalogPage.class);
@@ -118,4 +119,26 @@ public class CatalogPage {
     public String getTextDetails() { return textDetails; }
     public String getTextTeaser() { return textTeaser; }
     public List<CatalogItem> getItems() { return items; }
+    
+    /**
+     * Serializes this catalog page for the index.
+     * @param client GameClient requesting the page
+     * @param message ServerMessage to append to
+     */
+    public void serialize(GameClient client, ServerMessage message) {
+        message.appendBoolean(visible);
+        message.appendInt32(iconColor);
+        message.appendInt32(iconImage);
+        message.appendInt32(id);
+        message.appendStringWithBreak(caption);
+        message.appendBoolean(comingSoon);
+        
+        // Get catalog from game to calculate tree size
+        com.uber.server.game.Game game = com.uber.server.game.Game.getInstance();
+        if (game != null && game.getCatalog() != null) {
+            message.appendInt32(game.getCatalog().getTreeSize(client, id));
+        } else {
+            message.appendInt32(0);
+        }
+    }
 }

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room categories (message ID 151).
- * Ported from Messages/Requests/Navigator.cs GetFlatCats() (renamed from Flat to Room)
  */
 public class GetRoomCategoriesHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRoomCategoriesHandler.class);

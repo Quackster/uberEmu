@@ -15,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages avatar effects for a user.
- * Ported from HabboHotel/Users/Inventory/AvatarEffectsInventoryComponent.cs
  */
 public class AvatarEffectsInventoryComponent {
     private static final Logger logger = LoggerFactory.getLogger(AvatarEffectsInventoryComponent.class);
@@ -268,7 +267,6 @@ public class AvatarEffectsInventoryComponent {
     
     /**
      * Serializes effects to a ServerMessage.
-     * Ported from AvatarEffectsInventoryComponent.cs Serialize()
      * @return ServerMessage with effect data (ID 460)
      */
     public ServerMessage serialize() {

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Low priority background worker thread for maintenance tasks.
- * Ported from HabboHotel/Misc/LowPriorityWorker.cs
  */
 public class LowPriorityWorker {
     private static final Logger logger = LoggerFactory.getLogger(LowPriorityWorker.class);
@@ -46,8 +45,7 @@ public class LowPriorityWorker {
                 // Statistics
                 int status = 1;
                 // Note: usersOnline and roomsLoaded are calculated but not stored in server_status table
-                // The C# version updates server_status table, but Java version uses updateServerStatus
-                // which only updates users table. This is acceptable for now.
+                // The updateServerStatus method only updates users table online status.
                 
                 // Update server status in database
                 if (game.getUserRepository() != null) {

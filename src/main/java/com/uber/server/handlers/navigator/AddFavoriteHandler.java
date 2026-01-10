@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for adding a favorite room (message ID 19).
- * Ported from Messages/Requests/Navigator.cs AddFavorite()
  */
 public class AddFavoriteHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AddFavoriteHandler.class);
@@ -33,9 +32,8 @@ public class AddFavoriteHandler implements PacketHandler {
         
         if (data == null || habbo.getFavoriteRooms().size() >= 30 || 
             habbo.getFavoriteRooms().contains(roomId) || data.isPublicRoom()) {
-            ServerMessage error = new ServerMessage(33);
-            error.appendInt32(-9001);
-            client.sendMessage(error);
+            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(-9001);
+            client.sendMessage(errorComposer.compose());
             return;
         }
         
@@ -43,10 +41,8 @@ public class AddFavoriteHandler implements PacketHandler {
         if (game.getUserRepository().addFavorite(habbo.getId(), roomId)) {
             habbo.addFavoriteRoom(roomId);
             
-            ServerMessage response = new ServerMessage(459);
-            response.appendUInt(roomId);
-            response.appendBoolean(true);
-            client.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedEventComposer(roomId, true);
+            client.sendMessage(composer.compose());
         }
     }
 }

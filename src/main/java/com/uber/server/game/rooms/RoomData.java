@@ -6,7 +6,6 @@ import java.util.Map;
 
 /**
  * Represents room data/metadata.
- * Ported from HabboHotel/Rooms/RoomData.cs
  */
 public class RoomData {
     private long id;
@@ -47,18 +46,12 @@ public class RoomData {
         this.owner = (String) row.get("owner");
         
         String stateStr = ((String) row.get("state")).toLowerCase();
-        switch (stateStr) {
-            case "open":
-                this.state = 0;
-                break;
-            case "password":
-                this.state = 2;
-                break;
-            case "locked":
-            default:
-                this.state = 1;
-                break;
-        }
+        this.state = switch (stateStr) {
+            case "open" -> 0;
+            case "password" -> 2;
+            case "locked" -> 1;
+            default -> 1;
+        };
         
         this.category = ((Number) row.get("category")).intValue();
         this.usersNow = ((Number) row.get("users_now")).intValue();
@@ -124,8 +117,8 @@ public class RoomData {
         if (value == null) {
             return false;
         }
-        if (value instanceof Boolean) {
-            return (Boolean) value;
+        if (value instanceof Boolean bool) {
+            return bool;
         }
         String str = value.toString().trim();
         return "1".equals(str) || "true".equalsIgnoreCase(str);
@@ -181,7 +174,6 @@ public class RoomData {
     
     /**
      * Serializes room data to a ServerMessage.
-     * Ported from HabboHotel/Rooms/RoomData.cs Serialize()
      * @param message ServerMessage to append to
      * @param showEvents Whether to show room events
      * @param event Optional room event (if showEvents is true and event exists)
@@ -234,7 +226,7 @@ public class RoomData {
             icon.serialize(message);
         } else {
             // Default icon if not set
-            RoomIcon defaultIcon = new RoomIcon(1, 1, new java.util.concurrent.ConcurrentHashMap<>());
+            RoomIcon defaultIcon = new RoomIcon(0, 0, new java.util.concurrent.ConcurrentHashMap<>());
             defaultIcon.serialize(message);
         }
         

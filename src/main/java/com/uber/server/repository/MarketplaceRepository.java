@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for marketplace database operations.
- * Migrated from Marketplace.cs
  */
 public class MarketplaceRepository {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceRepository.class);
@@ -38,9 +37,10 @@ public class MarketplaceRepository {
     public boolean createOffer(long itemId, long userId, int askingPrice, int totalPrice, 
                               String publicName, int spriteId, int itemType, long timestamp, 
                               String extraData) {
-        String sql = "INSERT INTO catalog_marketplace_offers (item_id, user_id, asking_price, " +
-                    "total_price, public_name, sprite_id, item_type, timestamp, extra_data) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO catalog_marketplace_offers (item_id, user_id, asking_price, total_price, public_name, sprite_id, item_type, timestamp, extra_data)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -173,8 +173,10 @@ public class MarketplaceRepository {
      * @return Total profits from sold offers (state = 2)
      */
     public int getUserProfits(long userId) {
-        String sql = "SELECT SUM(asking_price) as total_profit FROM catalog_marketplace_offers " +
-                    "WHERE state = '2' AND user_id = ?";
+        String sql = """
+            SELECT SUM(asking_price) as total_profit FROM catalog_marketplace_offers
+            WHERE state = '2' AND user_id = ?
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

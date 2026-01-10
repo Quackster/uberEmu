@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 /**
  * Handler for taking all room rights (message ID 155).
- * Ported from Messages/Requests/Rooms.cs TakeAllRights()
  */
 public class TakeAllRightsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(TakeAllRightsHandler.class);

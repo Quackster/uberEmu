@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for purchasing a gift (message ID 472).
- * Ported from Messages/Requests/Catalog.cs PurchaseGift()
  */
 public class PurchaseGiftHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PurchaseGiftHandler.class);

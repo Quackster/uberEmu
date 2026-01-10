@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting group badges (message ID 230).
- * Ported from Messages/Requests/Rooms.cs GetGroupBadges()
  * 
  * Note: Groups not yet implemented - returns hardcoded value
  */
@@ -25,7 +24,7 @@ public class GetGroupBadgesHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        // Hardcoded group badges (from original C# code)
+        // Hardcoded group badges
         ServerMessage response = new ServerMessage(309);
         response.appendStringWithBreak("IcIrDs43103s19014d5a1dc291574a508bc80a64663e61a00");
         client.sendMessage(response);

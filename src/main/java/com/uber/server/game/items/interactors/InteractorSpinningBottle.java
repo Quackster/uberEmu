@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for spinning bottle items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorSpinningBottle
  */
 public class InteractorSpinningBottle extends FurniInteractor {
     @Override

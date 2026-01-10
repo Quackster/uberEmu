@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for rating a room (message ID 261).
- * Ported from Messages/Requests/Rooms.cs RateRoom()
  */
 public class RateRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RateRoomHandler.class);
@@ -41,17 +40,11 @@ public class RateRoomHandler implements PacketHandler {
         int rating = message.popWiredInt32();
         
         // Update room score
-        int scoreChange = 0;
-        switch (rating) {
-            case -1:
-                scoreChange = -1;
-                break;
-            case 1:
-                scoreChange = 1;
-                break;
-            default:
-                return; // Invalid rating
-        }
+        int scoreChange = switch (rating) {
+            case -1 -> -1;
+            case 1 -> 1;
+            default -> 0; // Invalid rating
+        };
         
         int newScore = room.getData().getScore() + scoreChange;
         room.getData().setScore(newScore);
@@ -63,8 +56,7 @@ public class RateRoomHandler implements PacketHandler {
         habbo.addRatedRoom(room.getRoomId());
         
         // Send updated score
-        ServerMessage response = new ServerMessage(345);
-        response.appendInt32(newScore);
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.rooms.RoomRatingEventComposer(newScore);
+        client.sendMessage(composer.compose());
     }
 }

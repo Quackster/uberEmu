@@ -6,7 +6,6 @@ import com.uber.server.messages.ServerMessage;
 
 /**
  * Represents a user's inventory item.
- * Ported from HabboHotel/Items/UserItem.cs
  */
 public class UserItem {
     private final long id;
@@ -46,7 +45,6 @@ public class UserItem {
     
     /**
      * Serializes the item to a ServerMessage.
-     * Ported from UserItem.cs Serialize()
      * @param message ServerMessage to append to
      * @param inventory True if serializing for inventory, false for room
      */

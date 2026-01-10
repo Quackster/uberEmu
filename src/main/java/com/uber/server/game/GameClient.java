@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class GameClient {
     private static final Logger logger = LoggerFactory.getLogger(GameClient.class);
+    private static final int MAX_MESSAGE_LENGTH = 65536; // Maximum reasonable message size (64KB)
+    private static final int MAX_BODY_LENGTH = MAX_MESSAGE_LENGTH - 2; // Account for 2-byte ID
     
     private final long clientId;
     private final TcpConnection connection;
@@ -96,14 +98,29 @@ public class GameClient {
                 
                 // Decode message length (3 bytes Base64)
                 byte[] lengthBytes = {data[pos++], data[pos++], data[pos++]};
-                int messageLength = com.uber.server.util.Base64Encoding.decodeInt32(lengthBytes);
+                int messageLength = com.uber.server.encoding.base64.Base64Encoding.decodeInt32(lengthBytes);
+                
+                // Validate message length (must be at least 2 for the ID bytes, reasonable max)
+                // Check for negative values and integer overflow issues
+                if (messageLength < 2 || messageLength > MAX_MESSAGE_LENGTH) {
+                    logger.warn("Invalid message length: {} (client: {})", messageLength, clientId);
+                    break; // Skip invalid packet
+                }
                 
                 // Decode message ID (2 bytes Base64)
                 byte[] idBytes = {data[pos++], data[pos++]};
-                long messageId = com.uber.server.util.Base64Encoding.decodeUInt32(idBytes);
+                long messageId = com.uber.server.encoding.base64.Base64Encoding.decodeUInt32(idBytes);
                 
                 // Extract message body
                 int bodyLength = messageLength - 2;
+                
+                // Validate body length before allocation (prevent integer underflow and excessive allocation)
+                if (bodyLength < 0 || bodyLength > MAX_BODY_LENGTH) {
+                    logger.warn("Invalid body length: {} (messageLength: {}) (client: {})", 
+                        bodyLength, messageLength, clientId);
+                    break; // Skip invalid packet
+                }
+                
                 if (pos + bodyLength > data.length) {
                     logger.warn("Invalid message format: body length exceeds available data");
                     break;
@@ -129,10 +146,10 @@ public class GameClient {
      * Thread-safe handler lookup and invocation.
      * Called by Netty channel handler or internal packet parser.
      */
-    void handleMessage(ClientMessage message) {
+    public void handleMessage(ClientMessage message) {
         int messageId = (int) message.getId();
         
-        logger.debug("[{}] --> {}", messageId, message.getBody());
+        logger.info("[{}] --> {}", messageId, message.getBody());
         
         if (messageId < 0 || messageId > 4004) { // HIGHEST_MESSAGE_ID
             logger.warn("Warning - out of protocol request: {}", message.getHeader());
@@ -185,9 +202,8 @@ public class GameClient {
      * @param message Notification message
      */
     public void sendNotif(String message) {
-        ServerMessage notif = new ServerMessage(3);
-        notif.appendStringWithBreak(message);
-        sendMessage(notif);
+        var composer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKMessageEventComposer(message);
+        sendMessage(composer.compose());
     }
     
     /**
@@ -206,8 +222,11 @@ public class GameClient {
      * @param url URL to include
      */
     public void sendNotif(String message, String url) {
-        // For now, just send the message with URL appended
-        sendNotif(message + "\n" + url);
+        // TODO: Replace with NotificationMessageEventComposer (ID 161) when created
+        ServerMessage notif = new ServerMessage(161);
+        notif.appendStringWithBreak(message);
+        notif.appendStringWithBreak(url);
+        sendMessage(notif);
     }
     
     /**

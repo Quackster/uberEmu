@@ -8,7 +8,6 @@ import com.uber.server.repository.MessengerRepository;
 
 /**
  * Represents a friend request.
- * Ported from HabboHotel/Users/Messenger/MessengerRequest.cs
  */
 public class MessengerRequest {
     private final long requestId;
@@ -66,7 +65,6 @@ public class MessengerRequest {
     
     /**
      * Serializes the request to a ServerMessage.
-     * Ported from MessengerRequest.cs Serialize()
      * @param message ServerMessage to append to
      */
     public void serialize(ServerMessage message) {

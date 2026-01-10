@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting a catalog page (message ID 102).
- * Ported from Messages/Requests/Catalog.cs GetCatalogPage()
  */
 public class GetCatalogPageHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetCatalogPageHandler.class);
@@ -33,67 +32,32 @@ public class GetCatalogPageHandler implements PacketHandler {
         
         int pageId = message.popWiredInt32();
         Catalog catalog = game.getCatalog();
+        if (catalog == null) {
+            logger.warn("Catalog is not initialized");
+            return;
+        }
+        
         CatalogPage page = catalog.getPage(pageId);
         
-        if (page == null) {
+        if (page == null || !page.isEnabled() || !page.isVisible() || page.isComingSoon() || page.getMinRank() > habbo.getRank()) {
             return;
         }
         
-        // Check rank access
-        if (page.getMinRank() > habbo.getRank()) {
+        if (page.isClubOnly() && !habbo.getSubscriptionManager().hasSubscription("habbo_club")) {
+            client.sendNotif("This page is for Uber Club members only!");
             return;
         }
         
-        ServerMessage response = new ServerMessage(102);
-        
-        // Serialize page info
-        response.appendBoolean(page.isVisible());
-        response.appendInt32(page.getIconColor());
-        response.appendInt32(page.getIconImage());
-        response.appendInt32(page.getId());
-        response.appendStringWithBreak(page.getCaption());
-        response.appendStringWithBreak(page.getLayoutHeadline());
-        response.appendStringWithBreak(page.getLayoutTeaser());
-        response.appendStringWithBreak(page.getLayoutSpecial());
-        response.appendInt32(page.getItems().size());
-        
-        // Serialize items
-        for (CatalogItem item : page.getItems()) {
-            if (item.isDeal()) {
-                // Handle deals (multiple items)
-                response.appendUInt(item.getId());
-                response.appendStringWithBreak(item.getName());
-                response.appendInt32(item.getCreditsCost());
-                response.appendInt32(item.getPixelsCost());
-                response.appendInt32(item.getItemIds().size()); // Number of items in deal
-                
-                // Serialize each item in the deal
-                for (Long itemId : item.getItemIds()) {
-                    Item baseItem = game.getItemManager().getItem(itemId);
-                    if (baseItem != null) {
-                        response.appendStringWithBreak(baseItem.getType());
-                        response.appendInt32(baseItem.getSpriteId());
-                    }
-                }
-                
-                response.appendStringWithBreak("");
-                response.appendInt32(item.getAmount());
-                response.appendInt32(-1);
-            } else {
-                // Regular single item
-                response.appendUInt(item.getId());
-                response.appendStringWithBreak(item.getName());
-                response.appendInt32(item.getCreditsCost());
-                response.appendInt32(item.getPixelsCost());
-                response.appendInt32(1); // Unknown
-                response.appendStringWithBreak(item.getBaseItem(game.getItemManager()).getType());
-                response.appendInt32(item.getBaseItem(game.getItemManager()).getSpriteId());
-                response.appendStringWithBreak("");
-                response.appendInt32(item.getAmount());
-                response.appendInt32(-1);
-            }
-        }
-        
+        // Use the catalog's serializePage method which returns message ID 127
+        ServerMessage response = catalog.serializePage(page);
         client.sendMessage(response);
+        
+        // Handle special case for recycler layout (send message 507)
+        if ("recycler".equals(page.getLayout())) {
+            ServerMessage recyclerResponse = new ServerMessage(507);
+            recyclerResponse.appendBoolean(true);
+            recyclerResponse.appendBoolean(false);
+            client.sendMessage(recyclerResponse);
+        }
     }
 }

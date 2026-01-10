@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for picking up a pet from room (message ID 3003).
- * Ported from Messages/Requests/Rooms.cs PickUpPet()
  */
 public class PickUpPetHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PickUpPetHandler.class);

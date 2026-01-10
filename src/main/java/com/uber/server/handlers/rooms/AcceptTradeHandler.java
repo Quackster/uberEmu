@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for accepting a trade (message ID 69).
- * Ported from Messages/Requests/Rooms.cs AcceptTrade()
  */
 public class AcceptTradeHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AcceptTradeHandler.class);

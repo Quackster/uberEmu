@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for performing a search (message ID 437).
- * Ported from Messages/Requests/Navigator.cs PerformSearch()
  */
 public class PerformSearchHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PerformSearchHandler.class);

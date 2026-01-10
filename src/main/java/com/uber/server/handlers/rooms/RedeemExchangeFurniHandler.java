@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for redeeming exchange furni (message ID 183).
- * Ported from Messages/Requests/Rooms.cs RedeemExchangeFurni()
  */
 public class RedeemExchangeFurniHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RedeemExchangeFurniHandler.class);

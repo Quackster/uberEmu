@@ -4,13 +4,18 @@ import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.GameEnvironment;
 import com.uber.server.game.Habbo;
+import com.uber.server.game.threading.GameThreadPool;
 import com.uber.server.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Manages activity points (pixels) for users.
- * Ported from HabboHotel/Misc/PixelManager.cs
+ * Uses shared thread pool from GameThreadPool.
  */
 public class PixelManager {
     private static final Logger logger = LoggerFactory.getLogger(PixelManager.class);
@@ -18,69 +23,54 @@ public class PixelManager {
     private static final int RCV_EVERY_MINS = 15;
     private static final int RCV_AMOUNT = 50;
     
-    private volatile boolean keepAlive;
-    private Thread workerThread;
+    private ScheduledFuture<?> processTask;
     
     public PixelManager() {
-        this.keepAlive = true;
-        this.workerThread = new Thread(this::process);
-        this.workerThread.setName("Pixel Manager");
-        this.workerThread.setPriority(Thread.MIN_PRIORITY);
+        // No initialization needed - will use shared thread pool
     }
     
     /**
-     * Starts the pixel manager worker thread.
+     * Starts the pixel manager worker.
+     * Uses shared thread pool from GameThreadPool.
      */
     public void start() {
-        if (workerThread != null && !workerThread.isAlive()) {
-            workerThread.start();
-            logger.info("PixelManager started");
+        if (processTask != null && !processTask.isCancelled()) {
+            return; // Already running
         }
-    }
-    
-    /**
-     * Stops the pixel manager worker thread.
-     */
-    public void stop() {
-        keepAlive = false;
-        if (workerThread != null && workerThread.isAlive()) {
-            workerThread.interrupt();
+        
+        ScheduledExecutorService executor = GameThreadPool.getInstance().getGameExecutor();
+        
+        // Schedule pixel updates every 15 seconds
+        processTask = executor.scheduleWithFixedDelay(() -> {
             try {
-                workerThread.join(5000);
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted while waiting for PixelManager thread to stop");
-                Thread.currentThread().interrupt();
-            }
-        }
-        logger.info("PixelManager stopped");
-    }
-    
-    /**
-     * Main processing loop for pixel updates.
-     */
-    private void process() {
-        try {
-            while (keepAlive) {
                 Game game = null;
                 try {
                     game = GameEnvironment.getInstance().getGame();
                 } catch (Exception e) {
                     logger.error("Could not get Game instance: {}", e.getMessage(), e);
-                    break;
+                    return;
                 }
                 
                 if (game != null && game.getClientManager() != null) {
                     game.getClientManager().checkPixelUpdates();
                 }
-                
-                Thread.sleep(15000); // 15 seconds
+            } catch (Exception e) {
+                logger.error("Error in PixelManager: {}", e.getMessage(), e);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.info("PixelManager thread interrupted");
-        } catch (Exception e) {
-            logger.error("Error in PixelManager: {}", e.getMessage(), e);
+        }, 0, 15, TimeUnit.SECONDS);
+        
+        logger.info("PixelManager started");
+    }
+    
+    /**
+     * Stops the pixel manager worker.
+     */
+    public void stop() {
+        if (processTask != null) {
+            processTask.cancel(false);
+            processTask = null;
         }
+        logger.info("PixelManager stopped");
     }
     
     /**

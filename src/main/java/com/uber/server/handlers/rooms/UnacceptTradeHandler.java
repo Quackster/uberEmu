@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for unaccepting a trade (message ID 68).
- * Ported from Messages/Requests/Rooms.cs UnacceptTrade()
  */
 public class UnacceptTradeHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(UnacceptTradeHandler.class);

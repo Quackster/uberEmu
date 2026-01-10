@@ -11,7 +11,6 @@ import java.sql.SQLException;
 
 /**
  * Database connection pool wrapper around HikariCP.
- * Replaces the custom DatabaseManager from C# version.
  */
 public class DatabasePool {
     private static final Logger logger = LoggerFactory.getLogger(DatabasePool.class);

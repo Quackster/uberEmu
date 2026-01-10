@@ -2,7 +2,6 @@ package com.uber.server.game.support;
 
 /**
  * Represents a help category.
- * Ported from HabboHotel/Support/HelpCategory.cs
  */
 public class HelpCategory {
     private final long id;

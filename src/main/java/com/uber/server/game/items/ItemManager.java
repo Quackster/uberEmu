@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages furniture item definitions.
- * Ported from HabboHotel/Items/ItemManager.cs
  */
 public class ItemManager {
     private static final Logger logger = LoggerFactory.getLogger(ItemManager.class);
@@ -85,8 +84,8 @@ public class ItemManager {
         if (value == null) {
             return false;
         }
-        if (value instanceof Boolean) {
-            return (Boolean) value;
+        if (value instanceof Boolean b) {
+            return b;
         }
         String str = value.toString().trim();
         return "1".equals(str) || "true".equalsIgnoreCase(str) || "yes".equalsIgnoreCase(str);

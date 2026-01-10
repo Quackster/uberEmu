@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Abstract base class for furniture interactors.
- * Ported from HabboHotel/Items/FurniInteractor.cs
  */
 public abstract class FurniInteractor {
     /**

@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a user in a trade.
- * Ported from HabboHotel/Rooms/Trade.cs TradeUser class
  */
 public class TradeUser {
     private static final Logger logger = LoggerFactory.getLogger(TradeUser.class);

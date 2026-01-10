@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for deleting a postit (message ID 85).
- * Ported from Messages/Requests/Rooms.cs DeletePostit()
  */
 public class DeletePostitHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeletePostitHandler.class);

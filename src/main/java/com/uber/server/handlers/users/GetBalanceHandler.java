@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user balance (message ID 8).
- * Ported from Messages/Requests/Users.cs GetBalance()
  */
 public class GetBalanceHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetBalanceHandler.class);

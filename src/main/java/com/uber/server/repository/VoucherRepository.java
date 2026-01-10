@@ -8,7 +8,6 @@ import java.sql.*;
 
 /**
  * Repository for voucher database operations.
- * Migrated from VoucherHandler.cs
  */
 public class VoucherRepository {
     private static final Logger logger = LoggerFactory.getLogger(VoucherRepository.class);

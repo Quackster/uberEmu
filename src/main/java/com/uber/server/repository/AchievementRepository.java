@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for achievement database operations.
- * Migrated from AchievementManager.cs
  */
 public class AchievementRepository {
     private static final Logger logger = LoggerFactory.getLogger(AchievementRepository.class);
@@ -101,8 +100,10 @@ public class AchievementRepository {
      * @return True if successful
      */
     public boolean updateUserAchievementLevel(long userId, long achievementId, int level) {
-        String sql = "UPDATE user_achievements SET achievement_level = ? " +
-                    "WHERE user_id = ? AND achievement_id = ? LIMIT 1";
+        String sql = """
+            UPDATE user_achievements SET achievement_level = ?
+            WHERE user_id = ? AND achievement_id = ? LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -126,8 +127,10 @@ public class AchievementRepository {
      * @return True if successful
      */
     public boolean insertUserAchievement(long userId, long achievementId, int level) {
-        String sql = "INSERT INTO user_achievements (user_id, achievement_id, achievement_level) " +
-                    "VALUES (?, ?, ?)";
+        String sql = """
+            INSERT INTO user_achievements (user_id, achievement_id, achievement_level)
+            VALUES (?, ?, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -150,8 +153,10 @@ public class AchievementRepository {
      * @return True if user has the achievement
      */
     public boolean hasUserAchievement(long userId, long achievementId) {
-        String sql = "SELECT achievement_level FROM user_achievements " +
-                    "WHERE user_id = ? AND achievement_id = ? LIMIT 1";
+        String sql = """
+            SELECT achievement_level FROM user_achievements
+            WHERE user_id = ? AND achievement_id = ? LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -175,8 +180,10 @@ public class AchievementRepository {
      * @return Achievement level, or 0 if not found
      */
     public int getUserAchievementLevel(long userId, long achievementId) {
-        String sql = "SELECT achievement_level FROM user_achievements " +
-                    "WHERE user_id = ? AND achievement_id = ? LIMIT 1";
+        String sql = """
+            SELECT achievement_level FROM user_achievements
+            WHERE user_id = ? AND achievement_id = ? LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

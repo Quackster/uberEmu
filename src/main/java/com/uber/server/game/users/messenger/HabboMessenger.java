@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages messenger functionality for a user (friends and friend requests).
- * Ported from HabboHotel/Users/Messenger/HabboMessenger.cs
  */
 public class HabboMessenger {
     private static final Logger logger = LoggerFactory.getLogger(HabboMessenger.class);
@@ -293,11 +292,8 @@ public class HabboMessenger {
         // Send update to client
         GameClient client = getClient();
         if (client != null) {
-            ServerMessage response = new ServerMessage(13);
-            response.appendInt32(0);
-            response.appendInt32(1);
-            response.appendInt32(-1);
-            response.appendUInt(friendId);
+            var updateComposer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateEventComposer(0, 1, friendId);
+            ServerMessage response = updateComposer.compose();
             client.sendMessage(response);
         }
     }
@@ -461,7 +457,6 @@ public class HabboMessenger {
     
     /**
      * Serializes friends list to a ServerMessage.
-     * Ported from HabboMessenger.cs SerializeFriends()
      * @return ServerMessage with friends list (ID 12)
      */
     public ServerMessage serializeFriends() {
@@ -482,7 +477,6 @@ public class HabboMessenger {
     
     /**
      * Serializes friend updates to a ServerMessage.
-     * Ported from HabboMessenger.cs SerializeUpdates()
      * @return ServerMessage with friend updates (ID 13)
      */
     public ServerMessage serializeUpdates() {
@@ -497,7 +491,7 @@ public class HabboMessenger {
             }
         }
         
-        ServerMessage updates = new ServerMessage(13);
+        ServerMessage updates = new ServerMessage(13); // _events[13] = FriendListUpdateEvent
         updates.appendInt32(0);
         updates.appendInt32(updateCount);
         updates.appendInt32(0);
@@ -507,12 +501,13 @@ public class HabboMessenger {
             updates.appendBoolean(false);
         }
         
-        return updates;
+        // Return wrapped in composer for consistency
+        var composer = new com.uber.server.messages.outgoing.messenger.FriendListUpdateEventComposer(updates);
+        return composer.compose();
     }
     
     /**
      * Serializes friend requests to a ServerMessage.
-     * Ported from HabboMessenger.cs SerializeRequests()
      * @return ServerMessage with friend requests (ID 314)
      */
     public ServerMessage serializeRequests() {
@@ -529,7 +524,6 @@ public class HabboMessenger {
     
     /**
      * Performs a search for users.
-     * Ported from HabboMessenger.cs PerformSearch()
      * @param searchQuery Search query (username pattern)
      * @return ServerMessage with search results (ID 435)
      */
@@ -572,6 +566,25 @@ public class HabboMessenger {
         }
         
         return search;
+    }
+    
+    /**
+     * Checks if a recipient is busy (in room and not appearing offline).
+     * @param recipient GameClient to check
+     * @return True if recipient is busy
+     */
+    private boolean isBusy(GameClient recipient) {
+        if (recipient == null || recipient.getHabbo() == null) {
+            return false;
+        }
+        
+        HabboMessenger recipientMessenger = recipient.getHabbo().getMessenger();
+        if (recipientMessenger == null) {
+            return false;
+        }
+        
+        // User is busy if they're in a room and not appearing offline
+        return recipient.getHabbo().getCurrentRoomId() > 0 && !recipientMessenger.isAppearOffline();
     }
     
     /**

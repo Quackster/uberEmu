@@ -4,7 +4,6 @@ import com.uber.server.util.TimeUtil;
 
 /**
  * Represents a user subscription.
- * Ported from HabboHotel/Users/Subscriptions/Subscription.cs
  */
 public class Subscription {
     private final String subscriptionId;

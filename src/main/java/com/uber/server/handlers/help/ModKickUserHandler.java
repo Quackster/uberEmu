@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for kicking a user (message ID 463).
- * Ported from Messages/Requests/Help.cs ModKickUser()
  */
 public class ModKickUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModKickUserHandler.class);

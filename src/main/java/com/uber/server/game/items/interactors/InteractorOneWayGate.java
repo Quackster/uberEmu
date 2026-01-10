@@ -8,7 +8,6 @@ import com.uber.server.game.pathfinding.Coord;
 
 /**
  * Interactor for one-way gate items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorOneWayGate
  */
 public class InteractorOneWayGate extends FurniInteractor {
     @Override

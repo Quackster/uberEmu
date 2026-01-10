@@ -2,7 +2,6 @@ package com.uber.server.plugins;
 
 /**
  * Interface for plugin host (provides plugin management).
- * Ported from Plugins/IUberPluginHost.cs
  */
 public interface IUberPluginHost {
     /**

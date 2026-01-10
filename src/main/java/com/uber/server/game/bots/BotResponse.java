@@ -5,7 +5,6 @@ import java.util.List;
 
 /**
  * Represents a bot response to user messages.
- * Ported from HabboHotel/RoomBots/BotResponse.cs
  */
 public class BotResponse {
     private final long id;

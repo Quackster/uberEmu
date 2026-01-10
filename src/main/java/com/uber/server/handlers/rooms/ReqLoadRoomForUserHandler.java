@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for requesting room load for user (message ID 59).
- * Ported from Messages/Requests/Rooms.cs ReqLoadRoomForUser()
  * 
  * This is a simple handler that triggers the room loading sequence.
  */
@@ -31,7 +30,6 @@ public class ReqLoadRoomForUserHandler implements PacketHandler {
         
         // This handler simply triggers the room loading sequence
         // The actual loading is handled by GetRoomData1/2/3 handlers
-        // This is a no-op in the original C# code as well
         logger.debug("ReqLoadRoomForUser called for user {} loading room {}", 
                     habbo.getId(), habbo.getLoadingRoom());
     }

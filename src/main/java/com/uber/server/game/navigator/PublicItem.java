@@ -2,7 +2,6 @@ package com.uber.server.game.navigator;
 
 /**
  * Represents a public room item in the navigator.
- * Ported from HabboHotel/Navigators/PublicItem.cs
  */
 public class PublicItem {
     public enum PublicImageType {
@@ -50,7 +49,6 @@ public class PublicItem {
     
     /**
      * Serializes this public item to a ServerMessage.
-     * Ported from HabboHotel/Navigators/PublicItem.cs Serialize()
      * @param message ServerMessage to append to
      */
     public void serialize(com.uber.server.messages.ServerMessage message) {

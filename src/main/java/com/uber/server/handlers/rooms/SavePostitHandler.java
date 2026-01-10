@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for saving a postit (message ID 84).
- * Ported from Messages/Requests/Rooms.cs SavePostit()
  */
 public class SavePostitHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SavePostitHandler.class);
@@ -69,14 +68,12 @@ public class SavePostitHandler implements PacketHandler {
         }
         
         // Validate color
-        switch (color) {
-            case "FFFF33":
-            case "FF9CFF":
-            case "9CCEFF":
-            case "9CFF9C":
-                break;
-            default:
-                return; // Invalid color
+        boolean isValidColor = switch (color) {
+            case "FFFF33", "FF9CFF", "9CCEFF", "9CFF9C" -> true;
+            default -> false;
+        };
+        if (!isValidColor) {
+            return; // Invalid color
         }
         
         // Update postit

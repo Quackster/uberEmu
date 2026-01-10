@@ -13,7 +13,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents a room event.
- * Ported from HabboHotel/Rooms/RoomEvent.cs
  */
 public class RoomEvent {
     private String name;
@@ -34,12 +33,11 @@ public class RoomEvent {
     
     /**
      * Serializes the room event to a ServerMessage.
-     * Ported from RoomEvent.cs Serialize()
      * @param session GameClient session
      * @return ServerMessage with event data
      */
     public ServerMessage serialize(GameClient session) {
-        ServerMessage message = new ServerMessage(370);
+        ServerMessage message = new ServerMessage(370); // _events[370] = RoomEventEvent
         
         Habbo habbo = session != null ? session.getHabbo() : null;
         if (habbo != null) {

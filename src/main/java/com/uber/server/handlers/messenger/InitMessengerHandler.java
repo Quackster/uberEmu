@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for initializing messenger (message ID 12).
- * Ported from Messages/Requests/Messenger.cs InitMessenger()
  */
 public class InitMessengerHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(InitMessengerHandler.class);
@@ -20,12 +19,7 @@ public class InitMessengerHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.game.users.messenger.HabboMessenger messenger = habbo.getMessenger();
-        if (messenger == null) {
-            return;
-        }
-        
-        // Send messenger initialization data (buddies and requests)
-        client.sendMessage(messenger.serializeUpdates());
+        // Initialize messenger (creates if needed, loads buddies and requests)
+        habbo.initMessenger();
     }
 }

@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for pet database operations.
- * Migrated from Pet.cs
  */
 public class PetRepository {
     private static final Logger logger = LoggerFactory.getLogger(PetRepository.class);
@@ -75,8 +74,10 @@ public class PetRepository {
      * @return The ID of the created pet, or 0 if failed
      */
     public long createPet(long userId, String name, int type, String race, String color, long createTimestamp) {
-        String sql = "INSERT INTO user_pets (user_id, name, type, race, color, expirience, energy, createstamp) " +
-                    "VALUES (?, ?, ?, ?, ?, 0, 100, ?)";
+        String sql = """
+            INSERT INTO user_pets (user_id, name, type, race, color, expirience, energy, createstamp)
+            VALUES (?, ?, ?, ?, ?, 0, 100, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

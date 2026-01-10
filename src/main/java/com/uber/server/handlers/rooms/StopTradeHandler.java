@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for stopping a trade (message ID 70, 403).
- * Ported from Messages/Requests/Rooms.cs StopTrade()
  */
 public class StopTradeHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopTradeHandler.class);

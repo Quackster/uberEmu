@@ -2,7 +2,6 @@ package com.uber.server.game.users.badges;
 
 /**
  * Represents a user badge.
- * Ported from HabboHotel/Users/Badges/Badge.cs
  */
 public class Badge {
     private final String code;

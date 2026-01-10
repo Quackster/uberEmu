@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for posting an item to marketplace (message ID 3010).
- * Ported from Messages/Requests/Catalog.cs MarketplacePostItem()
  */
 public class MarketplacePostItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplacePostItemHandler.class);

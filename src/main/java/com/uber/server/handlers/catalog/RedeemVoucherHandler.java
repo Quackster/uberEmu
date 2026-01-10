@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for redeeming vouchers (message ID 129).
- * Ported from Messages/Requests/Catalog.cs RedeemVoucher()
  */
 public class RedeemVoucherHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RedeemVoucherHandler.class);

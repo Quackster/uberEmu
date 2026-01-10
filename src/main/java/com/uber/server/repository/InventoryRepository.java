@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for inventory database operations.
- * Migrated from InventoryComponent.cs and AvatarEffectsInventoryComponent.cs
  */
 public class InventoryRepository {
     private static final Logger logger = LoggerFactory.getLogger(InventoryRepository.class);
@@ -185,8 +184,10 @@ public class InventoryRepository {
      * @return True if creation was successful
      */
     public boolean createUserEffect(long userId, int effectId, int duration) {
-        String sql = "INSERT INTO user_effects (user_id, effect_id, total_duration, is_activated, activated_stamp) " +
-                    "VALUES (?, ?, ?, '0', '0')";
+        String sql = """
+            INSERT INTO user_effects (user_id, effect_id, total_duration, is_activated, activated_stamp)
+            VALUES (?, ?, ?, '0', '0')
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

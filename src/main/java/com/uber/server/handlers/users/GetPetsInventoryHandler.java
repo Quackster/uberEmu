@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting pets inventory (message ID 3000).
- * Ported from Messages/Requests/Users.cs GetPetsInventory()
  */
 public class GetPetsInventoryHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetPetsInventoryHandler.class);

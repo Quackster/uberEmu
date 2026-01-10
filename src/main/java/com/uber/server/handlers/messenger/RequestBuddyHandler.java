@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Handler for requesting a buddy (message ID 39).
- * Ported from Messages/Requests/Messenger.cs RequestBuddy()
  */
 public class RequestBuddyHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RequestBuddyHandler.class);

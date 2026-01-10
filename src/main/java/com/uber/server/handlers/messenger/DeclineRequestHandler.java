@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for declining a friend request (message ID 38).
- * Ported from Messages/Requests/Messenger.cs DeclineRequest()
  */
 public class DeclineRequestHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeclineRequestHandler.class);
@@ -39,6 +38,6 @@ public class DeclineRequestHandler implements PacketHandler {
             // Decline all requests
             habbo.getMessenger().handleAllRequests();
         }
-        // else: invalid mode - do nothing (matches C# behavior)
+        // else: invalid mode - do nothing
     }
 }

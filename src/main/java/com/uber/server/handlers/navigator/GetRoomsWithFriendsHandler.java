@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting rooms with friends (message ID 433).
- * Ported from Messages/Requests/Navigator.cs GetRoomsWithFriends()
  */
 public class GetRoomsWithFriendsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRoomsWithFriendsHandler.class);

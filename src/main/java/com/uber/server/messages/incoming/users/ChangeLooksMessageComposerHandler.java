@@ -1,0 +1,84 @@
+package com.uber.server.messages.incoming.users;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.incoming.IncomingMessageHandler;
+import com.uber.server.util.AntiMutant;
+import com.uber.server.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for ChangeLooksMessageComposer (ID 44).
+ * Processes user look/gender update requests from the client.
+ */
+public class ChangeLooksMessageComposerHandler implements IncomingMessageHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ChangeLooksMessageComposerHandler.class);
+    private final Game game;
+    
+    public ChangeLooksMessageComposerHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null) {
+            return;
+        }
+        
+        // Check mutant penalty
+        if (habbo.isMutantPenalty()) {
+            client.sendNotif("Because of a penalty or restriction on your account, you are not allowed to change your look.");
+            return;
+        }
+        
+        // Read gender and look
+        String gender = message.popFixedString();
+        if (gender == null) {
+            return;
+        }
+        gender = gender.toUpperCase();
+        
+        String look = message.popFixedString();
+        if (look == null) {
+            return;
+        }
+        
+        // Filter injection characters and validate look
+        look = StringUtil.filterInjectionChars(look);
+        if (!AntiMutant.validateLook(look, gender)) {
+            return;
+        }
+        
+        // Update look and gender
+        habbo.setLook(look);
+        habbo.setGender(gender.toLowerCase());
+        
+        // Update in database
+        if (!game.getUserRepository().updateLook(habbo.getId(), look, gender)) {
+            logger.warn("Failed to update look for user {}", habbo.getId());
+            return;
+        }
+        
+        // Send response
+        var figureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+            -1, habbo.getLook(), habbo.getGender(), habbo.getMotto());
+        client.sendMessage(figureComposer.compose());
+        
+        // Update room if user is in a room
+        if (habbo.isInRoom() && game.getRoomManager() != null) {
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+            if (room != null) {
+                com.uber.server.game.rooms.RoomUser roomUser = room.getRoomUserByHabbo(habbo.getId());
+                if (roomUser != null) {
+                    var roomFigureComposer = new com.uber.server.messages.outgoing.users.UserFigureUpdateMessageEventComposer(
+                        roomUser.getVirtualId(), habbo.getLook(), habbo.getGender(), habbo.getMotto());
+                    room.sendMessage(roomFigureComposer.compose());
+                }
+            }
+        }
+    }
+}

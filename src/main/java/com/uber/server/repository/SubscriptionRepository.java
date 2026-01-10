@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for subscription database operations.
- * Migrated from SubscriptionManager.cs
  */
 public class SubscriptionRepository {
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionRepository.class);

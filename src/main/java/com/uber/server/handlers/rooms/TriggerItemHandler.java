@@ -11,10 +11,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for triggering an item (message IDs 392, 393, 232, 314, 247, 76).
- * Ported from Messages/Requests/Rooms.cs TriggerItem() and TriggerItemDiceSpecial()
  * 
- * Note: Full item interaction logic will be implemented when FurniInteractor is ported (Phase 11).
- * For now, this handler provides basic structure.
+ * Note: Full item interaction logic with FurniInteractor is being implemented incrementally.
+ * This handler provides the basic structure for item interactions.
  */
 public class TriggerItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(TriggerItemHandler.class);

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for looking at a position (message ID 79).
- * Ported from Messages/Requests/Rooms.cs LookAt()
  */
 public class LookAtHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(LookAtHandler.class);

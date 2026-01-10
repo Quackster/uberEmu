@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for kicking a bot (message ID 441).
- * Ported from Messages/Requests/Rooms.cs KickBot()
  */
 public class KickBotHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(KickBotHandler.class);

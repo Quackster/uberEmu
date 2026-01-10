@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for taking back an item from trade (message ID 405).
- * Ported from Messages/Requests/Rooms.cs TakeBackTradeItem()
  */
 public class TakeBackTradeItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(TakeBackTradeItemHandler.class);

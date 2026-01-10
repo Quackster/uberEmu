@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting events (message ID 439).
- * Ported from Messages/Requests/Navigator.cs GetEvents()
  */
 public class GetEventsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetEventsHandler.class);

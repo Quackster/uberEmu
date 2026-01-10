@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user achievements (message ID 370).
- * Ported from Messages/Requests/Users.cs GetAchievements()
  */
 public class GetAchievementsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetAchievementsHandler.class);

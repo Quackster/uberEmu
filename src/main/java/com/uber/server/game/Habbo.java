@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a logged-in user (Habbo).
- * Ported from HabboHotel/Users/Habbo.cs
  */
 public class Habbo {
     private static final Logger logger = LoggerFactory.getLogger(Habbo.class);
@@ -74,7 +73,6 @@ public class Habbo {
     
     /**
      * Called when the user enters a room.
-     * Ported from HabboHotel/Users/Habbo.cs OnEnterRoom()
      * @param roomId Room ID
      */
     public void onEnterRoom(long roomId) {
@@ -98,7 +96,6 @@ public class Habbo {
     
     /**
      * Called when the user leaves a room.
-     * Ported from HabboHotel/Users/Habbo.cs OnLeaveRoom()
      */
     public void onLeaveRoom() {
         if (currentRoomId <= 0) {
@@ -174,7 +171,6 @@ public class Habbo {
     
     /**
      * Loads user data from repositories.
-     * Ported from HabboHotel/Users/Habbo.cs LoadData()
      */
     public void loadData() {
         if (game == null) {
@@ -304,7 +300,6 @@ public class Habbo {
     
     /**
      * Loads favorite rooms from the database.
-     * Ported from HabboHotel/Users/Habbo.cs LoadFavorites()
      */
     public void loadFavorites() {
         favoriteRooms.clear();
@@ -337,7 +332,6 @@ public class Habbo {
     
     /**
      * Loads muted users from the database.
-     * Ported from HabboHotel/Users/Habbo.cs LoadMutedUsers()
      */
     public void loadMutedUsers() {
         mutedUsers.clear();
@@ -352,7 +346,6 @@ public class Habbo {
     
     /**
      * Loads user tags from the database.
-     * Ported from HabboHotel/Users/Habbo.cs LoadTags()
      */
     public void loadTags() {
         tags.clear();
@@ -375,7 +368,6 @@ public class Habbo {
     
     /**
      * Checks if the user has a specific permission (fuse).
-     * Ported from HabboHotel/Users/Habbo.cs HasFuse()
      * @param fuse Fuse/permission name to check
      * @return True if user has the permission, false otherwise
      */
@@ -403,7 +395,6 @@ public class Habbo {
     
     /**
      * Handles user disconnection.
-     * Ported from HabboHotel/Users/Habbo.cs OnDisconnect()
      */
     public void onDisconnect() {
         if (disconnected) {
@@ -447,7 +438,6 @@ public class Habbo {
     
     /**
      * Updates credits balance from database and sends update to client.
-     * Ported from HabboHotel/Users/Habbo.cs UpdateCreditsBalance()
      * @param userRepository UserRepository instance
      * @param inDatabase If true, updates database with current credits
      */
@@ -455,9 +445,8 @@ public class Habbo {
         // Send credits update message to client
         GameClient client = getClient();
         if (client != null) {
-            ServerMessage response = new ServerMessage(6);
-            response.appendStringWithBreak(credits + ".0");
-            client.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.users.CreditsMessageEventComposer(credits);
+            client.sendMessage(composer.compose());
         }
         
         if (inDatabase && userRepository != null) {
@@ -469,9 +458,8 @@ public class Habbo {
                 credits = dbCredits;
                 // Send updated credits to client
                 if (client != null) {
-                    ServerMessage response = new ServerMessage(6);
-                    response.appendStringWithBreak(credits + ".0");
-                    client.sendMessage(response);
+                    var composer = new com.uber.server.messages.outgoing.users.CreditsMessageEventComposer(credits);
+                    client.sendMessage(composer.compose());
                 }
             }
         }
@@ -499,7 +487,6 @@ public class Habbo {
     
     /**
      * Updates activity points balance.
-     * Ported from HabboHotel/Users/Habbo.cs UpdateActivityPointsBalance()
      * @param sendUpdate If true, sends update to client
      */
     public void updateActivityPointsBalance(boolean sendUpdate) {
@@ -515,10 +502,8 @@ public class Habbo {
         if (sendUpdate) {
             GameClient client = getClient();
             if (client != null) {
-                ServerMessage response = new ServerMessage(438);
-                response.appendInt32(activityPoints);
-                response.appendInt32(notifAmount);
-                client.sendMessage(response);
+                var composer = new com.uber.server.messages.outgoing.users.ActivityPointsMessageEventComposer(activityPoints, notifAmount);
+                client.sendMessage(composer.compose());
             }
         }
         
@@ -527,6 +512,29 @@ public class Habbo {
             long now = TimeUtil.getUnixTimestamp();
             game.getUserRepository().updateActivityPoints(id, activityPoints, now);
             this.lastActivityPointsUpdate = now;
+        }
+    }
+    
+    /**
+     * Initializes messenger (creates if needed, loads data, and sends to client).
+     */
+    public void initMessenger() {
+        // Create messenger if it doesn't exist
+        if (messenger == null) {
+            messenger = new HabboMessenger(id, game, game.getMessengerRepository(), game.getUserRepository());
+        }
+        
+        // Load buddies and requests (safe to call multiple times as they clear first)
+        messenger.loadBuddies();
+        messenger.loadRequests();
+        
+        // Always send messenger data to client, even if messenger already existed
+        GameClient client = getClient();
+        if (client != null) {
+            client.sendMessage(messenger.serializeFriends());
+            client.sendMessage(messenger.serializeRequests());
+            
+            messenger.onStatusChanged(true);
         }
     }
     

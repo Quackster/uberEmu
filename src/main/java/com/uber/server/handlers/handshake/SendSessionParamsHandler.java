@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for sending session parameters (message ID 206).
- * Ported from Messages/Requests/Handshake.cs SendSessionParams()
  */
 public class SendSessionParamsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SendSessionParamsHandler.class);

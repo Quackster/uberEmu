@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Static interactor for items that don't have special interactions.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorStatic
  */
 public class InteractorStatic extends FurniInteractor {
     @Override

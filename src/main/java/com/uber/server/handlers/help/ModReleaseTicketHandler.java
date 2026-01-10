@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for releasing a ticket (message ID 451).
- * Ported from Messages/Requests/Help.cs ModReleaseTicket()
  */
 public class ModReleaseTicketHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModReleaseTicketHandler.class);

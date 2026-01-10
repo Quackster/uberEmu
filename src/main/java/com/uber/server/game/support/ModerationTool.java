@@ -16,7 +16,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Moderation tool for staff members.
- * Ported from HabboHotel/Support/ModerationTool.cs
  */
 public class ModerationTool {
     private static final Logger logger = LoggerFactory.getLogger(ModerationTool.class);
@@ -126,7 +125,7 @@ public class ModerationTool {
             message.appendStringWithBreak(preset);
         }
         
-        // Append hardcoded values (from C# version)
+        // Append hardcoded preset values
         for (int i = 0; i < 20; i++) {
             message.appendInt32(1);
         }
@@ -216,7 +215,6 @@ public class ModerationTool {
     
     /**
      * Sends a new support ticket.
-     * Ported from HabboHotel/Support/ModerationTool.cs SendNewTicket()
      * @param session GameClient session
      * @param category Ticket category/type
      * @param reportedUserId Reported user ID
@@ -265,7 +263,6 @@ public class ModerationTool {
     
     /**
      * Deletes a pending ticket for a user.
-     * Ported from HabboHotel/Support/ModerationTool.cs DeletePendingTicketForUser()
      * @param userId User ID
      */
     public void deletePendingTicketForUser(long userId) {
@@ -280,7 +277,6 @@ public class ModerationTool {
     
     /**
      * Picks a ticket (assigns it to a moderator).
-     * Ported from HabboHotel/Support/ModerationTool.cs PickTicket()
      * @param session Moderator session
      * @param ticketId Ticket ID
      */
@@ -300,7 +296,6 @@ public class ModerationTool {
     
     /**
      * Releases a ticket (sets status back to OPEN).
-     * Ported from HabboHotel/Support/ModerationTool.cs ReleaseTicket()
      * @param session Moderator session
      * @param ticketId Ticket ID
      */
@@ -320,7 +315,6 @@ public class ModerationTool {
     
     /**
      * Closes a ticket with a result.
-     * Ported from HabboHotel/Support/ModerationTool.cs CloseTicket()
      * @param session Moderator session
      * @param ticketId Ticket ID
      * @param result Result code (1 = invalid, 2 = abusive, 3 = resolved)
@@ -338,34 +332,26 @@ public class ModerationTool {
         // Get sender client to send result message
         GameClient senderClient = game.getClientManager().getClientByHabbo(ticket.getSenderId());
         
-        TicketStatus newStatus;
-        int resultCode;
-        
-        switch (result) {
-            case 1:
-                resultCode = 1;
-                newStatus = TicketStatus.INVALID;
-                break;
-            case 2:
-                resultCode = 2;
-                newStatus = TicketStatus.ABUSIVE;
+        var resultPair = switch (result) {
+            case 1 -> {
+                yield new java.util.AbstractMap.SimpleEntry<>(1, TicketStatus.INVALID);
+            }
+            case 2 -> {
                 // Increment abusive Call for Help count
                 if (userInfoRepository != null) {
                     userInfoRepository.incrementCfhsAbusive(ticket.getSenderId());
                 }
-                break;
-            case 3:
-            default:
-                resultCode = 0;
-                newStatus = TicketStatus.RESOLVED;
-                break;
-        }
+                yield new java.util.AbstractMap.SimpleEntry<>(2, TicketStatus.ABUSIVE);
+            }
+            default -> new java.util.AbstractMap.SimpleEntry<>(0, TicketStatus.RESOLVED);
+        };
+        int resultCode = resultPair.getKey();
+        TicketStatus newStatus = resultPair.getValue();
         
         // Send result message to sender
         if (senderClient != null) {
-            ServerMessage response = new ServerMessage(540);
-            response.appendInt32(resultCode);
-            senderClient.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.support.ModerationActionResultMessageEventComposer(resultCode);
+            senderClient.sendMessage(composer.compose());
         }
         
         ticket.close(newStatus, true);
@@ -374,7 +360,6 @@ public class ModerationTool {
     
     /**
      * Sends a ticket update to all moderators.
-     * Ported from HabboHotel/Support/ModerationTool.cs SendTicketToModerators()
      * @param ticket SupportTicket to broadcast
      */
     public void sendTicketToModerators(SupportTicket ticket) {
@@ -388,7 +373,6 @@ public class ModerationTool {
     
     /**
      * Serializes user info for moderation.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeUserInfo()
      * @param userId User ID
      * @return ServerMessage with user info (ID 533)
      */
@@ -443,7 +427,6 @@ public class ModerationTool {
     
     /**
      * Serializes room visits for a user.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeRoomVisits()
      * @param userId User ID
      * @return ServerMessage with room visits (ID 537)
      */
@@ -480,7 +463,6 @@ public class ModerationTool {
     
     /**
      * Serializes user chat log.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeUserChatlog()
      * @param userId User ID
      * @return ServerMessage with user chat log (ID 536)
      */
@@ -534,7 +516,6 @@ public class ModerationTool {
     
     /**
      * Serializes room chat log.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeRoomChatlog()
      * @param roomId Room ID
      * @return ServerMessage with room chat log (ID 535)
      */
@@ -570,7 +551,6 @@ public class ModerationTool {
     
     /**
      * Serializes ticket chat log.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeTicketChatlog()
      * @param ticket SupportTicket
      * @param roomData RoomData
      * @param timestamp Timestamp
@@ -608,7 +588,6 @@ public class ModerationTool {
     
     /**
      * Serializes room tool for moderation.
-     * Ported from HabboHotel/Support/ModerationTool.cs SerializeRoomTool()
      * @param roomData RoomData
      * @return ServerMessage with room tool data (ID 538)
      */
@@ -627,7 +606,7 @@ public class ModerationTool {
         message.appendUInt(roomData.getId());
         message.appendInt32(roomData.getUsersNow());
         
-        // Check if owner is in room (by username, matching C# version)
+        // Check if owner is in room (by username)
         boolean ownerInRoom = false;
         if (room != null && roomData.getOwner() != null && !roomData.getOwner().isEmpty()) {
             com.uber.server.game.rooms.RoomUser ownerUser = room.getRoomUserByHabbo(roomData.getOwner());
@@ -674,7 +653,6 @@ public class ModerationTool {
     
     /**
      * Sends a room alert (caution or message) to all users in a room.
-     * Ported from HabboHotel/Support/ModerationTool.cs RoomAlert()
      * @param roomId Room ID
      * @param caution If true, send as caution (increments caution count)
      * @param alertMessage Alert message
@@ -717,7 +695,6 @@ public class ModerationTool {
     
     /**
      * Performs a room action (kick users, lock room, mark inappropriate).
-     * Ported from HabboHotel/Support/ModerationTool.cs PerformRoomAction()
      * @param modSession Moderator session
      * @param roomId Room ID
      * @param kickUsers If true, kick all users from room
@@ -777,7 +754,6 @@ public class ModerationTool {
     
     /**
      * Alerts a user (sends message or caution).
-     * Ported from HabboHotel/Support/ModerationTool.cs AlertUser()
      * @param modSession Moderator session
      * @param userId User ID to alert
      * @param alertMessage Alert message
@@ -809,7 +785,6 @@ public class ModerationTool {
     
     /**
      * Kicks a user from their current room.
-     * Ported from HabboHotel/Support/ModerationTool.cs KickUser()
      * @param modSession Moderator session
      * @param userId User ID to kick
      * @param message Kick message
@@ -854,7 +829,6 @@ public class ModerationTool {
     
     /**
      * Bans a user.
-     * Ported from HabboHotel/Support/ModerationTool.cs BanUser()
      * @param modSession Moderator session
      * @param userId User ID to ban
      * @param length Ban length in seconds

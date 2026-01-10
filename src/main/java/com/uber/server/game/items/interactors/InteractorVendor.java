@@ -10,7 +10,6 @@ import java.util.Random;
 
 /**
  * Interactor for vending machine items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorVendor
  */
 public class InteractorVendor extends FurniInteractor {
     private static final Random random = new Random();

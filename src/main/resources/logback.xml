@@ -3,12 +3,14 @@
     <property name="LOG_DIR" value="logs"/>
     <property name="LOG_FILE" value="uberemu.log"/>
 
-    <!-- Console Appender -->
+    <!-- Console Appender with colored output -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
+        <!-- Use System.out to prevent red output (System.err defaults to red in many terminals) -->
         <target>System.out</target>
+        <encoder>
+            <!-- Colored pattern for console - highlights different log levels with default colors -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
     </appender>
 
     <!-- File Appender -->
@@ -35,4 +37,7 @@
     <!-- Application Loggers -->
     <logger name="com.uber.server" level="DEBUG"/>
     <logger name="com.zaxxer.hikari" level="INFO"/>
+    
+    <!-- Route Log4j loggers through SLF4J/Logback -->
+    <logger name="org.apache.logging" level="DEBUG"/>
 </configuration>

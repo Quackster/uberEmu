@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting moodlight data (message ID 341).
- * Ported from Messages/Requests/Rooms.cs GetMoodlight()
  */
 public class GetMoodlightHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetMoodlightHandler.class);

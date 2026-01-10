@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for GetRoomData2 (message ID 390).
- * Ported from Messages/Requests/Rooms.cs GetRoomData2()
  */
 public class GetRoomData2Handler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRoomData2Handler.class);
@@ -43,14 +42,17 @@ public class GetRoomData2Handler implements PacketHandler {
         }
         if (model == null) {
             client.sendNotif("Sorry, model data is missing from this room and therefore cannot be loaded.");
-            client.sendMessage(new ServerMessage(18));
+            var composer = new com.uber.server.messages.outgoing.rooms.RoomEntryErrorMessageEventComposer();
+            client.sendMessage(composer.compose());
             habbo.setLoadingRoom(0);
             habbo.setLoadingChecksPassed(false);
             return;
         }
         
-        // Send heightmap (ID 31) and relative heightmap (ID 470)
-        client.sendMessage(model.serializeHeightmap());
-        client.sendMessage(model.serializeRelativeHeightmap());
+        // Send heightmap and relative heightmap
+        var heightmapComposer = new com.uber.server.messages.outgoing.rooms.RoomHeightmapMessageEventComposer(model.serializeHeightmap());
+        client.sendMessage(heightmapComposer.compose());
+        var relativeHeightmapComposer = new com.uber.server.messages.outgoing.rooms.RoomRelativeHeightmapMessageEventComposer(model.serializeRelativeHeightmap());
+        client.sendMessage(relativeHeightmapComposer.compose());
     }
 }

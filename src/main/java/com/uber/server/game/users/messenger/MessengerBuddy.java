@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a friend/buddy in the messenger system.
- * Ported from HabboHotel/Users/Messenger/MessengerBuddy.cs
  */
 public class MessengerBuddy {
     private static final Logger logger = LoggerFactory.getLogger(MessengerBuddy.class);
@@ -163,7 +162,6 @@ public class MessengerBuddy {
     
     /**
      * Serializes the buddy to a ServerMessage.
-     * Ported from MessengerBuddy.cs Serialize()
      * @param message ServerMessage to append to
      * @param search If true, serializes for search results; if false, for friends list
      */

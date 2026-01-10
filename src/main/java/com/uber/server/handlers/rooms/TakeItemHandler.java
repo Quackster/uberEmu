@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for taking an item from a room (message ID 67).
- * Ported from Messages/Requests/Rooms.cs TakeItem()
  */
 public class TakeItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(TakeItemHandler.class);

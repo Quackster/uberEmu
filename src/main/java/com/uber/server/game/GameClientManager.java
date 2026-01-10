@@ -1,5 +1,6 @@
 package com.uber.server.game;
 
+import com.uber.server.game.threading.GameThreadPool;
 import com.uber.server.messages.PacketHandlerRegistry;
 import com.uber.server.messages.ServerMessage;
 import com.uber.server.net.TcpConnection;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +26,6 @@ public class GameClientManager {
     private final ConcurrentMap<Long, GameClient> clients;
     private final PacketHandlerRegistry handlerRegistry;
     private final TcpConnectionManager connectionManager;
-    private ScheduledExecutorService connectionChecker;
     private final AtomicBoolean isRunning;
     
     public GameClientManager(PacketHandlerRegistry handlerRegistry, TcpConnectionManager connectionManager) {
@@ -56,7 +55,6 @@ public class GameClientManager {
     
     /**
      * Gets a client by Habbo user ID.
-     * Ported from HabboHotel/GameClients/GameClientManager.cs GetClientByHabbo()
      * Thread-safe: iterates through clients and checks Habbo ID.
      * @param habboId Habbo user ID
      * @return The client, or null if not found
@@ -82,7 +80,6 @@ public class GameClientManager {
     
     /**
      * Gets a client by Habbo username.
-     * Ported from HabboHotel/GameClients/GameClientManager.cs GetClientByHabbo(string)
      * Thread-safe: iterates through clients and checks username.
      * @param username Habbo username
      * @return The client, or null if not found
@@ -176,6 +173,7 @@ public class GameClientManager {
     /**
      * Starts the connection checker thread.
      * Checks for timed-out connections and sends ping messages.
+     * Uses shared thread pool from GameThreadPool.
      */
     public void startConnectionChecker(int pingInterval) {
         if (isRunning.getAndSet(true)) {
@@ -187,15 +185,13 @@ public class GameClientManager {
             throw new IllegalArgumentException("Invalid configuration value for ping interval! Must be above 100 milliseconds.");
         }
         
-        connectionChecker = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "Connection Checker");
-            t.setDaemon(true);
-            return t;
-        });
+        // Use shared thread pool instead of dedicated executor
+        ScheduledExecutorService executor = GameThreadPool.getInstance().getGameExecutor();
         
-        ServerMessage pingMessage = new ServerMessage(50);
+        var pingComposer = new com.uber.server.messages.outgoing.global.PingMessageEventComposer();
+        ServerMessage pingMessage = pingComposer.compose();
         
-        connectionChecker.scheduleWithFixedDelay(() -> {
+        executor.scheduleWithFixedDelay(() -> {
             try {
                 List<Long> timedOutClients = new ArrayList<>();
                 List<GameClient> toPing = new ArrayList<>();
@@ -244,22 +240,11 @@ public class GameClientManager {
     
     /**
      * Stops the connection checker.
+     * Note: We don't shut down the shared executor here, only mark as not running.
      */
     public void stopConnectionChecker() {
         if (!isRunning.getAndSet(false)) {
             return;
-        }
-        
-        if (connectionChecker != null && !connectionChecker.isShutdown()) {
-            connectionChecker.shutdown();
-            try {
-                if (!connectionChecker.awaitTermination(5, TimeUnit.SECONDS)) {
-                    connectionChecker.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                connectionChecker.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
         }
         
         logger.info("Connection checker stopped");
@@ -311,7 +296,6 @@ public class GameClientManager {
     
     /**
      * Gets a username by user ID.
-     * Ported from HabboHotel/GameClients/GameClientManager.cs GetNameById()
      * @param userId User ID
      * @return Username, or empty string if not found
      */
@@ -325,7 +309,6 @@ public class GameClientManager {
     
     /**
      * Checks and updates avatar effects for all clients.
-     * Ported from HabboHotel/GameClients/GameClientManager.cs CheckEffects()
      */
     public void checkEffects() {
         // Create a copy of keys to iterate safely
@@ -350,7 +333,6 @@ public class GameClientManager {
     
     /**
      * Checks and updates pixel (activity points) for all clients.
-     * Ported from HabboHotel/GameClients/GameClientManager.cs CheckPixelUpdates()
      */
     public void checkPixelUpdates() {
         Game game = null;

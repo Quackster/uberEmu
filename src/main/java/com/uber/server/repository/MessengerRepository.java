@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for messenger database operations.
- * Migrated from HabboMessenger.cs
  */
 public class MessengerRepository {
     private static final Logger logger = LoggerFactory.getLogger(MessengerRepository.class);
@@ -109,8 +108,10 @@ public class MessengerRepository {
      * @return True if friendship exists
      */
     public boolean friendshipExists(long userOne, long userTwo) {
-        String sql = "SELECT * FROM messenger_friendships WHERE (user_one_id = ? AND user_two_id = ?) " +
-                    "OR (user_one_id = ? AND user_two_id = ?) LIMIT 1";
+        String sql = """
+            SELECT * FROM messenger_friendships WHERE (user_one_id = ? AND user_two_id = ?)
+            OR (user_one_id = ? AND user_two_id = ?) LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -286,8 +287,10 @@ public class MessengerRepository {
      * @return Request ID, or 0 if not found
      */
     public long getRequestId(long toId, long fromId) {
-        String sql = "SELECT id FROM messenger_requests WHERE to_id = ? AND from_id = ? " +
-                    "ORDER BY id DESC LIMIT 1";
+        String sql = """
+            SELECT id FROM messenger_requests WHERE to_id = ? AND from_id = ?
+            ORDER BY id DESC LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

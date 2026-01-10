@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for banning a user from a room (message ID 320).
- * Ported from Messages/Requests/Rooms.cs BanUser()
  */
 public class BanUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(BanUserHandler.class);

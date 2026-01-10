@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents a room advertisement.
- * Ported from HabboHotel/Advertisements/RoomAdvertisement.cs
  */
 public class RoomAdvertisement {
     private static final Logger logger = LoggerFactory.getLogger(RoomAdvertisement.class);

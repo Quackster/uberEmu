@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for applying room effect (wallpaper/floor/landscape) (message ID 66).
- * Ported from Messages/Requests/Rooms.cs ApplyRoomEffect()
  */
 public class ApplyRoomEffectHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ApplyRoomEffectHandler.class);

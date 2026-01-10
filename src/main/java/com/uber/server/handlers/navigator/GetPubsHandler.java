@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting public rooms (message ID 380).
- * Ported from Messages/Requests/Navigator.cs GetPubs()
  */
 public class GetPubsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetPubsHandler.class);

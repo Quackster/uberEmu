@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room edit data (message ID 400).
- * Ported from Messages/Requests/Rooms.cs GetRoomEditData()
  */
 public class GetRoomEditDataHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRoomEditDataHandler.class);

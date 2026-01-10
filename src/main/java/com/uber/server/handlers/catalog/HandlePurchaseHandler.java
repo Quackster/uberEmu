@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for catalog purchase (message ID 100).
- * Ported from Messages/Requests/Catalog.cs HandlePurchase()
  */
 public class HandlePurchaseHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(HandlePurchaseHandler.class);

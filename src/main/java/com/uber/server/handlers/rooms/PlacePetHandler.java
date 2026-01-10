@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for placing a pet in a room (message ID 3002).
- * Ported from Messages/Requests/Rooms.cs PlacePet()
  */
 public class PlacePetHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PlacePetHandler.class);

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room visits for a user (message ID 458).
- * Ported from Messages/Requests/Help.cs ModGetRoomVisits()
  */
 public class ModGetRoomVisitsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModGetRoomVisitsHandler.class);

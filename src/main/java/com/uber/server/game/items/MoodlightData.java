@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents moodlight data for a room.
- * Ported from HabboHotel/Items/MoodlightData.cs
  */
 public class MoodlightData {
     private static final Logger logger = LoggerFactory.getLogger(MoodlightData.class);
@@ -90,19 +89,11 @@ public class MoodlightData {
             return;
         }
         
-        String presetField;
-        switch (preset) {
-            case 3:
-                presetField = "preset_three";
-                break;
-            case 2:
-                presetField = "preset_two";
-                break;
-            case 1:
-            default:
-                presetField = "preset_one";
-                break;
-        }
+        String presetField = switch (preset) {
+            case 3 -> "preset_three";
+            case 2 -> "preset_two";
+            default -> "preset_one";
+        };
         
         String presetValue = colorCode + "," + intensity + "," + (bgOnly ? "1" : "0");
         repository.updateMoodlightPreset(itemId, presetField, presetValue);
@@ -168,18 +159,10 @@ public class MoodlightData {
             return false;
         }
         
-        switch (colorCode) {
-            case "#000000":
-            case "#0053F7":
-            case "#EA4532":
-            case "#82F349":
-            case "#74F5F5":
-            case "#E759DE":
-            case "#F2F851":
-                return true;
-            default:
-                return false;
-        }
+        return switch (colorCode) {
+            case "#000000", "#0053F7", "#EA4532", "#82F349", "#74F5F5", "#E759DE", "#F2F851" -> true;
+            default -> false;
+        };
     }
     
     /**

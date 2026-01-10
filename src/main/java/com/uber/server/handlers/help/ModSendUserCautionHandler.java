@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for sending user caution (message ID 461).
- * Ported from Messages/Requests/Help.cs ModSendUserCaution()
  */
 public class ModSendUserCautionHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModSendUserCautionHandler.class);

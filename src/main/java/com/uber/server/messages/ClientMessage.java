@@ -1,7 +1,8 @@
 package com.uber.server.messages;
 
-import com.uber.server.util.Base64Encoding;
-import com.uber.server.util.WireEncoding;
+import com.uber.server.encoding.base64.Base64Encoding;
+import com.uber.server.encoding.client.ClientMessageDecoder;
+import com.uber.server.encoding.wire.WireEncoding;
 
 import java.nio.charset.Charset;
 
@@ -14,6 +15,7 @@ public class ClientMessage {
     private final byte[] body;
     private int pointer;
     private static final Charset DEFAULT_ENCODING = Charset.defaultCharset();
+    private ClientMessageDecoder decoder;
     
     public ClientMessage(long messageId, byte[] body) {
         this.messageId = messageId;
@@ -92,83 +94,62 @@ public class ClientMessage {
     }
     
     /**
+     * Gets the decoder for this message.
+     * @return ClientMessageDecoder instance
+     */
+    public ClientMessageDecoder getDecoder() {
+        if (decoder == null) {
+            decoder = new ClientMessageDecoder(this);
+        }
+        return decoder;
+    }
+    
+    /**
      * Reads a fixed-length value (length-prefixed with 2-byte Base64 length).
-     * @return The value bytes
+     * Delegates to ClientMessageDecoder.
      */
     public byte[] readFixedValue() {
-        byte[] lengthBytes = readBytes(2);
-        if (lengthBytes.length < 2) {
-            return new byte[0];
-        }
-        int len = Base64Encoding.decodeInt32(lengthBytes);
-        return readBytes(len);
+        return getDecoder().readFixedValue();
     }
     
     public boolean popBase64Boolean() {
-        if (getRemainingLength() > 0 && body[pointer++] == Base64Encoding.POSITIVE) {
-            return true;
-        }
-        return false;
+        return getDecoder().popBase64Boolean();
     }
     
     public int popInt32() {
-        byte[] bytes = readBytes(2);
-        if (bytes.length < 2) {
-            return 0;
-        }
-        return Base64Encoding.decodeInt32(bytes);
+        return getDecoder().popInt32();
     }
     
     public long popUInt32() {
-        return Integer.toUnsignedLong(popInt32());
+        return getDecoder().popUInt32();
     }
     
     public String popFixedString() {
-        return popFixedString(DEFAULT_ENCODING);
+        return getDecoder().popFixedString();
     }
     
     public String popFixedString(Charset encoding) {
-        byte[] value = readFixedValue();
-        String result = new String(value, encoding);
-        return result.replace('\u0001', ' '); // Replace char 1 with space
+        return getDecoder().popFixedString(encoding);
     }
     
     public int popFixedInt32() {
-        String s = popFixedString(Charset.forName("ASCII"));
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+        return getDecoder().popFixedInt32();
     }
     
     public long popFixedUInt32() {
-        return Integer.toUnsignedLong(popFixedInt32());
+        return getDecoder().popFixedUInt32();
     }
     
     public boolean popWiredBoolean() {
-        if (getRemainingLength() > 0 && body[pointer++] == WireEncoding.POSITIVE) {
-            return true;
-        }
-        return false;
+        return getDecoder().popWiredBoolean();
     }
     
     public int popWiredInt32() {
-        if (getRemainingLength() < 1) {
-            return 0;
-        }
-        
-        byte[] data = plainReadBytes(WireEncoding.MAX_INTEGER_BYTE_AMOUNT);
-        int[] totalBytesOut = new int[1];
-        int result = WireEncoding.decodeInt32(data, totalBytesOut);
-        
-        pointer += totalBytesOut[0];
-        
-        return result;
+        return getDecoder().popWiredInt32();
     }
     
     public long popWiredUInt() {
-        return Integer.toUnsignedLong(popWiredInt32());
+        return getDecoder().popWiredUInt();
     }
     
     @Override

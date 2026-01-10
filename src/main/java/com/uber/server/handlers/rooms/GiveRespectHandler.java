@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for giving respect (message ID 371).
- * Ported from Messages/Requests/Rooms.cs GiveRespect()
  */
 public class GiveRespectHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GiveRespectHandler.class);

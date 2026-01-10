@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for initializing help tool (message ID 416).
- * Ported from Messages/Requests/Help.cs InitHelpTool()
  */
 public class InitHelpToolHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(InitHelpToolHandler.class);

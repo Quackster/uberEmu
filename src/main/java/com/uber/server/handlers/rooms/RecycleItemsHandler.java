@@ -20,7 +20,6 @@ import java.util.Map;
 
 /**
  * Handler for recycling items (message ID 414).
- * Ported from Messages/Requests/Rooms.cs RecycleItems()
  */
 public class RecycleItemsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RecycleItemsHandler.class);

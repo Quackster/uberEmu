@@ -4,7 +4,6 @@ import com.uber.server.util.TimeUtil;
 
 /**
  * Represents an avatar effect.
- * Ported from HabboHotel/Users/Inventory/AvatarEffect.cs
  */
 public class AvatarEffect {
     private final int effectId;

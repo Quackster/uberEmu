@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for starting typing (message ID 317).
- * Ported from Messages/Requests/Rooms.cs StartTyping()
  */
 public class StartTypingHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(StartTypingHandler.class);
@@ -38,9 +37,8 @@ public class StartTypingHandler implements PacketHandler {
             return;
         }
         
-        ServerMessage typingMessage = new ServerMessage(361);
-        typingMessage.appendInt32(roomUser.getVirtualId());
-        typingMessage.appendBoolean(true);
-        room.sendMessage(typingMessage);
+        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageEventComposer(
+            roomUser.getVirtualId(), true);
+        room.sendMessage(composer.compose());
     }
 }

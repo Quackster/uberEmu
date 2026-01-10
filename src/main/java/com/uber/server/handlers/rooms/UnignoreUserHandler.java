@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for unignoring a user (message ID 322).
- * Ported from Messages/Requests/Rooms.cs UnignoreUser()
- * 
- * Note: The original C# implementation is commented out - placeholder for future implementation
  */
 public class UnignoreUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(UnignoreUserHandler.class);
@@ -30,7 +27,7 @@ public class UnignoreUserHandler implements PacketHandler {
             return;
         }
         
-        // Original C# implementation is commented out - placeholder for future implementation
+        // TODO: Implement user unignoring functionality
         // long userId = message.popWiredUInt();
         // if (habbo.getMutedUsers().contains(userId)) {
         //     habbo.getMutedUsers().remove(userId);

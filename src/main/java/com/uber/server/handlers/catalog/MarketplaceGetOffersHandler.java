@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting marketplace offers (message ID 3018).
- * Ported from Messages/Requests/Catalog.cs MarketplaceGetOffers()
  */
 public class MarketplaceGetOffersHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceGetOffersHandler.class);

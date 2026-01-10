@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user info (message ID 454).
- * Ported from Messages/Requests/Help.cs ModGetUserInfo()
  */
 public class ModGetUserInfoHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModGetUserInfoHandler.class);

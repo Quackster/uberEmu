@@ -2,7 +2,6 @@ package com.uber.server.game.items;
 
 /**
  * Represents a furniture item definition.
- * Ported from HabboHotel/Items/Item.cs
  */
 public class Item {
     private final long id;

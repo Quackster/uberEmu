@@ -1,8 +1,13 @@
 package com.uber.server.net;
 
 import com.uber.server.game.GameClientManager;
+import com.uber.server.net.netty.pipeline.PipelineInitializer;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -15,11 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * TCP connection listener using Netty.
- * Ported from C# TcpConnectionListener.cs
  */
 public class TcpConnectionListener {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnectionListener.class);
     private static final int QUEUE_LENGTH = 1;
+    final private static int BACK_LOG = 20;
+    final private static int BUFFER_SIZE = 2048;
     
     private final String listenerIP;
     private final int listenerPort;
@@ -49,35 +55,24 @@ public class TcpConnectionListener {
         
         try {
             // Create event loop groups
-            bossGroup = new NioEventLoopGroup(1); // Single thread for accepting connections
-            workerGroup = new NioEventLoopGroup(); // Default thread count for handling connections
+            int threads = Runtime.getRuntime().availableProcessors();
+            this.bossGroup = (Epoll.isAvailable()) ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
+            this.workerGroup = (Epoll.isAvailable()) ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
             
             // Create server bootstrap
             bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, QUEUE_LENGTH)
-                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .channel((Epoll.isAvailable()) ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, BACK_LOG)
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.SO_RCVBUF, BUFFER_SIZE)
+                    .childOption(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(BUFFER_SIZE))
+                    .childOption(ChannelOption.ALLOCATOR, new PooledByteBufAllocator(true))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            // This is called when a new connection is accepted
-                            // Create TcpConnection first
-                            TcpConnection connection = manager.getFactory().createConnection(ch);
-                            if (connection == null) {
-                                ch.close();
-                                return;
-                            }
-                            
-                            // Set connection ID in channel attributes for HabboChannelHandler
-                            ch.attr(io.netty.util.AttributeKey.valueOf("connectionId")).set(connection.getId());
-                            
-                            // Add connection to manager (this will create GameClient)
-                            manager.handleNewConnection(connection);
-                            
-                            // Set up the pipeline with decoder, encoder, and handler
+                            // Use PipelineInitializer to set up the pipeline
                             GameClientManager gameClientManager = manager.getGameClientManager();
                             if (gameClientManager == null) {
                                 logger.error("GameClientManager not set in TcpConnectionManager");
@@ -85,10 +80,8 @@ public class TcpConnectionListener {
                                 return;
                             }
                             
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast("decoder", new HabboPacketDecoder());
-                            pipeline.addLast("encoder", new HabboPacketEncoder());
-                            pipeline.addLast("handler", new HabboChannelHandler(manager, gameClientManager));
+                            PipelineInitializer pipelineInitializer = new PipelineInitializer(manager, gameClientManager);
+                            pipelineInitializer.initializePipeline(ch);
                         }
                     });
             
@@ -109,58 +102,8 @@ public class TcpConnectionListener {
         } catch (Exception e) {
             isListening.set(false);
             logger.error("Failed to start TCP listener on {}:{}: {}", listenerIP, listenerPort, e.getMessage(), e);
-            
-            // Fallback to loopback if bind failed
-            if (!listenerIP.equals("127.0.0.1") && !listenerIP.equals("localhost")) {
-                logger.warn("Falling back to loopback address");
-                try {
+
                     shutdown();
-                    
-                    // Try again with loopback
-                    bossGroup = new NioEventLoopGroup(1);
-                    workerGroup = new NioEventLoopGroup();
-                    bootstrap = new ServerBootstrap();
-                    bootstrap.group(bossGroup, workerGroup)
-                            .channel(NioServerSocketChannel.class)
-                            .option(ChannelOption.SO_BACKLOG, QUEUE_LENGTH)
-                            .option(ChannelOption.SO_REUSEADDR, true)
-                            .childOption(ChannelOption.TCP_NODELAY, true)
-                            .childOption(ChannelOption.SO_KEEPALIVE, true)
-                            .childHandler(new ChannelInitializer<SocketChannel>() {
-                                @Override
-                                protected void initChannel(SocketChannel ch) throws Exception {
-                                    TcpConnection connection = manager.getFactory().createConnection(ch);
-                                    if (connection == null) {
-                                        ch.close();
-                                        return;
-                                    }
-                                    
-                                    ch.attr(io.netty.util.AttributeKey.valueOf("connectionId")).set(connection.getId());
-                                    manager.handleNewConnection(connection);
-                                    
-                                    GameClientManager gameClientManager = manager.getGameClientManager();
-                                    if (gameClientManager == null) {
-                                        ch.close();
-                                        return;
-                                    }
-                                    
-                                    ChannelPipeline pipeline = ch.pipeline();
-                                    pipeline.addLast("decoder", new HabboPacketDecoder());
-                                    pipeline.addLast("encoder", new HabboPacketEncoder());
-                                    pipeline.addLast("handler", new HabboChannelHandler(manager, gameClientManager));
-                                }
-                            });
-                    
-                    InetSocketAddress loopback = new InetSocketAddress("127.0.0.1", listenerPort);
-                    ChannelFuture bindFuture = bootstrap.bind(loopback);
-                    serverChannel = bindFuture.sync().channel();
-                    isListening.set(true);
-                    logger.info("Game socket listening on 127.0.0.1:{}", listenerPort);
-                } catch (Exception e2) {
-                    logger.error("Failed to bind to loopback address: {}", e2.getMessage(), e2);
-                    shutdown();
-                }
-            }
         }
     }
     

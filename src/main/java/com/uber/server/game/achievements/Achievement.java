@@ -2,7 +2,6 @@ package com.uber.server.game.achievements;
 
 /**
  * Represents an achievement definition.
- * Ported from HabboHotel/Achievements/Achievement.cs
  */
 public class Achievement {
     private final long id;

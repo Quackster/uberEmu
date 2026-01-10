@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Main entry point for the UberEmu server.
- * Replaces Program.cs from C# version.
  */
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -36,7 +35,7 @@ public class Main {
             environment = GameEnvironment.getInstance();
             environment.initialize();
             
-            // Main loop: read commands from console (similar to C# version)
+            // Main loop: read commands from console
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(System.in, StandardCharsets.UTF_8));
             

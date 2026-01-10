@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for room item database operations.
- * Migrated from RoomItem.cs and Room.cs
  */
 public class RoomItemRepository {
     private static final Logger logger = LoggerFactory.getLogger(RoomItemRepository.class);

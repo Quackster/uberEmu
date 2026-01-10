@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting favorite rooms (message ID 435).
- * Ported from Messages/Requests/Navigator.cs GetFavoriteRooms()
  */
 public class GetFavoriteRoomsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetFavoriteRoomsHandler.class);

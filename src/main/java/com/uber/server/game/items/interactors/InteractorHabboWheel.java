@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for Habbo wheel items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorHabboWheel
  */
 public class InteractorHabboWheel extends FurniInteractor {
     @Override
@@ -27,7 +26,7 @@ public class InteractorHabboWheel extends FurniInteractor {
         
         if (!"-1".equals(item.getExtraData())) {
             item.setExtraData("-1");
-            item.updateState();
+            item.updateState(false, true);
             item.reqUpdate(10);
         }
     }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for checking if user can sell on marketplace (message ID 3012).
- * Ported from Messages/Requests/Catalog.cs MarketplaceCanSell()
  */
 public class MarketplaceCanSellHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceCanSellHandler.class);

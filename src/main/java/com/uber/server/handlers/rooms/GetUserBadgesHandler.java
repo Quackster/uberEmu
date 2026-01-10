@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user badges (message ID 159).
- * Ported from Messages/Requests/Rooms.cs GetUserBadges()
  */
 public class GetUserBadgesHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetUserBadgesHandler.class);
@@ -57,6 +56,7 @@ public class GetUserBadgesHandler implements PacketHandler {
             }
         }
         
-        client.sendMessage(response);
+        var badgesComposer = new com.uber.server.messages.outgoing.users.BadgesEventComposer(response);
+        client.sendMessage(badgesComposer.compose());
     }
 }

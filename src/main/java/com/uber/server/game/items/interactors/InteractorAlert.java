@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for alert items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorAlert
  */
 public class InteractorAlert extends FurniInteractor {
     @Override

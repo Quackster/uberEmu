@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages user subscriptions.
- * Ported from HabboHotel/Users/Subscriptions/SubscriptionManager.cs
  */
 public class SubscriptionManager {
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionManager.class);

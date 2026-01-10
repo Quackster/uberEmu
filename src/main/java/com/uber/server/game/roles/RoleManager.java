@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages user roles and permissions (fuses).
- * Ported from HabboHotel/Roles/RoleManager.cs
  */
 public class RoleManager {
     private static final Logger logger = LoggerFactory.getLogger(RoleManager.class);

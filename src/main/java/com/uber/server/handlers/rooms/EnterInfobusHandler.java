@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for entering infobus (message ID 113).
- * Ported from Messages/Requests/Rooms.cs EnterInfobus()
  */
 public class EnterInfobusHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnterInfobusHandler.class);
@@ -28,9 +27,9 @@ public class EnterInfobusHandler implements PacketHandler {
             return;
         }
         
-        // Infobus is currently closed (placeholder message from original C# code)
-        ServerMessage response = new ServerMessage(81);
-        response.appendStringWithBreak("The Uber Infobus is not yet in use.");
-        client.sendMessage(response);
+        // Infobus is currently closed
+        var composer = new com.uber.server.messages.outgoing.rooms.InfobusErrorMessageEventComposer(
+            "The Uber Infobus is not yet in use.");
+        client.sendMessage(composer.compose());
     }
 }

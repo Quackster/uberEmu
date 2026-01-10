@@ -34,8 +34,8 @@ class Base64EncodingTest {
         int original = -1234;
         byte[] encoded = Base64Encoding.encodeInt32(original, 2);
         int decoded = Base64Encoding.decodeInt32(encoded);
-        // Note: Base64Encoding doesn't handle negatives well in C# version,
-        // so this test may fail - adjust if needed based on actual behavior
+        // Note: Base64Encoding may have limitations with negative values,
+        // so this test may need adjustment based on actual implementation behavior
         assertEquals(original, decoded);
     }
     

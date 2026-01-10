@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for love shuffler items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorLoveShuffler
  */
 public class InteractorLoveShuffler extends FurniInteractor {
     @Override

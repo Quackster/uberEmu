@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for catalog database operations.
- * Migrated from CatalogPage.cs and Catalog.cs
  */
 public class CatalogRepository {
     private static final Logger logger = LoggerFactory.getLogger(CatalogRepository.class);
@@ -28,8 +27,12 @@ public class CatalogRepository {
      * @return List of catalog item data (id, item_ids, catalog_name, cost_credits, cost_pixels, amount)
      */
     public List<Map<String, Object>> loadCatalogItems(int pageId) {
-        String sql = "SELECT id, item_ids, catalog_name, cost_credits, cost_pixels, amount " +
-                    "FROM catalog_items WHERE page_id = ? ORDER BY item_ids ASC";
+        String sql = """
+            SELECT id, item_ids, catalog_name, cost_credits, cost_pixels, amount
+            FROM catalog_items
+            WHERE page_id = ?
+            ORDER BY item_ids ASC
+            """;
         List<Map<String, Object>> items = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -137,12 +140,19 @@ public class CatalogRepository {
     
     /**
      * Generates a new unique item ID using the item_id_generator table.
-     * Ported from HabboHotel/Catalogs/Catalog.cs GenerateItemId()
      * @return New item ID
      */
     public long generateItemId() {
-        String selectSql = "SELECT id_generator FROM item_id_generator LIMIT 1";
-        String updateSql = "UPDATE item_id_generator SET id_generator = id_generator + 1 LIMIT 1";
+        String selectSql = """
+            SELECT id_generator
+            FROM item_id_generator
+            LIMIT 1
+            """;
+        String updateSql = """
+            UPDATE item_id_generator
+            SET id_generator = id_generator + 1
+            LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection()) {
             long itemId;

@@ -1,7 +1,7 @@
 package com.uber.server.net;
 
 import com.uber.server.messages.ServerMessage;
-import com.uber.server.util.Base64Encoding;
+import com.uber.server.encoding.base64.Base64Encoding;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents a TCP connection with a client using Netty.
- * Ported from C# TcpConnection.cs
  */
 public class TcpConnection {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnection.class);
@@ -196,6 +195,7 @@ public class TcpConnection {
             
             future.addListener(f -> {
                 if (!f.isSuccess()) {
+                    f.cause().printStackTrace();
                     logger.warn("Failed to send message to connection {}: {}", id, f.cause().getMessage());
                     connectionDead();
                 }

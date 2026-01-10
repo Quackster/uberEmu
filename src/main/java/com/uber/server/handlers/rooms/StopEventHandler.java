@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for stopping a room event (message ID 347).
- * Ported from Messages/Requests/Rooms.cs StopEvent()
  */
 public class StopEventHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopEventHandler.class);
@@ -37,8 +36,7 @@ public class StopEventHandler implements PacketHandler {
         room.setEvent(null);
         
         // Broadcast event stop message
-        ServerMessage stopMessage = new ServerMessage(370);
-        stopMessage.appendStringWithBreak("-1");
-        room.sendMessage(stopMessage);
+        var stopComposer = new com.uber.server.messages.outgoing.rooms.RoomEventComposer();
+        room.sendMessage(stopComposer.compose());
     }
 }

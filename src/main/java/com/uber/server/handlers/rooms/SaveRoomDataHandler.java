@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Handler for saving room data (message ID 401).
- * Ported from Messages/Requests/Rooms.cs SaveRoomData()
  */
 public class SaveRoomDataHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SaveRoomDataHandler.class);

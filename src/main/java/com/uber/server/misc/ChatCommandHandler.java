@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Handles chat commands (commands starting with ":").
- * Ported from HabboHotel/Misc/ChatCommandHandler.cs
  */
 public class ChatCommandHandler {
     private static final Logger logger = LoggerFactory.getLogger(ChatCommandHandler.class);
@@ -73,9 +72,8 @@ public class ChatCommandHandler {
                 
                 case "update_bots":
                     if (habbo.hasFuse("fuse_admin")) {
-                        // TODO: Implement when BotManager is ported
-                        // game.getBotManager().loadBots();
-                        session.sendNotif("BotManager not yet implemented.");
+                        // BotManager reload functionality not yet implemented
+                        session.sendNotif("BotManager reload not yet implemented.");
                         return true;
                     }
                     return false;

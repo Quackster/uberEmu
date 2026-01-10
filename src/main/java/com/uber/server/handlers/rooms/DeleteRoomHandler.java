@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for deleting a room (message ID 23).
- * Ported from Messages/Requests/Rooms.cs DeleteRoom()
  */
 public class DeleteRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeleteRoomHandler.class);
@@ -48,8 +47,8 @@ public class DeleteRoomHandler implements PacketHandler {
             com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(roomId);
             if (room != null) {
                 // Send kick message to all users
-                ServerMessage kickMessage = new ServerMessage(18);
-                room.sendMessage(kickMessage);
+                var kickComposer = new com.uber.server.messages.outgoing.rooms.RoomEntryErrorMessageEventComposer();
+                room.sendMessage(kickComposer.compose());
                 
                 // Remove all users from room
                 for (com.uber.server.game.rooms.RoomUser user : room.getUsers().values()) {

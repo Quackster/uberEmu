@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Handler for getting recycler rewards (message ID 412).
- * Ported from Messages/Requests/Catalog.cs GetRecyclerRewards()
  */
 public class GetRecyclerRewardsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRecyclerRewardsHandler.class);

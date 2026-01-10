@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for picking a ticket (message ID 450).
- * Ported from Messages/Requests/Help.cs ModPickTicket()
  */
 public class ModPickTicketHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModPickTicketHandler.class);

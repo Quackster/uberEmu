@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Represents a pet.
- * Ported from HabboHotel/Pets/Pet.cs
  */
 public class Pet {
     private static final Logger logger = LoggerFactory.getLogger(Pet.class);

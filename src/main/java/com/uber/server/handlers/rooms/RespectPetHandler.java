@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for respecting a pet (message ID 3005).
- * Ported from Messages/Requests/Rooms.cs RespectPet()
  */
 public class RespectPetHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RespectPetHandler.class);

@@ -2,7 +2,6 @@ package com.uber.server.util;
 
 /**
  * Validates user appearance strings to prevent mutant avatars.
- * Ported from HabboHotel/Misc/AntiMutant.cs
  */
 public class AntiMutant {
     /**
@@ -34,7 +33,7 @@ public class AntiMutant {
                 
                 String name = parts[0];
                 int type = Integer.parseInt(parts[1]);
-                // Note: C# code had a bug using parts[1] twice - fixed to use parts[2] for color
+                // Parse color value from parts[2]
                 int color = Integer.parseInt(parts[2]);
                 
                 if (type <= 0 || color < 0) {

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for switching moodlight status (message ID 343).
- * Ported from Messages/Requests/Rooms.cs SwitchMoodlightStatus()
  */
 public class SwitchMoodlightStatusHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SwitchMoodlightStatusHandler.class);

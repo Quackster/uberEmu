@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for checking if an item can be gifted (message ID 3030).
- * Ported from Messages/Requests/Catalog.cs CanGift()
  */
 public class CanGiftHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CanGiftHandler.class);

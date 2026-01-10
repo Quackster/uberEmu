@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Handler for sending an instant invite (message ID 34).
- * Ported from Messages/Requests/Messenger.cs SendInstantInvite()
  */
 public class SendInstantInviteHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SendInstantInviteHandler.class);

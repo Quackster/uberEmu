@@ -2,7 +2,6 @@ package com.uber.server.game.items;
 
 /**
  * Represents a moodlight preset.
- * Ported from HabboHotel/Items/MoodlightData.cs (inner class MoodlightPreset)
  */
 public class MoodlightPreset {
     private String colorCode;

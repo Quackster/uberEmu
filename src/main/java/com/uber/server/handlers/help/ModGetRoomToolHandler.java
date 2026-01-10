@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room tool data (message ID 459).
- * Ported from Messages/Requests/Help.cs ModGetRoomTool()
  */
 public class ModGetRoomToolHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModGetRoomToolHandler.class);

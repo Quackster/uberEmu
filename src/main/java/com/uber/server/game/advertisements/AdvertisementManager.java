@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages room advertisements.
- * Ported from HabboHotel/Advertisements/AdvertisementManager.cs
  */
 public class AdvertisementManager {
     private static final Logger logger = LoggerFactory.getLogger(AdvertisementManager.class);
@@ -29,7 +28,6 @@ public class AdvertisementManager {
     
     /**
      * Loads room advertisements from database.
-     * Ported from AdvertisementManager.cs LoadRoomAdvertisements()
      */
     public void loadRoomAdvertisements() {
         roomAdvertisements.clear();
@@ -55,7 +53,6 @@ public class AdvertisementManager {
     
     /**
      * Gets a random room advertisement that hasn't exceeded its limit.
-     * Ported from AdvertisementManager.cs GetRandomRoomAdvertisement()
      * @return RoomAdvertisement, or null if none available
      */
     public RoomAdvertisement getRandomRoomAdvertisement() {

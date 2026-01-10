@@ -12,7 +12,6 @@ import java.util.Random;
 
 /**
  * Guide bot AI implementation.
- * Ported from HabboHotel/RoomBots/GuideBot.cs
  */
 public class GuideBot extends BotAI {
     private static final Logger logger = LoggerFactory.getLogger(GuideBot.class);
@@ -34,11 +33,11 @@ public class GuideBot extends BotAI {
             return;
         }
         
-        botUser.chat(null, "Hi and welcome to Uber! I am a bot Guide and I'm here to help you.", false);
-        botUser.chat(null, "This is your own room, you can always come back to room by clicking the nest icon on the left.", false);
-        botUser.chat(null, "If you want to explore the Habbo by yourself, click on the orange hotel icon on the left (we call it navigator).", false);
-        botUser.chat(null, "You will find cool rooms and fun events with other people in them, feel free to visit them.", false);
-        botUser.chat(null, "I can give you tips and hints on what to do here, just ask me a question :)", false);
+        botUser.chat(null, "Hi and welcome to Uber! I am a bot Guide and I'm here to help you.", 0);
+        botUser.chat(null, "This is your own room, you can always come back to room by clicking the nest icon on the left.", 0);
+        botUser.chat(null, "If you want to explore the Habbo by yourself, click on the orange hotel icon on the left (we call it navigator).", 0);
+        botUser.chat(null, "You will find cool rooms and fun events with other people in them, feel free to visit them.", 0);
+        botUser.chat(null, "I can give you tips and hints on what to do here, just ask me a question :)", 0);
     }
     
     @Override
@@ -88,25 +87,17 @@ public class GuideBot extends BotAI {
         
         String responseType = response.getResponseType().toLowerCase();
         switch (responseType) {
-            case "say":
-                botUser.chat(null, response.getResponseText(), false);
-                break;
-                
-            case "shout":
-                botUser.chat(null, response.getResponseText(), true);
-                break;
-                
-            case "whisper":
-                ServerMessage tellMsg = new ServerMessage(25);
-                tellMsg.appendInt32(botUser.getVirtualId());
-                tellMsg.appendStringWithBreak(response.getResponseText());
-                tellMsg.appendBoolean(false);
-                
+            case "say" -> botUser.chat(null, response.getResponseText(), 0);
+            case "shout" -> botUser.chat(null, response.getResponseText(), 1);
+            case "whisper" -> {
+                // Use WhisperMessageComposer (outgoing ID 25)
+                var whisperComposer = new com.uber.server.messages.outgoing.rooms.WhisperMessageComposer(
+                    botUser.getVirtualId(), response.getResponseText(), 0);
                 GameClient userClient = user.getClient();
                 if (userClient != null) {
-                    userClient.sendMessage(tellMsg);
+                    userClient.sendMessage(whisperComposer.compose());
                 }
-                break;
+            }
         }
         
         if (response.getServeId() >= 1) {
@@ -133,7 +124,7 @@ public class GuideBot extends BotAI {
         if (speechTimer <= 0) {
             RandomSpeech speech = botData.getRandomSpeech();
             if (speech != null) {
-                botUser.chat(null, speech.getMessage(), speech.isShout());
+                botUser.chat(null, speech.getMessage(), speech.isShout() ? 1 : 0);
             }
             
             speechTimer = random.nextInt(150); // 0-150

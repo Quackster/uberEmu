@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting room info (message ID 385).
- * Ported from Messages/Requests/Navigator.cs GetRoomInfo()
  */
 public class GetRoomInfoHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRoomInfoHandler.class);
@@ -38,7 +37,7 @@ public class GetRoomInfoHandler implements PacketHandler {
         }
         
         ServerMessage response = new ServerMessage(454);
-        response.appendInt32(0); // Unknown
+        response.appendInt32(0); // Show events flag
         data.serialize(response, false);
         client.sendMessage(response);
     }

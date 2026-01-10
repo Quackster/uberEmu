@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for placing an item in a room (message ID 90).
- * Ported from Messages/Requests/Rooms.cs PlaceItem()
  */
 public class PlaceItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PlaceItemHandler.class);

@@ -12,7 +12,6 @@ import java.util.Random;
 
 /**
  * Pet bot AI implementation.
- * Ported from HabboHotel/RoomBots/PetBot.cs
  */
 public class PetBot extends BotAI {
     private static final Logger logger = LoggerFactory.getLogger(PetBot.class);
@@ -31,7 +30,7 @@ public class PetBot extends BotAI {
     public void onSelfEnterRoom() {
         RoomUser botUser = getRoomUser();
         if (botUser != null) {
-            botUser.chat(null, "*drool over master*", false);
+            botUser.chat(null, "*drool over master*", 0);
         }
     }
     
@@ -52,7 +51,7 @@ public class PetBot extends BotAI {
         
         if (userClient.getHabbo() != null && 
             userClient.getHabbo().getUsername().toLowerCase().equals(petData.getOwnerName().toLowerCase())) {
-            botUser.chat(null, "*drool over master*", false);
+            botUser.chat(null, "*drool over master*", 0);
         }
     }
     
@@ -86,7 +85,7 @@ public class PetBot extends BotAI {
         
         if (lowerMessage.startsWith(lowerPetName + " ")) {
             // Pet is confused by command
-            botUser.chat(null, "*confused*", false);
+            botUser.chat(null, "*confused*", 0);
         }
     }
     
@@ -109,7 +108,7 @@ public class PetBot extends BotAI {
         if (speechTimer <= 0) {
             RandomSpeech speech = botData.getRandomSpeech();
             if (speech != null) {
-                botUser.chat(null, speech.getMessage(), speech.isShout());
+                botUser.chat(null, speech.getMessage(), speech.isShout() ? 1 : 0);
             }
             
             speechTimer = random.nextInt(290) + 10; // 10-300

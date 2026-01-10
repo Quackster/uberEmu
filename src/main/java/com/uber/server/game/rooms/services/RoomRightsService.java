@@ -1,8 +1,9 @@
 package com.uber.server.game.rooms.services;
 
 import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
 import com.uber.server.game.rooms.Room;
-import com.uber.server.messages.ServerMessage;
+import com.uber.server.repository.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,145 +12,133 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Service for managing room rights (room managers).
- * Extracted from Room class to improve separation of concerns.
+ * Handles loading, adding, and removing room rights.
  */
 public class RoomRightsService {
     private static final Logger logger = LoggerFactory.getLogger(RoomRightsService.class);
     
     private final Room room;
+    private final RoomRepository roomRepository;
     private final CopyOnWriteArrayList<Long> usersWithRights;
     
-    public RoomRightsService(Room room, List<Long> initialRights) {
+    public RoomRightsService(Room room, RoomRepository roomRepository, 
+                      CopyOnWriteArrayList<Long> usersWithRights) {
         this.room = room;
-        this.usersWithRights = new CopyOnWriteArrayList<>(initialRights);
+        this.roomRepository = roomRepository;
+        this.usersWithRights = usersWithRights;
     }
     
     /**
-     * Checks if a session has room rights.
-     * @param session GameClient session
-     * @return True if user has rights
+     * Loads room rights (room managers) from database.
+     */
+    public void loadRights() {
+        usersWithRights.clear();
+        
+        List<Long> rights = roomRepository.loadRoomRights(room.getRoomId());
+        usersWithRights.addAll(rights);
+    }
+    
+    /**
+     * Checks if a user has room rights.
      */
     public boolean checkRights(GameClient session) {
         return checkRights(session, false);
     }
     
     /**
-     * Checks if a session has room rights.
-     * @param session GameClient session
-     * @param requireOwnership If true, requires ownership (not just rights)
-     * @return True if user has rights
+     * Checks if a user has room rights.
      */
     public boolean checkRights(GameClient session, boolean requireOwnership) {
         if (session == null || session.getHabbo() == null) {
             return false;
         }
         
-        long userId = session.getHabbo().getId();
+        Habbo habbo = session.getHabbo();
         
-        // Check ownership
-        if (room.getOwner().equals(session.getHabbo().getUsername())) {
+        // Owner always has rights
+        if (habbo.getUsername().toLowerCase().equals(room.getData().getOwner().toLowerCase())) {
             return true;
         }
         
-        // If ownership is required, return false
-        if (requireOwnership) {
-            return false;
+        // Check admin fuses
+        if (habbo.hasFuse("fuse_admin") || habbo.hasFuse("fuse_any_room_controller")) {
+            return true;
         }
         
-        // Check rights
-        return hasRights(userId);
+        if (!requireOwnership) {
+            // Check room rights fuse
+            if (habbo.hasFuse("fuse_any_room_rights")) {
+                return true;
+            }
+            
+            // Check if user has room rights
+            if (usersWithRights.contains(habbo.getId())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
-     * Checks if a user has room rights.
-     * @param userId User ID
-     * @return True if user has rights
-     */
-    public boolean hasRights(long userId) {
-        return usersWithRights.contains(userId);
-    }
-    
-    /**
-     * Adds rights for a user.
-     * @param userId User ID
-     * @return True if rights were added
+     * Adds a room right (room manager).
      */
     public boolean addRight(long userId) {
-        if (hasRights(userId)) {
+        if (usersWithRights.contains(userId)) {
+            return false; // Already has rights
+        }
+        
+        if (roomRepository.addRoomRight(room.getRoomId(), userId)) {
+            usersWithRights.add(userId);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Removes a room right.
+     */
+    public boolean removeRight(long userId) {
+        if (!usersWithRights.contains(userId)) {
             return false;
         }
         
-        usersWithRights.add(userId);
-        
-        // Send update to room
-        ServerMessage update = new ServerMessage(42);
-        update.appendUInt(room.getRoomId());
-        update.appendUInt(userId);
-        update.appendStringWithBreak("");
-        room.sendMessage(update);
-        
-        return true;
-    }
-    
-    /**
-     * Removes rights for a user.
-     * @param userId User ID
-     * @return True if rights were removed
-     */
-    public boolean removeRight(long userId) {
-        boolean removed = usersWithRights.remove(userId);
-        
-        if (removed) {
-            // Send update to room
-            ServerMessage update = new ServerMessage(43);
-            update.appendUInt(room.getRoomId());
-            update.appendUInt(userId);
-            room.sendMessage(update);
+        if (roomRepository.deleteRoomRights(room.getRoomId(), new long[]{userId})) {
+            usersWithRights.remove(userId);
+            return true;
         }
         
-        return removed;
+        return false;
     }
     
     /**
-     * Removes all rights.
-     * @return Number of rights removed
+     * Removes all room rights.
      */
-    public int removeAllRights() {
-        int count = usersWithRights.size();
-        usersWithRights.clear();
+    public boolean removeAllRights() {
+        if (usersWithRights.isEmpty()) {
+            return true;
+        }
         
-        // Send update to room
-        ServerMessage update = new ServerMessage(44);
-        update.appendUInt(room.getRoomId());
-        room.sendMessage(update);
+        if (roomRepository.deleteRoomRights(room.getRoomId(), null)) {
+            usersWithRights.clear();
+            return true;
+        }
         
-        return count;
+        return false;
     }
     
     /**
      * Gets list of users with rights.
-     * @return List of user IDs with rights
      */
     public List<Long> getUsersWithRights() {
-        return List.copyOf(usersWithRights);
+        return new java.util.ArrayList<>(usersWithRights);
     }
     
     /**
-     * Sends a message to all users with rights.
-     * @param message Message to send
+     * Checks if a user has rights.
      */
-    public void sendMessageToUsersWithRights(ServerMessage message) {
-        if (message == null) {
-            return;
-        }
-        
-        for (Long userId : usersWithRights) {
-            com.uber.server.game.GameClient client = com.uber.server.game.Game.getInstance()
-                    .getClientManager().getClientByHabbo(userId);
-            if (client != null && client.getHabbo() != null 
-                    && client.getHabbo().getCurrentRoomId() == room.getRoomId()) {
-                client.sendMessage(message);
-            }
-        }
+    public boolean hasRights(long userId) {
+        return usersWithRights.contains(userId);
     }
 }

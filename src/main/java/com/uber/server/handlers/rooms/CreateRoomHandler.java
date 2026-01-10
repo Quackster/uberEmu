@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for creating a room (message ID 29).
- * Ported from Messages/Requests/Rooms.cs CreateRoom()
  */
 public class CreateRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CreateRoomHandler.class);
@@ -40,10 +39,9 @@ public class CreateRoomHandler implements PacketHandler {
         com.uber.server.game.rooms.RoomData newRoom = game.getRoomManager().createRoom(client, roomName, modelName);
         
         if (newRoom != null) {
-            ServerMessage response = new ServerMessage(59);
-            response.appendUInt(newRoom.getId());
-            response.appendStringWithBreak(newRoom.getName());
-            client.sendMessage(response);
+            var composer = new com.uber.server.messages.outgoing.navigator.FlatCreatedEventComposer(
+                newRoom.getId(), newRoom.getName());
+            client.sendMessage(composer.compose());
         }
     }
 }

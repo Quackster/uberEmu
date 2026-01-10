@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for banning a user (message ID 464).
- * Ported from Messages/Requests/Help.cs ModBanUser()
  */
 public class ModBanUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModBanUserHandler.class);

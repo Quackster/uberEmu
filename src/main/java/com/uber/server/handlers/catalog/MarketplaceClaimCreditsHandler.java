@@ -14,7 +14,6 @@ import java.util.Map;
 
 /**
  * Handler for claiming marketplace credits (message ID 3016).
- * Ported from Messages/Requests/Catalog.cs MarketplaceClaimCredits()
  */
 public class MarketplaceClaimCreditsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceClaimCreditsHandler.class);

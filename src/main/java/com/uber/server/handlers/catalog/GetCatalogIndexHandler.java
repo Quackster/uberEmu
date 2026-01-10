@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Handler for getting catalog index (message ID 101).
- * Ported from Messages/Requests/Catalog.cs GetCatalogIndex()
  */
 public class GetCatalogIndexHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetCatalogIndexHandler.class);
@@ -33,35 +32,13 @@ public class GetCatalogIndexHandler implements PacketHandler {
         }
         
         Catalog catalog = game.getCatalog();
-        ServerMessage response = new ServerMessage(101);
-        
-        // Get root pages (parent_id = -1 or 0)
-        int rootCount = 0;
-        for (CatalogPage page : catalog.getPages().values()) {
-            if (page.getParentId() == -1 || page.getParentId() == 0) {
-                if (page.getMinRank() <= habbo.getRank()) {
-                    rootCount++;
-                }
-            }
+        if (catalog == null) {
+            logger.warn("Catalog is not initialized");
+            return;
         }
         
-        response.appendInt32(rootCount);
-        
-        // Serialize root pages
-        for (CatalogPage page : catalog.getPages().values()) {
-            if (page.getParentId() == -1 || page.getParentId() == 0) {
-                if (page.getMinRank() <= habbo.getRank()) {
-                    response.appendBoolean(page.isVisible());
-                    response.appendInt32(page.getIconColor());
-                    response.appendInt32(page.getIconImage());
-                    response.appendInt32(page.getId());
-                    response.appendStringWithBreak(page.getCaption());
-                    response.appendBoolean(page.isComingSoon());
-                    response.appendInt32(catalog.getTreeSize(page.getId(), habbo.getRank()));
-                }
-            }
-        }
-        
+        // Use the catalog's serializeIndex method which returns message ID 126
+        ServerMessage response = catalog.serializeIndex(client);
         client.sendMessage(response);
     }
 }

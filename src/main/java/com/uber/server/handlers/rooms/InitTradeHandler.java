@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for initiating a trade (message ID 71).
- * Ported from Messages/Requests/Rooms.cs InitTrade()
  */
 public class InitTradeHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(InitTradeHandler.class);

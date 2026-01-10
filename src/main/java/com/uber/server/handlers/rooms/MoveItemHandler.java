@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for moving an item in a room (message ID 73).
- * Ported from Messages/Requests/Rooms.cs MoveItem()
  */
 public class MoveItemHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MoveItemHandler.class);

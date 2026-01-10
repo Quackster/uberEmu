@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for stopping typing (message ID 318).
- * Ported from Messages/Requests/Rooms.cs StopTyping()
  */
 public class StopTypingHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopTypingHandler.class);
@@ -38,9 +37,8 @@ public class StopTypingHandler implements PacketHandler {
             return;
         }
         
-        ServerMessage typingMessage = new ServerMessage(361);
-        typingMessage.appendInt32(roomUser.getVirtualId());
-        typingMessage.appendBoolean(false);
-        room.sendMessage(typingMessage);
+        var composer = new com.uber.server.messages.outgoing.rooms.UserTypingMessageEventComposer(
+            roomUser.getVirtualId(), false);
+        room.sendMessage(composer.compose());
     }
 }

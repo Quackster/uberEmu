@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for going to hotel view (message ID 53).
- * Ported from Messages/Requests/Navigator.cs GoToHotelView()
  */
 public class GoToHotelViewHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GoToHotelViewHandler.class);

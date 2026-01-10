@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for removing a favorite room (message ID 20).
- * Ported from Messages/Requests/Navigator.cs RemoveFavorite()
  */
 public class RemoveFavoriteHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RemoveFavoriteHandler.class);
@@ -36,9 +35,7 @@ public class RemoveFavoriteHandler implements PacketHandler {
         // Remove from database
         game.getUserRepository().removeFavorite(habbo.getId(), roomId);
         
-        ServerMessage response = new ServerMessage(459);
-        response.appendUInt(roomId);
-        response.appendBoolean(false);
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedEventComposer(roomId, false);
+        client.sendMessage(composer.compose());
     }
 }

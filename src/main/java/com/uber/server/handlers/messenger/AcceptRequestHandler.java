@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for accepting a friend request (message ID 37).
- * Ported from Messages/Requests/Messenger.cs AcceptRequest()
  */
 public class AcceptRequestHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AcceptRequestHandler.class);

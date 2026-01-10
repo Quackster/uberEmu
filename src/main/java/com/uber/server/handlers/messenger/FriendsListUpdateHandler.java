@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for friends list update (message ID 15).
- * Ported from Messages/Requests/Messenger.cs FriendsListUpdate()
  */
 public class FriendsListUpdateHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(FriendsListUpdateHandler.class);

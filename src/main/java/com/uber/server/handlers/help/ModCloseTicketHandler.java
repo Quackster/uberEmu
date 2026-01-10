@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for closing a ticket (message ID 452).
- * Ported from Messages/Requests/Help.cs ModCloseTicket()
  */
 public class ModCloseTicketHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(ModCloseTicketHandler.class);

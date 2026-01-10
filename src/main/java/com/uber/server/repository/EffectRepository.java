@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for avatar effects database operations.
- * Migrated from AvatarEffectsInventoryComponent.cs
  */
 public class EffectRepository {
     private static final Logger logger = LoggerFactory.getLogger(EffectRepository.class);
@@ -61,8 +60,10 @@ public class EffectRepository {
      * @return True if successful
      */
     public boolean addEffect(long userId, int effectId, int duration) {
-        String sql = "INSERT INTO user_effects (user_id, effect_id, total_duration, " +
-                    "is_activated, activated_stamp) VALUES (?, ?, ?, '0', 0)";
+        String sql = """
+            INSERT INTO user_effects (user_id, effect_id, total_duration, is_activated, activated_stamp)
+            VALUES (?, ?, ?, '0', 0)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -107,8 +108,9 @@ public class EffectRepository {
      * @return True if successful
      */
     public boolean deleteActivatedEffect(long userId, int effectId) {
-        String sql = "DELETE FROM user_effects WHERE user_id = ? AND effect_id = ? " +
-                    "AND is_activated = '1' LIMIT 1";
+        String sql = """
+            DELETE FROM user_effects WHERE user_id = ? AND effect_id = ? AND is_activated = '1' LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -131,8 +133,10 @@ public class EffectRepository {
      * @return True if successful
      */
     public boolean enableEffect(long userId, int effectId, long timestamp) {
-        String sql = "UPDATE user_effects SET is_activated = '1', activated_stamp = ? " +
-                    "WHERE user_id = ? AND effect_id = ? LIMIT 1";
+        String sql = """
+            UPDATE user_effects SET is_activated = '1', activated_stamp = ?
+            WHERE user_id = ? AND effect_id = ? LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

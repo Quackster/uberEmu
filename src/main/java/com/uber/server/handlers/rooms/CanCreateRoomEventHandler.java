@@ -5,13 +5,11 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handler for checking if user can create a room event (message ID 345).
- * Ported from Messages/Requests/Rooms.cs CanCreateRoomEvent()
  */
 public class CanCreateRoomEventHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CanCreateRoomEventHandler.class);
@@ -42,9 +40,7 @@ public class CanCreateRoomEventHandler implements PacketHandler {
             errorCode = 3;
         }
         
-        ServerMessage response = new ServerMessage(367);
-        response.appendBoolean(allow);
-        response.appendInt32(errorCode);
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.rooms.CanCreateRoomEventResponseMessageEventComposer(allow, errorCode);
+        client.sendMessage(composer.compose());
     }
 }

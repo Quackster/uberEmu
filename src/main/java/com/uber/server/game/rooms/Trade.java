@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a trade between two users.
- * Ported from HabboHotel/Rooms/Trade.cs
  */
 public class Trade {
     private static final Logger logger = LoggerFactory.getLogger(Trade.class);
@@ -42,7 +41,7 @@ public class Trade {
         if (room != null) {
             for (TradeUser tradeUser : users.values()) {
                 RoomUser roomUser = tradeUser.getRoomUser();
-                if (roomUser != null && !roomUser.getStatuses().containsKey("trd")) {
+                if (roomUser != null && !roomUser.hasStatus("trd")) {
                     roomUser.addStatus("trd", "");
                     roomUser.setUpdateNeeded(true);
                 }
@@ -50,12 +49,9 @@ public class Trade {
         }
         
         // Send trade start message
-        ServerMessage message = new ServerMessage(104);
-        message.appendUInt(userOneId);
-        message.appendBoolean(true);
-        message.appendUInt(userTwoId);
-        message.appendBoolean(true);
-        sendMessageToUsers(message);
+        var composer = new com.uber.server.messages.outgoing.rooms.TradeStartEventComposer(
+            userOneId, true, userTwoId, true);
+        sendMessageToUsers(composer.compose());
     }
     
     /**
@@ -91,7 +87,7 @@ public class Trade {
     
     /**
      * Offers an item to the trade.
-     * Ported from Trade.cs OfferItem()
+ OfferItem()
      * @param userId User ID
      * @param item UserItem to offer
      */
@@ -114,7 +110,7 @@ public class Trade {
     
     /**
      * Takes back an item from the trade.
-     * Ported from Trade.cs TakeBackItem()
+ TakeBackItem()
      * @param userId User ID
      * @param item UserItem to take back
      */
@@ -131,7 +127,7 @@ public class Trade {
     
     /**
      * Accepts the trade (stage 1).
-     * Ported from Trade.cs Accept()
+ Accept()
      * @param userId User ID
      */
     public void accept(long userId) {
@@ -142,13 +138,12 @@ public class Trade {
         
         tradeUser.setAccepted(true);
         
-        ServerMessage message = new ServerMessage(109);
-        message.appendUInt(userId);
-        message.appendBoolean(true);
-        sendMessageToUsers(message);
+        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradeAcceptEventComposer(userId, true);
+        sendMessageToUsers(acceptComposer.compose());
         
         if (isAllUsersAccepted()) {
-            sendMessageToUsers(new ServerMessage(111));
+            var confirmComposer = new com.uber.server.messages.outgoing.rooms.TradeConfirmationEventComposer();
+            sendMessageToUsers(confirmComposer.compose());
             tradeStage = 2;
             clearAccepted();
         }
@@ -156,7 +151,7 @@ public class Trade {
     
     /**
      * Unaccepts the trade (stage 1).
-     * Ported from Trade.cs Unaccept()
+ Unaccept()
      * @param userId User ID
      */
     public void unaccept(long userId) {
@@ -175,7 +170,7 @@ public class Trade {
     
     /**
      * Completes the trade (stage 2).
-     * Ported from Trade.cs CompleteTrade()
+ CompleteTrade()
      * @param userId User ID
      */
     public void completeTrade(long userId) {
@@ -186,10 +181,8 @@ public class Trade {
         
         tradeUser.setAccepted(true);
         
-        ServerMessage message = new ServerMessage(109);
-        message.appendUInt(userId);
-        message.appendBoolean(true);
-        sendMessageToUsers(message);
+        var acceptComposer = new com.uber.server.messages.outgoing.rooms.TradeAcceptEventComposer(userId, true);
+        sendMessageToUsers(acceptComposer.compose());
         
         if (isAllUsersAccepted()) {
             tradeStage = 999;
@@ -200,7 +193,7 @@ public class Trade {
     
     /**
      * Clears accepted status for all users.
-     * Ported from Trade.cs ClearAccepted()
+ ClearAccepted()
      */
     public void clearAccepted() {
         for (TradeUser user : users.values()) {
@@ -210,10 +203,10 @@ public class Trade {
     
     /**
      * Updates the trade window.
-     * Ported from Trade.cs UpdateTradeWindow()
+ UpdateTradeWindow()
      */
     public void updateTradeWindow() {
-        ServerMessage message = new ServerMessage(108);
+        ServerMessage message = new ServerMessage(108); // _events[108] = TradeUpdateEvent
         
         for (TradeUser tradeUser : users.values()) {
             message.appendUInt(tradeUser.getUserId());
@@ -248,7 +241,7 @@ public class Trade {
     
     /**
      * Delivers items to users.
-     * Ported from Trade.cs DeliverItems()
+ DeliverItems()
      */
     public void deliverItems() {
         TradeUser userOne = getTradeUser(oneId);
@@ -304,7 +297,7 @@ public class Trade {
     
     /**
      * Closes trade cleanly (after completion).
-     * Ported from Trade.cs CloseTradeClean()
+ CloseTradeClean()
      */
     public void closeTradeClean() {
         for (TradeUser tradeUser : users.values()) {
@@ -315,7 +308,8 @@ public class Trade {
             }
         }
         
-        sendMessageToUsers(new ServerMessage(112));
+        var completeComposer = new com.uber.server.messages.outgoing.rooms.TradeCompleteEventComposer();
+        sendMessageToUsers(completeComposer.compose());
         
         // Remove from room's active trades
         Room room = getRoom();
@@ -326,7 +320,7 @@ public class Trade {
     
     /**
      * Closes trade (cancelled).
-     * Ported from Trade.cs CloseTrade()
+ CloseTrade()
      * @param userId User ID who closed the trade
      */
     public void closeTrade(long userId) {
@@ -338,14 +332,13 @@ public class Trade {
             }
         }
         
-        ServerMessage message = new ServerMessage(110);
-        message.appendUInt(userId);
-        sendMessageToUsers(message);
+        var closedComposer = new com.uber.server.messages.outgoing.rooms.TradeClosedEventComposer(userId);
+        sendMessageToUsers(closedComposer.compose());
     }
     
     /**
      * Sends a message to both trade users.
-     * Ported from Trade.cs SendMessageToUsers()
+ SendMessageToUsers()
      * @param message ServerMessage to send
      */
     public void sendMessageToUsers(ServerMessage message) {

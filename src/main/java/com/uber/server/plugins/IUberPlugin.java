@@ -2,7 +2,6 @@ package com.uber.server.plugins;
 
 /**
  * Interface for Uber plugins.
- * Ported from Plugins/IUberPlugin.cs
  */
 public interface IUberPlugin {
     /**

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for searching for a Habbo (message ID 41).
- * Ported from Messages/Requests/Messenger.cs SearchHabbo()
  */
 public class SearchHabboHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SearchHabboHandler.class);

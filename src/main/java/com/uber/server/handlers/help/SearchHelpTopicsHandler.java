@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for searching help topics (message ID 419).
- * Ported from Messages/Requests/Help.cs SearchHelpTopics()
  */
 public class SearchHelpTopicsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SearchHelpTopicsHandler.class);

@@ -4,7 +4,6 @@ import java.util.Objects;
 
 /**
  * Represents a coordinate (x, y) in the room grid.
- * Ported from HabboHotel/Pathfinding/Coord.cs
  */
 public class Coord {
     private int x;

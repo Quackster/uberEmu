@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user inventory (message ID 404).
- * Ported from Messages/Requests/Rooms.cs GetInventory()
  */
 public class GetInventoryHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetInventoryHandler.class);
@@ -31,6 +30,8 @@ public class GetInventoryHandler implements PacketHandler {
             return;
         }
         
-        client.sendMessage(habbo.getInventoryComponent().serializeItemInventory());
+        var furniInventoryComposer = new com.uber.server.messages.outgoing.users.FurniInventoryMessageEventComposer(
+            habbo.getInventoryComponent().serializeItemInventory());
+        client.sendMessage(furniInventoryComposer.compose());
     }
 }

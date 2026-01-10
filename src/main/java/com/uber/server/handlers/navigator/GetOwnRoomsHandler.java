@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting own rooms (message ID 434).
- * Ported from Messages/Requests/Navigator.cs GetOwnRooms()
  */
 public class GetOwnRoomsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetOwnRoomsHandler.class);

@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for navigator database operations.
- * Migrated from Navigator.cs
  */
 public class NavigatorRepository {
     private static final Logger logger = LoggerFactory.getLogger(NavigatorRepository.class);
@@ -79,9 +78,11 @@ public class NavigatorRepository {
      * @return List of public item data
      */
     public List<Map<String, Object>> loadPublicItems() {
-        String sql = "SELECT id, bannertype, caption, image, image_type, room_id, " +
-                    "category_id, category_parent_id, ordernum FROM navigator_publics " +
-                    "ORDER BY ordernum ASC";
+        String sql = """
+            SELECT id, bannertype, caption, image, image_type, room_id, category_id, category_parent_id, ordernum
+            FROM navigator_publics
+            ORDER BY ordernum ASC
+            """;
         List<Map<String, Object>> items = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -138,8 +139,10 @@ public class NavigatorRepository {
      * @return List of room data with tags (tags, users_now)
      */
     public List<Map<String, Object>> loadPopularRoomTags() {
-        String sql = "SELECT tags, users_now FROM rooms WHERE roomtype = 'private' " +
-                    "AND users_now > 0 ORDER BY users_now DESC LIMIT 50";
+        String sql = """
+            SELECT tags, users_now FROM rooms WHERE roomtype = 'private' AND users_now > 0
+            ORDER BY users_now DESC LIMIT 50
+            """;
         List<Map<String, Object>> rooms = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -165,8 +168,10 @@ public class NavigatorRepository {
      * @return List of matching room data
      */
     public List<Map<String, Object>> searchRooms(String searchQuery) {
-        String sql = "SELECT * FROM rooms WHERE (caption LIKE ? OR tags LIKE ? OR owner LIKE ?) " +
-                    "AND roomtype = 'private' ORDER BY users_now DESC LIMIT 30";
+        String sql = """
+            SELECT * FROM rooms WHERE (caption LIKE ? OR tags LIKE ? OR owner LIKE ?) AND roomtype = 'private'
+            ORDER BY users_now DESC LIMIT 30
+            """;
         List<Map<String, Object>> rooms = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -206,8 +211,10 @@ public class NavigatorRepository {
      * @return List of top scored room data
      */
     public List<Map<String, Object>> loadTopScoredRooms() {
-        String sql = "SELECT * FROM rooms WHERE score > 0 AND roomtype = 'private' " +
-                    "ORDER BY score DESC LIMIT 40";
+        String sql = """
+            SELECT * FROM rooms WHERE score > 0 AND roomtype = 'private'
+            ORDER BY score DESC LIMIT 40
+            """;
         return loadRoomsWithQuery(sql, null);
     }
     
@@ -283,10 +290,10 @@ public class NavigatorRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             if (param != null) {
-                if (param instanceof String) {
-                    stmt.setString(1, (String) param);
-                } else if (param instanceof Integer) {
-                    stmt.setInt(1, (Integer) param);
+                if (param instanceof String s) {
+                    stmt.setString(1, s);
+                } else if (param instanceof Integer i) {
+                    stmt.setInt(1, i);
                 }
             }
             

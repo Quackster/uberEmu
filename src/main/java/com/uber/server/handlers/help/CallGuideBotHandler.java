@@ -5,14 +5,11 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handler for calling guide bot (message ID 440).
- * Ported from Messages/Requests/Help.cs CallGuideBot()
- * Note: This is a placeholder implementation until BotManager is fully ported.
  */
 public class CallGuideBotHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(CallGuideBotHandler.class);
@@ -44,18 +41,16 @@ public class CallGuideBotHandler implements PacketHandler {
         // Check if guide bot already exists in room
         for (com.uber.server.game.rooms.RoomUser roomUser : room.getUsers().values()) {
             if (roomUser.isBot() && roomUser.getBotData() != null && roomUser.getBotData().getBotId() == 55) {
-                ServerMessage response = new ServerMessage(33);
-                response.appendInt32(4009); // Error code: guide bot already exists
-                client.sendMessage(response);
+                var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(4009); // Error code: guide bot already exists
+                client.sendMessage(errorComposer.compose());
                 return;
             }
         }
         
         // Check if user already called guide bot
         if (habbo.isCalledGuideBot()) {
-            ServerMessage response = new ServerMessage(33);
-            response.appendInt32(4010); // Error code: user already called guide bot
-            client.sendMessage(response);
+            var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(4010);
+            client.sendMessage(errorComposer.compose());
             return;
         }
         

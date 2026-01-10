@@ -8,7 +8,6 @@ import java.util.Map;
 
 /**
  * Registry for packet handlers using ConcurrentHashMap for thread safety.
- * Replaces the array-based RequestHandler[] from C# version.
  */
 public class PacketHandlerRegistry {
     private static final Logger logger = LoggerFactory.getLogger(PacketHandlerRegistry.class);

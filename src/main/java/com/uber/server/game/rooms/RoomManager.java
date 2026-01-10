@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages room lifecycle and loading.
- * Ported from HabboHotel/Rooms/RoomManager.cs
  */
 public class RoomManager {
     private static final Logger logger = LoggerFactory.getLogger(RoomManager.class);
@@ -35,7 +34,6 @@ public class RoomManager {
     
     /**
      * Loads room models from database.
-     * Ported from HabboHotel/Rooms/RoomManager.cs LoadModels()
      */
     public void loadModels() {
         models.clear();
@@ -99,7 +97,6 @@ public class RoomManager {
     
     /**
      * Gets a room model.
-     * Ported from HabboHotel/Rooms/RoomManager.cs GetModel()
      */
     public RoomModel getModel(String modelName) {
         if (modelName == null) {
@@ -110,7 +107,6 @@ public class RoomManager {
     
     /**
      * Gets or loads a room.
-     * Ported from HabboHotel/Rooms/RoomManager.cs LoadRoom() and GetRoom()
      * @param roomId Room ID
      * @return Room instance, or null if room doesn't exist
      */
@@ -128,7 +124,6 @@ public class RoomManager {
     
     /**
      * Creates a new room.
-     * Ported from HabboHotel/Rooms/RoomManager.cs CreateRoom()
      * @param client GameClient creating the room
      * @param roomName Room name
      * @param modelName Model name
@@ -174,7 +169,6 @@ public class RoomManager {
     
     /**
      * Loads a room into memory.
-     * Ported from HabboHotel/Rooms/RoomManager.cs LoadRoom()
      * @param roomId Room ID
      */
     public void loadRoom(long roomId) {
@@ -203,7 +197,6 @@ public class RoomManager {
     
     /**
      * Unloads a room from memory.
-     * Ported from HabboHotel/Rooms/RoomManager.cs UnloadRoom()
      * @param roomId Room ID
      */
     public void unloadRoom(long roomId) {
@@ -216,7 +209,6 @@ public class RoomManager {
     
     /**
      * Requests room unload (marks for unloading).
-     * Ported from HabboHotel/Rooms/RoomManager.cs RequestRoomUnload()
      * @param roomId Room ID
      */
     public void requestRoomUnload(long roomId) {
@@ -246,7 +238,6 @@ public class RoomManager {
     
     /**
      * Gets event rooms for a category.
-     * Ported from HabboHotel/Rooms/RoomManager.cs GetEventRoomsForCategory()
      * @param categoryId Category ID (0 for all categories)
      * @return List of rooms with ongoing events in the specified category
      */

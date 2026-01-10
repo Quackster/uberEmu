@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user badges (message ID 157).
- * Ported from Messages/Requests/Users.cs GetBadges()
  */
 public class GetBadgesHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetBadgesHandler.class);

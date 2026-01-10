@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the catalog system.
- * Ported from HabboHotel/Catalogs/Catalog.cs
  */
 public class Catalog {
     private static final Logger logger = LoggerFactory.getLogger(Catalog.class);
@@ -128,8 +127,8 @@ public class Catalog {
         if (value == null) {
             return false;
         }
-        if (value instanceof Boolean) {
-            return (Boolean) value;
+        if (value instanceof Boolean b) {
+            return b;
         }
         String str = value.toString().trim();
         return "1".equals(str) || "true".equalsIgnoreCase(str) || "yes".equalsIgnoreCase(str);
@@ -170,6 +169,27 @@ public class Catalog {
 
     /**
      * Gets the tree size (number of child pages) for a page.
+     * @param client GameClient for rank filtering
+     * @param treeId Parent page ID
+     * @return Number of child pages
+     */
+    public int getTreeSize(GameClient client, int treeId) {
+        Habbo habbo = client != null ? client.getHabbo() : null;
+        if (habbo == null) {
+            return 0;
+        }
+        
+        int count = 0;
+        for (CatalogPage page : pages.values()) {
+            if (page.getParentId() == treeId && page.getMinRank() <= habbo.getRank()) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Gets the tree size (number of child pages) for a page (legacy method for backward compatibility).
      * @param treeId Parent page ID
      * @param userRank User rank for filtering
      * @return Number of child pages
@@ -214,7 +234,6 @@ public class Catalog {
 
     /**
      * Gets a random ecotron reward based on probability.
-     * Ported from HabboHotel/Catalogs/Catalog.cs GetRandomEcotronReward()
      * @return Random EcotronReward
      */
     public EcotronReward getRandomEcotronReward() {
@@ -256,7 +275,6 @@ public class Catalog {
 
     /**
      * Generates a Pet from a database row.
-     * Ported from HabboHotel/Catalogs/Catalog.cs GeneratePetFromRow()
      * @param row Database row map
      * @return Pet instance
      */
@@ -270,7 +288,6 @@ public class Catalog {
 
     /**
      * Handles a catalog purchase.
-     * Ported from HabboHotel/Catalogs/Catalog.cs HandlePurchase()
      * @param client GameClient making the purchase
      * @param pageId Catalog page ID
      * @param itemId Catalog item ID
@@ -311,10 +328,8 @@ public class Catalog {
             giftUserId = userRepository.getUserIdByUsername(giftUser);
 
             if (giftUserId == 0) {
-                ServerMessage response = new ServerMessage(76);
-                response.appendBoolean(true);
-                response.appendStringWithBreak(giftUser);
-                client.sendMessage(response);
+                var composer = new com.uber.server.messages.outgoing.catalog.GiftWrappingErrorMessageEventComposer(true, giftUser);
+                client.sendMessage(composer.compose());
                 return;
             }
         }
@@ -332,9 +347,8 @@ public class Catalog {
         }
 
         if (creditsError || pixelError) {
-            ServerMessage response = new ServerMessage(68);
-            response.appendBoolean(creditsError);
-            response.appendBoolean(pixelError);
+            var composer = new com.uber.server.messages.outgoing.catalog.PurchaseErrorMessageEventComposer(creditsError, pixelError);
+            ServerMessage response = composer.compose();
             client.sendMessage(response);
             return;
         }
@@ -379,7 +393,8 @@ public class Catalog {
         response.appendInt32(1);
         response.appendInt32(-1);
         response.appendStringWithBreak("");
-        client.sendMessage(response);
+        var composer = new com.uber.server.messages.outgoing.catalog.PurchaseConfirmationMessageEventComposer(response);
+        client.sendMessage(composer.compose());
 
         if (isGift) {
             // Create gift
@@ -520,7 +535,6 @@ public class Catalog {
 
     /**
      * Delivers items to the user's inventory.
-     * Ported from HabboHotel/Catalogs/Catalog.cs DeliverItems()
      * @param client GameClient receiving items
      * @param item Base item
      * @param amount Amount to deliver
@@ -632,18 +646,15 @@ public class Catalog {
                     subResponse.appendBoolean(false);
                     subResponse.appendInt32(0);
                 }
-                client.sendMessage(subResponse);
+                var subscriptionComposer = new com.uber.server.messages.outgoing.users.SubscriptionDataMessageEventComposer(subResponse);
+                client.sendMessage(subscriptionComposer.compose());
 
                 // Send rights update
                 Game game = Game.getInstance();
                 if (game.getRoleManager() != null) {
                     List<String> rights = game.getRoleManager().getRightsForHabbo(habbo);
-                    ServerMessage rightsResponse = new ServerMessage(2);
-                    rightsResponse.appendInt32(rights.size());
-                    for (String right : rights) {
-                        rightsResponse.appendStringWithBreak(right);
-                    }
-                    client.sendMessage(rightsResponse);
+                    var rightsComposer = new com.uber.server.messages.outgoing.handshake.UserRightsMessageEventComposer(rights);
+                    client.sendMessage(rightsComposer.compose());
                 }
                 break;
 
@@ -679,5 +690,155 @@ public class Catalog {
         long createTimestamp = TimeUtil.getUnixTimestamp();
         long petId = petRepository.createPet(userId, name, type, race, color, createTimestamp);
         return petId;
+    }
+    
+    /**
+     * Serializes the catalog index for a client.
+     * @param client GameClient requesting the index
+     * @return ServerMessage with catalog index (ID 126)
+     */
+    public ServerMessage serializeIndex(GameClient client) {
+        ServerMessage index = new ServerMessage(126); // Will be wrapped by composer when sent
+        index.appendBoolean(false);
+        index.appendInt32(0);
+        index.appendInt32(0);
+        index.appendInt32(-1);
+        index.appendStringWithBreak("");
+        index.appendBoolean(false);
+        index.appendInt32(getTreeSize(client, -1));
+        
+        // Serialize root pages and their children
+        for (CatalogPage page : pages.values()) {
+            if (page.getParentId() != -1) {
+                continue;
+            }
+            
+            page.serialize(client, index);
+            
+            // Serialize child pages
+            for (CatalogPage childPage : pages.values()) {
+                if (childPage.getParentId() == page.getId()) {
+                    childPage.serialize(client, index);
+                }
+            }
+        }
+        
+        return index;
+    }
+    
+    /**
+     * Serializes a catalog page for a client.
+     * @param page CatalogPage to serialize
+     * @return ServerMessage with page data (ID 127)
+     */
+    public ServerMessage serializePage(CatalogPage page) {
+        ServerMessage pageData = new ServerMessage(127); // Will be wrapped by composer when sent
+        pageData.appendInt32(page.getId());
+        
+        String layout = page.getLayout();
+        
+        switch (layout) {
+            case "frontpage":
+                pageData.appendStringWithBreak("frontpage3");
+                pageData.appendInt32(3);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendStringWithBreak(page.getLayoutTeaser());
+                pageData.appendStringWithBreak("");
+                pageData.appendInt32(11);
+                pageData.appendStringWithBreak(page.getText1());
+                pageData.appendStringWithBreak("");
+                pageData.appendStringWithBreak(page.getText2());
+                pageData.appendStringWithBreak(page.getTextDetails());
+                pageData.appendStringWithBreak("");
+                pageData.appendStringWithBreak("#FAF8CC");
+                pageData.appendStringWithBreak("#FAF8CC");
+                pageData.appendStringWithBreak("Other ways to get more credits >");
+                pageData.appendStringWithBreak("magic.credits");
+                break;
+                
+            case "recycler_info":
+                pageData.appendStringWithBreak(page.getLayout());
+                pageData.appendInt32(2);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendStringWithBreak(page.getLayoutTeaser());
+                pageData.appendInt32(3);
+                pageData.appendStringWithBreak(page.getText1());
+                pageData.appendStringWithBreak(page.getText2());
+                pageData.appendStringWithBreak(page.getTextDetails());
+                break;
+                
+            case "recycler_prizes":
+                pageData.appendStringWithBreak("recycler_prizes");
+                pageData.appendInt32(1);
+                pageData.appendStringWithBreak("catalog_recycler_headline3");
+                pageData.appendInt32(1);
+                pageData.appendStringWithBreak(page.getText1());
+                break;
+                
+            case "spaces":
+                pageData.appendStringWithBreak(page.getLayout());
+                pageData.appendInt32(1);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendInt32(1);
+                pageData.appendStringWithBreak(page.getText1());
+                break;
+                
+            case "recycler":
+                pageData.appendStringWithBreak(page.getLayout());
+                pageData.appendInt32(2);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendStringWithBreak(page.getLayoutTeaser());
+                pageData.appendInt32(1);
+                // Text1 should be limited to 10 characters for recycler layout
+                String recyclerText1 = page.getText1();
+                if (recyclerText1 != null && recyclerText1.length() > 10) {
+                    recyclerText1 = recyclerText1.substring(0, 10);
+                }
+                pageData.appendStringWithBreak(recyclerText1 != null ? recyclerText1 : "");
+                pageData.appendStringWithBreak(page.getText2());
+                pageData.appendStringWithBreak(page.getTextDetails());
+                break;
+                
+            case "trophies":
+                pageData.appendStringWithBreak("trophies");
+                pageData.appendInt32(1);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendInt32(2);
+                pageData.appendStringWithBreak(page.getText1());
+                pageData.appendStringWithBreak(page.getTextDetails());
+                break;
+                
+            case "pets":
+                pageData.appendStringWithBreak("pets");
+                pageData.appendInt32(2);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendStringWithBreak(page.getLayoutTeaser());
+                pageData.appendInt32(4);
+                pageData.appendStringWithBreak(page.getText1());
+                pageData.appendStringWithBreak("Give a name:");
+                pageData.appendStringWithBreak("Pick a color:");
+                pageData.appendStringWithBreak("Pick a race:");
+                break;
+                
+            default:
+                pageData.appendStringWithBreak(page.getLayout());
+                pageData.appendInt32(3);
+                pageData.appendStringWithBreak(page.getLayoutHeadline());
+                pageData.appendStringWithBreak(page.getLayoutTeaser());
+                pageData.appendStringWithBreak(page.getLayoutSpecial());
+                pageData.appendInt32(3);
+                pageData.appendStringWithBreak(page.getText1());
+                pageData.appendStringWithBreak(page.getTextDetails());
+                pageData.appendStringWithBreak(page.getTextTeaser());
+                break;
+        }
+        
+        pageData.appendInt32(page.getItems().size());
+        
+        for (CatalogItem item : page.getItems()) {
+            item.serialize(pageData, itemManager);
+        }
+        
+        return pageData;
     }
 }

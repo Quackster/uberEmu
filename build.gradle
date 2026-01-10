@@ -15,10 +15,13 @@ repositories {
 java {
     withSourcesJar()
     withJavadocJar()
-    toolchain { languageVersion = JavaLanguageVersion.of(24) }
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/io.netty/netty-all
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.33.Final'
+
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.1'
 
@@ -29,9 +32,18 @@ dependencies {
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
 
-    // SLF4J Provider - Simple implementation
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-    runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
+    // Logback Classic - SLF4J implementation with Logback
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.3'
+
+    // Log4j 2.x API for HabboPacketDecoder (using Log4j API but routing through SLF4J/Logback)
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.23.1'
+    
+    // Log4j to SLF4J bridge - routes Log4j calls through SLF4J/Logback
+    // This replaces log4j-core at runtime, allowing Log4j API calls to use Logback configuration
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j
+    runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.23.1'
 
     // Testing
     // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api

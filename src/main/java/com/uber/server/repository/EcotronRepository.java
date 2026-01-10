@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for ecotron reward database operations.
- * Migrated from Catalog.cs
  */
 public class EcotronRepository {
     private static final Logger logger = LoggerFactory.getLogger(EcotronRepository.class);

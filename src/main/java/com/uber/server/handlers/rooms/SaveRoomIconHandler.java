@@ -14,7 +14,6 @@ import java.util.Map;
 
 /**
  * Handler for saving room icon (message ID 386).
- * Ported from Messages/Requests/Rooms.cs SaveRoomIcon()
  */
 public class SaveRoomIconHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SaveRoomIconHandler.class);

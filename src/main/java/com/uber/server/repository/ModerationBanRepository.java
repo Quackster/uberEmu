@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for moderation ban database operations.
- * Migrated from ModerationBanManager.cs
  */
 public class ModerationBanRepository {
     private static final Logger logger = LoggerFactory.getLogger(ModerationBanRepository.class);
@@ -33,8 +32,10 @@ public class ModerationBanRepository {
      * @return True if creation was successful
      */
     public boolean createBan(String banType, String value, String reason, long expire, long addedBy, String addedDate) {
-        String sql = "INSERT INTO bans (bantype, value, reason, expire, added_by, added_date) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO bans (bantype, value, reason, expire, added_by, added_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

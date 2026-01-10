@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for performing a search (variant 2) (message ID 438).
- * Ported from Messages/Requests/Navigator.cs PerformSearch2()
  */
 public class PerformSearch2Handler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(PerformSearch2Handler.class);

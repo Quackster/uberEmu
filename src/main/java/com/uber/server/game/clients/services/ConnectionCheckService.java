@@ -50,7 +50,8 @@ public class ConnectionCheckService {
             return t;
         });
         
-        ServerMessage pingMessage = new ServerMessage(50);
+        var pingComposer = new com.uber.server.messages.outgoing.global.PingMessageEventComposer();
+        ServerMessage pingMessage = pingComposer.compose();
         
         connectionChecker.scheduleWithFixedDelay(() -> {
             try {

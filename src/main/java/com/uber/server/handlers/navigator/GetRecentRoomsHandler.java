@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting recent rooms (message ID 436).
- * Ported from Messages/Requests/Navigator.cs GetRecentRooms()
  */
 public class GetRecentRoomsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetRecentRoomsHandler.class);

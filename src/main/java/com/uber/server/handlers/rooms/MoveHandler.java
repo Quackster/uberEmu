@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for user movement in room (message ID 75).
- * Ported from Messages/Requests/Rooms.cs Move()
  */
 public class MoveHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MoveHandler.class);

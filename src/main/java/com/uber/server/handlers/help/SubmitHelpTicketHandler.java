@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for submitting a help ticket (message ID 453).
- * Ported from Messages/Requests/Help.cs SubmitHelpTicket()
  */
 public class SubmitHelpTicketHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(SubmitHelpTicketHandler.class);

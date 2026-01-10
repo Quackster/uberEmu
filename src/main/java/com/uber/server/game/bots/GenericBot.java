@@ -12,7 +12,6 @@ import java.util.Random;
 
 /**
  * Generic bot AI implementation.
- * Ported from HabboHotel/RoomBots/GenericBot.cs
  */
 public class GenericBot extends BotAI {
     private static final Logger logger = LoggerFactory.getLogger(GenericBot.class);
@@ -69,25 +68,20 @@ public class GenericBot extends BotAI {
         
         String responseType = response.getResponseType().toLowerCase();
         switch (responseType) {
-            case "say":
-                botUser.chat(null, response.getResponseText(), false);
-                break;
-                
-            case "shout":
-                botUser.chat(null, response.getResponseText(), true);
-                break;
-                
-            case "whisper":
-                ServerMessage tellMsg = new ServerMessage(25);
-                tellMsg.appendInt32(botUser.getVirtualId());
-                tellMsg.appendStringWithBreak(response.getResponseText());
-                tellMsg.appendBoolean(false);
-                
+            case "say" -> {
+                botUser.chat(null, response.getResponseText(), 0); // 0 = talk
+            }
+            case "shout" -> {
+                botUser.chat(null, response.getResponseText(), 1); // 1 = shout
+            }
+            case "whisper" -> {
+                var whisperComposer = new com.uber.server.messages.outgoing.rooms.WhisperMessageComposer(
+                    botUser.getVirtualId(), response.getResponseText(), 0);
                 GameClient userClient = user.getClient();
                 if (userClient != null) {
-                    userClient.sendMessage(tellMsg);
+                    userClient.sendMessage(whisperComposer.compose());
                 }
-                break;
+            }
         }
         
         if (response.getServeId() >= 1) {
@@ -100,7 +94,7 @@ public class GenericBot extends BotAI {
         if (random.nextInt(11) >= 5) { // 50% chance
             RoomUser botUser = getRoomUser();
             if (botUser != null) {
-                botUser.chat(null, "There's no need to shout!", true);
+                botUser.chat(null, "There's no need to shout!", 1); // 1 = shout
             }
         }
     }
@@ -119,7 +113,7 @@ public class GenericBot extends BotAI {
         if (speechTimer <= 0) {
             RandomSpeech speech = botData.getRandomSpeech();
             if (speech != null) {
-                botUser.chat(null, speech.getMessage(), speech.isShout());
+                botUser.chat(null, speech.getMessage(), speech.isShout() ? 1 : 0);
             }
             
             speechTimer = random.nextInt(290) + 10; // 10-300
@@ -135,23 +129,20 @@ public class GenericBot extends BotAI {
                 int randomX = 0;
                 int randomY = 0;
                 
-                switch (walkMode) {
-                    case "stand":
-                    default:
-                        // Do nothing - bot stands still
-                        break;
-                        
-                    case "freeroam":
+                        switch (walkMode) {
+                    case "freeroam" -> {
                         randomX = random.nextInt(model.getMapSizeX());
                         randomY = random.nextInt(model.getMapSizeY());
                         botUser.moveTo(randomX, randomY);
-                        break;
-                        
-                    case "specified_range":
+                    }
+                    case "specified_range" -> {
                         randomX = random.nextInt(botData.getMaxX() - botData.getMinX() + 1) + botData.getMinX();
                         randomY = random.nextInt(botData.getMaxY() - botData.getMinY() + 1) + botData.getMinY();
                         botUser.moveTo(randomX, randomY);
-                        break;
+                    }
+                    default -> {
+                        // Do nothing - bot stands still
+                    }
                 }
             }
             

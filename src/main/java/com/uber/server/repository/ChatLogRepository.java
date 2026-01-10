@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for chat log database operations.
- * Migrated from RoomUser.cs
  */
 public class ChatLogRepository {
     private static final Logger logger = LoggerFactory.getLogger(ChatLogRepository.class);
@@ -36,8 +35,10 @@ public class ChatLogRepository {
      */
     public boolean logChat(long userId, long roomId, int hour, int minute, long timestamp, 
                           String message, String userName, String fullDate) {
-        String sql = "INSERT INTO chatlogs (user_id, room_id, hour, minute, timestamp, message, " +
-                    "user_name, full_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO chatlogs (user_id, room_id, hour, minute, timestamp, message, user_name, full_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -143,8 +144,10 @@ public class ChatLogRepository {
      * @return List of chat log entries
      */
     public List<Map<String, Object>> getUserRoomChatLogsInRange(long roomId, long userId, long startTimestamp, long endTimestamp) {
-        String sql = "SELECT user_id, user_name, hour, minute, message FROM chatlogs " +
-                    "WHERE room_id = ? AND user_id = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC";
+        String sql = """
+            SELECT user_id, user_name, hour, minute, message FROM chatlogs
+            WHERE room_id = ? AND user_id = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC
+            """;
         List<Map<String, Object>> logs = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -182,8 +185,10 @@ public class ChatLogRepository {
      * @return List of chat log entries
      */
     public List<Map<String, Object>> getRoomChatLogsInTimeRange(long roomId, long startTimestamp, long endTimestamp) {
-        String sql = "SELECT user_id, user_name, hour, minute, message FROM chatlogs " +
-                    "WHERE room_id = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC";
+        String sql = """
+            SELECT user_id, user_name, hour, minute, message FROM chatlogs
+            WHERE room_id = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC
+            """;
         List<Map<String, Object>> logs = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();
@@ -220,8 +225,10 @@ public class ChatLogRepository {
      * @return List of room visit maps with room_id and chat log count
      */
     public List<Map<String, Object>> getUserRoomVisitsWithChatLogs(long userId, int limit) {
-        String sql = "SELECT room_id, COUNT(*) as chat_count, MAX(timestamp) as last_visit " +
-                    "FROM chatlogs WHERE user_id = ? GROUP BY room_id ORDER BY last_visit DESC LIMIT ?";
+        String sql = """
+            SELECT room_id, COUNT(*) as chat_count, MAX(timestamp) as last_visit
+            FROM chatlogs WHERE user_id = ? GROUP BY room_id ORDER BY last_visit DESC LIMIT ?
+            """;
         List<Map<String, Object>> visits = new ArrayList<>();
         
         try (Connection conn = databasePool.getConnection();

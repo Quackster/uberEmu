@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for enabling an effect (message ID 373).
- * Ported from Messages/Requests/Rooms.cs EnableEffect()
  */
 public class EnableEffectHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnableEffectHandler.class);

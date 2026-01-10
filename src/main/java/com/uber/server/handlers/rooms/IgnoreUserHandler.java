@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for ignoring a user (message ID 319).
- * Ported from Messages/Requests/Rooms.cs IgnoreUser()
- * 
- * Note: The original C# implementation is commented out - placeholder for future implementation
  */
 public class IgnoreUserHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(IgnoreUserHandler.class);
@@ -30,7 +27,7 @@ public class IgnoreUserHandler implements PacketHandler {
             return;
         }
         
-        // Original C# implementation is commented out - placeholder for future implementation
+        // TODO: Implement user ignoring functionality
         // long userId = message.popWiredUInt();
         // if (!habbo.getMutedUsers().contains(userId)) {
         //     habbo.getMutedUsers().add(userId);

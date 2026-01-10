@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages all bots in the hotel.
- * Ported from HabboHotel/RoomBots/BotManager.cs
  */
 public class BotManager {
     private static final Logger logger = LoggerFactory.getLogger(BotManager.class);
@@ -26,7 +25,6 @@ public class BotManager {
     
     /**
      * Loads all bots from the database.
-     * Ported from BotManager.cs LoadBots()
      */
     public void loadBots() {
         bots.clear();

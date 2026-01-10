@@ -6,7 +6,6 @@ import com.uber.server.game.rooms.Room;
 
 /**
  * Interactor for gate items with multiple modes.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorGate
  */
 public class InteractorGate extends FurniInteractor {
     private final int modes;
@@ -67,7 +66,7 @@ public class InteractorGate extends FurniInteractor {
         }
         
         item.setExtraData(String.valueOf(newMode));
-        item.updateState();
+        item.updateState(false, true);
         // Note: GenerateMaps() would be called here in full implementation
     }
 }

@@ -8,7 +8,6 @@ import java.sql.*;
 
 /**
  * Repository for moodlight database operations.
- * Migrated from MoodlightData.cs
  */
 public class MoodlightRepository {
     private static final Logger logger = LoggerFactory.getLogger(MoodlightRepository.class);
@@ -24,8 +23,10 @@ public class MoodlightRepository {
      * @return Moodlight data (enabled, current_preset, preset_one, preset_two, preset_three), or null if not found
      */
     public MoodlightData loadMoodlight(long itemId) {
-        String sql = "SELECT enabled, current_preset, preset_one, preset_two, preset_three " +
-                    "FROM room_items_moodlight WHERE item_id = ? LIMIT 1";
+        String sql = """
+            SELECT enabled, current_preset, preset_one, preset_two, preset_three
+            FROM room_items_moodlight WHERE item_id = ? LIMIT 1
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -56,9 +57,10 @@ public class MoodlightRepository {
      * @return True if creation was successful
      */
     public boolean createMoodlight(long itemId) {
-        String sql = "INSERT INTO room_items_moodlight (item_id, enabled, current_preset, " +
-                    "preset_one, preset_two, preset_three) VALUES (?, '0', '1', " +
-                    "'#000000,255,0', '#000000,255,0', '#000000,255,0')";
+        String sql = """
+            INSERT INTO room_items_moodlight (item_id, enabled, current_preset, preset_one, preset_two, preset_three)
+            VALUES (?, '0', '1', '#000000,255,0', '#000000,255,0', '#000000,255,0')
+            """;
         
         try (Connection conn = databasePool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -104,19 +106,11 @@ public class MoodlightRepository {
      * @return True if update was successful
      */
     public boolean updatePreset(long itemId, int preset, String colorCode, int intensity, boolean backgroundOnly) {
-        String presetColumn;
-        switch (preset) {
-            case 3:
-                presetColumn = "preset_three";
-                break;
-            case 2:
-                presetColumn = "preset_two";
-                break;
-            case 1:
-            default:
-                presetColumn = "preset_one";
-                break;
-        }
+        String presetColumn = switch (preset) {
+            case 3 -> "preset_three";
+            case 2 -> "preset_two";
+            default -> "preset_one";
+        };
         
         String sql = "UPDATE room_items_moodlight SET " + presetColumn + " = ? WHERE item_id = ? LIMIT 1";
         String presetValue = colorCode + "," + intensity + "," + (backgroundOnly ? "1" : "0");

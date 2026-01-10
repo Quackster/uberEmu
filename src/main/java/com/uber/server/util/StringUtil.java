@@ -2,7 +2,6 @@ package com.uber.server.util;
 
 /**
  * String utility functions for filtering and sanitizing user input.
- * Ported from UberEnvironment.cs FilterInjectionChars methods.
  */
 public class StringUtil {
     /**
@@ -29,7 +28,7 @@ public class StringUtil {
         
         input = input.replace((char) 1, ' ');
         input = input.replace((char) 2, ' ');
-        // Character 3 is not replaced in C# version
+        // Character 3 (ETX) is not replaced (allowed in protocol)
         input = input.replace((char) 9, ' '); // Tab character
         
         if (!allowLinebreaks) {
@@ -41,7 +40,6 @@ public class StringUtil {
     
     /**
      * Checks if a string contains only alphanumeric characters.
-     * Ported from UberEnvironment.cs IsValidAlphaNumeric()
      * @param inputStr The string to validate
      * @return True if string is alphanumeric only
      */

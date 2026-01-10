@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for removing a buddy (message ID 40).
- * Ported from Messages/Requests/Messenger.cs RemoveBuddy()
  */
 public class RemoveBuddyHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(RemoveBuddyHandler.class);

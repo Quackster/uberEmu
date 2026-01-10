@@ -5,7 +5,6 @@ import com.uber.server.game.items.RoomItem;
 
 /**
  * Interactor for scoreboard items.
- * Ported from HabboHotel/Items/FurniInteractor.cs InteractorScoreboard
  */
 public class InteractorScoreboard extends FurniInteractor {
     @Override
@@ -55,6 +54,6 @@ public class InteractorScoreboard extends FurniInteractor {
         }
         
         item.setExtraData(String.valueOf(newMode));
-        item.updateState();
+        item.updateState(false, true);
     }
 }

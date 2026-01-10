@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for deleting a pending Call for Help ticket (message ID 238).
- * Ported from Messages/Requests/Help.cs DeletePendingCFH()
  */
 public class DeletePendingCallForHelpHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeletePendingCallForHelpHandler.class);

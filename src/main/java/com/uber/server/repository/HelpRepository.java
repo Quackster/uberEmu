@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * Repository for help system database operations.
- * Migrated from HelpTool.cs
  */
 public class HelpRepository {
     private static final Logger logger = LoggerFactory.getLogger(HelpRepository.class);

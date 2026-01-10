@@ -5,7 +5,6 @@ import com.uber.server.game.items.ItemManager;
 
 /**
  * Represents an ecotron reward.
- * Ported from HabboHotel/Catalogs/EcotronReward.cs
  */
 public class EcotronReward {
     private final long id;

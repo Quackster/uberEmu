@@ -5,7 +5,6 @@ import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
-import com.uber.server.messages.ServerMessage;
 import com.uber.server.game.rooms.Room;
 import com.uber.server.game.rooms.RoomData;
 import com.uber.server.game.rooms.RoomManager;
@@ -14,17 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handler for entering a room (message IDs 2 = OpenPublicRoom, 391 = OpenPrivateRoom).
- * Ported from Messages/Requests/Rooms.cs OpenPub(), OpenFlat()
+ * Handler for entering a room using OpenConnectionMessageEvent (incoming ID 19).
+ * Handles both public and private rooms, determined dynamically by room data.
  */
 public class EnterRoomHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnterRoomHandler.class);
     private final Game game;
-    private final boolean isPublic;
     
-    public EnterRoomHandler(Game game, boolean isPublic) {
+    public EnterRoomHandler(Game game, boolean unused) {
         this.game = game;
-        this.isPublic = isPublic;
     }
     
     @Override
@@ -34,27 +31,16 @@ public class EnterRoomHandler implements PacketHandler {
             return;
         }
         
-        long roomId;
-        String password = "";
-        
-        if (isPublic) {
-            // OpenPublicRoom: reads junk, roomId, junk
-            message.popWiredInt32(); // Junk
-            roomId = message.popWiredUInt();
-            message.popWiredInt32(); // Junk2
-        } else {
-            // OpenPrivateRoom: reads roomId, password, junk
-            roomId = message.popWiredUInt();
-            password = message.popFixedString();
-            message.popWiredInt32(); // Junk
-        }
+        // OpenConnectionMessageEvent format: reads roomId, password, junk
+        long roomId = message.popWiredUInt();
+        String password = message.popFixedString();
+        message.popWiredInt32(); // Junk
         
         prepareRoomForUser(client, habbo, roomId, password);
     }
     
     /**
      * Prepares room for user entry.
-     * Ported from Messages/Requests/Rooms.cs PrepareRoomForUser()
      * Made public so it can be called from FollowBuddyHandler
      */
     public void prepareRoomForUser(GameClient client, Habbo habbo, long roomId, String password) {
@@ -74,15 +60,7 @@ public class EnterRoomHandler implements PacketHandler {
             return;
         }
         
-        // Check room type matches handler type
-        if (isPublic && !data.isPublicRoom()) {
-            logger.debug("User {} tried to enter private room {} as public", habbo.getUsername(), roomId);
-            return;
-        }
-        if (!isPublic && data.isPublicRoom()) {
-            logger.debug("User {} tried to enter public room {} as private", habbo.getUsername(), roomId);
-            return;
-        }
+        // Room type is determined dynamically from room data, not handler type
         
         // Remove user from current room if in room
         if (habbo.isInRoom()) {
@@ -109,10 +87,10 @@ public class EnterRoomHandler implements PacketHandler {
         // Check bans
         if (room.userIsBanned(habbo.getId())) {
             if (!room.hasBanExpired(habbo.getId())) {
-                ServerMessage error = new ServerMessage(224);
-                error.appendInt32(4); // Banned
-                client.sendMessage(error);
-                client.sendMessage(new ServerMessage(18)); // Leave
+                var errorComposer = new com.uber.server.messages.outgoing.rooms.CantConnectMessageEventComposer(4); // Banned
+                client.sendMessage(errorComposer.compose());
+                var quitComposer = new com.uber.server.messages.outgoing.rooms.QuitMessageEventComposer();
+                client.sendMessage(quitComposer.compose());
                 habbo.setLoadingRoom(0);
                 return;
             }
@@ -123,10 +101,10 @@ public class EnterRoomHandler implements PacketHandler {
         if (room.getUserCount() >= room.getData().getUsersMax()) {
             // Check if user has fuse to enter full rooms
             if (!habbo.hasFuse("fuse_enter_full_rooms")) {
-                ServerMessage error = new ServerMessage(224);
-                error.appendInt32(1); // Room full
-                client.sendMessage(error);
-                client.sendMessage(new ServerMessage(18)); // Leave
+                var errorComposer = new com.uber.server.messages.outgoing.rooms.CantConnectMessageEventComposer(1); // Room full
+                client.sendMessage(errorComposer.compose());
+                var quitComposer = new com.uber.server.messages.outgoing.rooms.QuitMessageEventComposer();
+                client.sendMessage(quitComposer.compose());
                 habbo.setLoadingRoom(0);
                 return;
             }
@@ -138,21 +116,19 @@ public class EnterRoomHandler implements PacketHandler {
             if (data.getState() > 0) {
                 if (!habbo.hasFuse("fuse_mod")) {
                     client.sendNotif("This public room is accessible to Uber staff only.");
-                    client.sendMessage(new ServerMessage(18));
+                    var quitComposer = new com.uber.server.messages.outgoing.rooms.QuitMessageEventComposer();
+                    client.sendMessage(quitComposer.compose());
                     habbo.setLoadingRoom(0);
                     return;
                 }
             }
             
-            // Send public room entry message
-            ServerMessage entryMsg = new ServerMessage(166);
-            entryMsg.appendStringWithBreak("/client/public/" + data.getModelName() + "/0");
-            client.sendMessage(entryMsg);
+            // Send public room entry
+            var entryComposer = new com.uber.server.messages.outgoing.rooms.OpenConnectionMessageEventComposer(
+                "/client/public/" + data.getModelName() + "/0");
+            client.sendMessage(entryComposer.compose());
         } else {
             // Private room
-            ServerMessage entryMsg = new ServerMessage(19);
-            client.sendMessage(entryMsg);
-            
             // Check rights, password, etc.
             boolean canEnter = room.checkRights(client, true);
             canEnter = canEnter || habbo.hasFuse("fuse_enter_any_room");
@@ -160,37 +136,35 @@ public class EnterRoomHandler implements PacketHandler {
             if (!canEnter && !habbo.isTeleporting()) {
                 if (data.getState() == 1) { // Locked
                     if (room.getUserCount() == 0) {
-                        ServerMessage lockedMsg = new ServerMessage(131);
-                        client.sendMessage(lockedMsg);
+                        var lockedComposer = new com.uber.server.messages.outgoing.rooms.FlatAccessDeniedMessageEventComposer();
+                        client.sendMessage(lockedComposer.compose());
                     } else {
-                        ServerMessage ringMsg = new ServerMessage(91);
-                        ringMsg.appendStringWithBreak("");
-                        client.sendMessage(ringMsg);
+                        var ringComposer = new com.uber.server.messages.outgoing.rooms.DoorbellMessageEventComposer("");
+                        client.sendMessage(ringComposer.compose());
                         
                         // Ring doorbell to room owners
-                        ServerMessage ringToOwners = new ServerMessage(91);
-                        ringToOwners.appendStringWithBreak(habbo.getUsername());
-                        room.sendMessageToUsersWithRights(ringToOwners);
+                        var ringToOwnersComposer = new com.uber.server.messages.outgoing.rooms.DoorbellMessageEventComposer(habbo.getUsername());
+                        room.sendMessageToUsersWithRights(ringToOwnersComposer.compose());
                     }
                     habbo.setLoadingRoom(0);
                     return;
                 } else if (data.getState() == 2) { // Password
                     String roomPassword = room.getData().getPassword();
                     if (password == null || !password.equalsIgnoreCase(roomPassword != null ? roomPassword : "")) {
-                        ServerMessage error = new ServerMessage(33);
-                        error.appendInt32(-100002); // Wrong password
-                        client.sendMessage(error);
-                        client.sendMessage(new ServerMessage(18));
+                        var errorComposer = new com.uber.server.messages.outgoing.global.GenericErrorEventComposer(-100002);
+                        client.sendMessage(errorComposer.compose());
+                        var quitComposer = new com.uber.server.messages.outgoing.rooms.QuitMessageEventComposer();
+                        client.sendMessage(quitComposer.compose());
                         habbo.setLoadingRoom(0);
                         return;
                     }
                 }
             }
             
-            // Send private room entry message
-            ServerMessage privateEntryMsg = new ServerMessage(166);
-            privateEntryMsg.appendStringWithBreak("/client/private/" + roomId + "/id");
-            client.sendMessage(privateEntryMsg);
+            // Send private room entry
+            var privateEntryComposer = new com.uber.server.messages.outgoing.rooms.OpenFlatConnectionMessageEventComposer(
+                "/client/private/" + roomId + "/id");
+            client.sendMessage(privateEntryComposer.compose());
         }
         
         // Mark loading checks as passed
@@ -202,38 +176,81 @@ public class EnterRoomHandler implements PacketHandler {
     
     /**
      * Loads room data for user (sends room data messages).
-     * Ported from Messages/Requests/Rooms.cs LoadRoomForUser()
      */
     private void loadRoomForUser(GameClient client, Habbo habbo, Room room) {
         if (room == null || !habbo.isLoadingChecksPassed()) {
             return;
         }
         
-        // Send GetRoomData1 (empty response)
-        ServerMessage data1 = new ServerMessage(297);
-        data1.appendInt32(0);
-        client.sendMessage(data1);
-        
-        // Send GetRoomData2 (heightmap)
         RoomData data = room.getData();
         if (data == null) {
             return;
         }
         
-        RoomModel model = room.getModel();
-        if (model == null) {
-            client.sendNotif("Sorry, model data is missing from this room and therefore cannot be loaded.");
-            client.sendMessage(new ServerMessage(18));
-            habbo.setLoadingRoom(0);
-            habbo.setLoadingChecksPassed(false);
-            return;
+        // Send group badges
+        var groupBadgesComposer = new com.uber.server.messages.outgoing.rooms.GroupBadgesMessageEventComposer(
+            "IcIrDs43103s19014d5a1dc291574a508bc80a64663e61a00");
+        client.sendMessage(groupBadgesComposer.compose());
+        
+        // Send model name and room ID
+        var modelComposer = new com.uber.server.messages.outgoing.rooms.RoomModelNameMessageEventComposer(
+            data.getModelName(), room.getRoomId());
+        client.sendMessage(modelComposer.compose());
+        
+        // Send spectator mode check if spectator
+        if (habbo.isSpectatorMode()) {
+            var spectatorComposer = new com.uber.server.messages.outgoing.rooms.SpectatorModeMessageEventComposer();
+            client.sendMessage(spectatorComposer.compose());
         }
         
-        // Send heightmap (ID 31) and relative heightmap (ID 470)
-        client.sendMessage(model.serializeHeightmap());
-        client.sendMessage(model.serializeRelativeHeightmap());
-        
-        // GetRoomData3 will be handled by GetRoomData3Handler (separate handler)
-        // Client will send GetRoomData3 (ID 126) after receiving heightmaps
+        // Private room specific packets
+        if (!room.isPublicRoom()) {
+            // Send wallpaper if not "0.0"
+            String wallpaper = data.getWallpaper();
+            if (wallpaper != null && !wallpaper.equals("0.0")) {
+                var wallpaperComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer("wallpaper", wallpaper);
+                client.sendMessage(wallpaperComposer.compose());
+            }
+            
+            // Send floor if not "0.0"
+            String floor = data.getFloor();
+            if (floor != null && !floor.equals("0.0")) {
+                var floorComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer("floor", floor);
+                client.sendMessage(floorComposer.compose());
+            }
+            
+            // Send landscape - always sent (no check for "0.0")
+            var landscapeComposer = new com.uber.server.messages.outgoing.rooms.RoomDecorationMessageEventComposer(
+                "landscape", data.getLandscape() != null ? data.getLandscape() : "0.0");
+            client.sendMessage(landscapeComposer.compose());
+            
+            // Send rights if has rights, owner message if owner
+            if (room.checkRights(client, true)) {
+                // Owner gets both rights and owner messages
+                var rightsComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsLevelMessageEventComposer();
+                client.sendMessage(rightsComposer.compose());
+                
+                var ownerComposer = new com.uber.server.messages.outgoing.rooms.RoomOwnerMessageEventComposer();
+                client.sendMessage(ownerComposer.compose());
+            } else if (room.checkRights(client, false)) {
+                // Has rights but not owner - only rights message
+                var rightsComposer = new com.uber.server.messages.outgoing.rooms.RoomRightsLevelMessageEventComposer();
+                client.sendMessage(rightsComposer.compose());
+            }
+            
+            // Send room score (ID 345)
+            int scoreToSend = (habbo.getRatedRooms().contains(room.getRoomId()) || room.checkRights(client, true)) 
+                ? data.getScore() : -1;
+            var scoreComposer = new com.uber.server.messages.outgoing.rooms.RoomRatingEventComposer(scoreToSend);
+            client.sendMessage(scoreComposer.compose());
+            
+            // Send event (ID 370) - always send for private rooms
+            if (room.hasOngoingEvent()) {
+                client.sendMessage(room.getEvent().serialize(client));
+            } else {
+                var noEventComposer = new com.uber.server.messages.outgoing.rooms.RoomEventComposer();
+                client.sendMessage(noEventComposer.compose());
+            }
+        }
     }
 }

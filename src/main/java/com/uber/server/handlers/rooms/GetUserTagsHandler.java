@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for getting user tags (message ID 263).
- * Ported from Messages/Requests/Rooms.cs GetUserTags()
  */
 public class GetUserTagsHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(GetUserTagsHandler.class);

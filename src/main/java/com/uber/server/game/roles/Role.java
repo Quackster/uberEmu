@@ -2,7 +2,6 @@ package com.uber.server.game.roles;
 
 /**
  * Represents a user role/rank.
- * Ported from HabboHotel/Roles/Role.cs
  */
 public class Role {
     private final long roleId;

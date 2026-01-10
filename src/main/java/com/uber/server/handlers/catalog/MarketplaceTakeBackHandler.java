@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Handler for taking back a marketplace offer (message ID 3015).
- * Ported from Messages/Requests/Catalog.cs MarketplaceTakeBack()
  */
 public class MarketplaceTakeBackHandler implements PacketHandler {
     private static final Logger logger = LoggerFactory.getLogger(MarketplaceTakeBackHandler.class);
