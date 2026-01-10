@@ -3,14 +3,17 @@ package com.uber.server.game.rooms.services;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.items.RoomItem;
 import com.uber.server.game.rooms.Room;
+import com.uber.server.game.pathfinding.Coord;
 import com.uber.server.messages.ServerMessage;
 import com.uber.server.repository.RoomItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -134,11 +137,20 @@ public class RoomItemService {
         // Calculate Z coordinate (simplified - use floor height from model if available)
         double newZ = 0.0; // Default to 0, will be enhanced with model heightmap
         
+        // Store old rotation to check if it changed
+        int oldRot = item.getRot();
+        boolean rotationChanged = (oldRot != newRot);
+        
         // Update item position
         item.setX(newX);
         item.setY(newY);
         item.setZ(newZ);
         item.setRot(newRot);
+        
+        // If rotation changed and item is a seat or bed, update users sitting on it
+        if (rotationChanged && (baseItem.canSit() || "bed".equalsIgnoreCase(baseItem.getInteractionType()))) {
+            updateUsersOnItem(item, newX, newY, newRot);
+        }
         
         // Call item interactor OnPlace
         item.getInteractor().onPlace(session, item);
@@ -243,6 +255,89 @@ public class RoomItemService {
         // Remove from room and database
         items.remove(itemId);
         roomItemRepository.deleteRoomItem(itemId);
+    }
+    
+    /**
+     * Updates users sitting on an item when the item rotates.
+     * @param item The item that was rotated
+     * @param itemX Item X coordinate
+     * @param itemY Item Y coordinate
+     * @param newRot New rotation value
+     */
+    private void updateUsersOnItem(RoomItem item, int itemX, int itemY, int newRot) {
+        com.uber.server.game.items.Item baseItem = item.getBaseItem();
+        if (baseItem == null) {
+            return;
+        }
+        
+        boolean isSeat = baseItem.canSit();
+        boolean isBed = "bed".equalsIgnoreCase(baseItem.getInteractionType());
+        
+        if (!isSeat && !isBed) {
+            return; // Not a seat or bed, nothing to update
+        }
+        
+        // Get room mapping once
+        com.uber.server.game.rooms.mapping.RoomMapping mapping = room.getRoomMapping();
+        if (mapping == null) {
+            return;
+        }
+        
+        // Build set of positions covered by this item (for multi-tile items)
+        Set<Coord> itemPositions = new HashSet<>();
+        
+        // Add base position
+        itemPositions.add(new Coord(itemX, itemY));
+        
+        // Add affected tiles for multi-tile items
+        int length = baseItem.getLength();
+        int width = baseItem.getWidth();
+        if (length > 1 || width > 1) {
+            java.util.Map<Integer, com.uber.server.game.rooms.mapping.AffectedTile> affectedTiles = 
+                mapping.getAffectedTiles(length, width, itemX, itemY, newRot);
+            for (com.uber.server.game.rooms.mapping.AffectedTile tile : affectedTiles.values()) {
+                itemPositions.add(new Coord(tile.getX(), tile.getY()));
+            }
+        }
+        
+        // Get user matrix from room mapping
+        boolean[][] userMatrix = mapping.getUserMatrix();
+        if (userMatrix == null || userMatrix.length == 0) {
+            return;
+        }
+        
+        int matrixSizeY = userMatrix[0] != null ? userMatrix[0].length : 0;
+        
+        // For each item position, check if there's a user there using the matrix
+        for (Coord itemPos : itemPositions) {
+            int x = itemPos.getX();
+            int y = itemPos.getY();
+            
+            // Check bounds and if user matrix indicates a user at this position
+            if (x >= 0 && x < userMatrix.length && y >= 0 && y < matrixSizeY && userMatrix[x][y]) {
+                // Find the user at this position
+                for (com.uber.server.game.rooms.RoomUser user : room.getUsers().values()) {
+                    if (user.getX() == x && user.getY() == y) {
+                        // Check if user is sitting (for seats) or laying (for beds)
+                        boolean shouldUpdate = false;
+                        if (isSeat && user.hasStatus("sit")) {
+                            shouldUpdate = true;
+                        } else if (isBed && user.hasStatus("lay")) {
+                            shouldUpdate = true;
+                        }
+                        
+                        if (shouldUpdate) {
+                            // Update user rotation to match item rotation
+                            user.setRotHead(newRot);
+                            user.setRotBody(newRot);
+                            user.setUpdateNeeded(true);
+                        }
+                        // Break since we found the user at this position (matrix only shows one user per tile)
+                        break;
+                    }
+                }
+            }
+        }
     }
     
     /**
