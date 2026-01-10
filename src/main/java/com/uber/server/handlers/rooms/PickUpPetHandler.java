@@ -1,0 +1,60 @@
+package com.uber.server.handlers.rooms;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.PacketHandler;
+import com.uber.server.pets.Pet;
+import com.uber.server.rooms.RoomUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for picking up a pet from room (message ID 3003).
+ * Ported from Messages/Requests/Rooms.cs PickUpPet()
+ */
+public class PickUpPetHandler implements PacketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(PickUpPetHandler.class);
+    private final Game game;
+    
+    public PickUpPetHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || !habbo.isInRoom()) {
+            return;
+        }
+        
+        com.uber.server.rooms.Room room = game.getRoomManager().getRoom(habbo.getCurrentRoomId());
+        if (room == null || room.isPublicRoom()) {
+            return;
+        }
+        
+        // Check if pets are allowed or user has rights
+        if (!room.getData().isAllowPets() && !room.checkRights(client, true)) {
+            return;
+        }
+        
+        long petId = message.popWiredUInt();
+        RoomUser petUser = room.getPet(petId);
+        
+        if (petUser == null || petUser.getPetData() == null || petUser.getPetData().getOwnerId() != habbo.getId()) {
+            return;
+        }
+        
+        com.uber.server.pets.Pet pet = petUser.getPetData();
+        if (pet == null) {
+            return;
+        }
+        
+        // Add pet back to inventory
+        habbo.getInventoryComponent().addPet(pet);
+        
+        // Remove pet from room
+        room.removeBot(petUser.getVirtualId(), false);
+    }
+}

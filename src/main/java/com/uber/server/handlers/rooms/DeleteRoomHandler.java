@@ -1,0 +1,71 @@
+package com.uber.server.handlers.rooms;
+
+import com.uber.server.game.Game;
+import com.uber.server.game.GameClient;
+import com.uber.server.game.Habbo;
+import com.uber.server.messages.ClientMessage;
+import com.uber.server.messages.PacketHandler;
+import com.uber.server.messages.ServerMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Handler for deleting a room (message ID 23).
+ * Ported from Messages/Requests/Rooms.cs DeleteRoom()
+ */
+public class DeleteRoomHandler implements PacketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteRoomHandler.class);
+    private final Game game;
+    
+    public DeleteRoomHandler(Game game) {
+        this.game = game;
+    }
+    
+    @Override
+    public void handle(GameClient client, ClientMessage message) {
+        Habbo habbo = client.getHabbo();
+        if (habbo == null) {
+            return;
+        }
+        
+        long roomId = message.popWiredUInt();
+        com.uber.server.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        
+        if (data == null || !data.getOwner().toLowerCase().equals(habbo.getUsername().toLowerCase())) {
+            return;
+        }
+        
+        // Delete room from database
+        if (game.getRoomRepository().deleteRoom(roomId)) {
+            // Also delete room items and rights
+            game.getRoomItemRepository().deleteRoomItems(roomId);
+            game.getRoomRepository().deleteRoomRights(roomId, null);
+            
+            // Update users with this as home room
+            game.getUserRepository().updateHomeRoomForRoom(roomId, 0);
+            
+            // If room is loaded, kick all users and unload
+            com.uber.server.rooms.Room room = game.getRoomManager().getRoom(roomId);
+            if (room != null) {
+                // Send kick message to all users
+                ServerMessage kickMessage = new ServerMessage(18);
+                room.sendMessage(kickMessage);
+                
+                // Remove all users from room
+                for (com.uber.server.rooms.RoomUser user : room.getUsers().values()) {
+                    if (user.isBot()) {
+                        continue;
+                    }
+                    GameClient userClient = user.getClient();
+                    if (userClient != null && userClient.getHabbo() != null) {
+                        // Set current room to 0
+                        userClient.getHabbo().setCurrentRoomId(0);
+                    }
+                }
+                
+                // Unload room
+                game.getRoomManager().unloadRoom(roomId);
+            }
+        }
+    }
+}
