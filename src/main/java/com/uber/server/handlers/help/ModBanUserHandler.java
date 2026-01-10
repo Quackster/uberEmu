@@ -21,15 +21,31 @@ public class ModBanUserHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        String banMessage = message.popFixedString();
+        int banHours = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.ModBanUserEvent event = new com.uber.server.event.packet.help.ModBanUserEvent(
+            client, message, userId, banMessage, banHours);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        userId = event.getUserId();
+        banMessage = event.getMessage();
+        banHours = event.getBanHours();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_ban")) {
             return;
         }
         
-        long userId = message.popWiredUInt();
-        String banMessage = message.popFixedString();
-        int lengthHours = message.popWiredInt32();
-        long lengthSeconds = lengthHours * 3600L; // Convert hours to seconds
+        long lengthSeconds = banHours * 3600L; // Convert hours to seconds
         
         game.getModerationTool().banUser(client, userId, lengthSeconds, banMessage);
     }

@@ -24,6 +24,15 @@ public class TakeAllRightsMessageComposerHandler implements IncomingMessageHandl
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.room.TakeAllRightsEvent event = new com.uber.server.event.packet.room.TakeAllRightsEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

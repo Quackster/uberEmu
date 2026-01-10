@@ -1,5 +1,6 @@
 package com.uber.server.messages.incoming.rooms;
 
+import com.uber.server.event.packet.room.ShoutMessageEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -25,6 +26,20 @@ public class ShoutMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String chatMessage = message.popFixedString();
+        
+        ShoutMessageEvent event = new ShoutMessageEvent(client, message, chatMessage);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        chatMessage = event.getMessage();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
@@ -33,8 +48,6 @@ public class ShoutMessageComposerHandler implements IncomingMessageHandler {
         if (!habbo.isInRoom()) {
             return;
         }
-        
-        String chatMessage = message.popFixedString();
         if (chatMessage == null || chatMessage.isEmpty()) {
             return;
         }

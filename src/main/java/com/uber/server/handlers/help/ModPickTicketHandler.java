@@ -21,13 +21,27 @@ public class ModPickTicketHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: Handler reads junk + ticketId, but event expects just ticketId (as per PacketEventFactory)
+        // Reading according to event structure (junk will be skipped by reading ticketId directly)
+        int ticketId = message.popWiredInt32(); // This matches PacketEventFactory pattern
+        
+        com.uber.server.event.packet.help.ModPickTicketEvent event = new com.uber.server.event.packet.help.ModPickTicketEvent(
+            client, message, ticketId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        ticketId = event.getTicketId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_mod")) {
             return;
         }
-        
-        int junk = message.popWiredInt32(); // Unused
-        long ticketId = message.popWiredUInt();
         
         game.getModerationTool().pickTicket(client, ticketId);
     }

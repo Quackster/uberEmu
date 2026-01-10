@@ -22,29 +22,43 @@ public class DeleteRoomMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.DeleteRoomEvent event = new com.uber.server.event.packet.room.DeleteRoomEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long roomId = message.popWiredUInt();
-        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        long roomIdLong = roomId;
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomIdLong);
         
         if (data == null || !data.getOwner().toLowerCase().equals(habbo.getUsername().toLowerCase())) {
             return;
         }
         
         // Delete room from database
-        if (game.getRoomRepository().deleteRoom(roomId)) {
+        if (game.getRoomRepository().deleteRoom(roomIdLong)) {
             // Also delete room items and rights
-            game.getRoomItemRepository().deleteRoomItems(roomId);
-            game.getRoomRepository().deleteRoomRights(roomId, null);
+            game.getRoomItemRepository().deleteRoomItems(roomIdLong);
+            game.getRoomRepository().deleteRoomRights(roomIdLong, null);
             
             // Update users with this as home room
-            game.getUserRepository().updateHomeRoomForRoom(roomId, 0);
+            game.getUserRepository().updateHomeRoomForRoom(roomIdLong, 0);
             
             // If room is loaded, kick all users and unload
-            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(roomId);
+            com.uber.server.game.rooms.Room room = game.getRoomManager().getRoom(roomIdLong);
             if (room != null) {
                 // Send kick message to all users
                 var kickComposer = new com.uber.server.messages.outgoing.rooms.RoomEntryErrorMessageEventComposer();
@@ -63,7 +77,7 @@ public class DeleteRoomMessageComposerHandler implements IncomingMessageHandler 
                 }
                 
                 // Unload room
-                game.getRoomManager().unloadRoom(roomId);
+                game.getRoomManager().unloadRoom(roomIdLong);
             }
         }
     }

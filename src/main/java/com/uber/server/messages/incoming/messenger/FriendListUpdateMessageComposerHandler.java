@@ -15,6 +15,15 @@ public class FriendListUpdateMessageComposerHandler implements IncomingMessageHa
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.messenger.FriendListUpdateEvent event = new com.uber.server.event.packet.messenger.FriendListUpdateEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         var habbo = client.getHabbo();
         if (habbo == null) {
             return;

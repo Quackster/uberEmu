@@ -23,6 +23,24 @@ public class SavePostitHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        String postitText = message.popFixedString();
+        String postitColor = message.popFixedString();
+        
+        com.uber.server.event.packet.room.SavePostitEvent event = new com.uber.server.event.packet.room.SavePostitEvent(client, message, itemId, postitText, postitColor);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        itemId = event.getItemId();
+        postitText = event.getText();
+        postitColor = event.getColor();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -33,7 +51,6 @@ public class SavePostitHandler implements PacketHandler {
             return;
         }
         
-        long itemId = message.popWiredUInt();
         RoomItem item = room.getItem(itemId);
         
         if (item == null) {
@@ -45,19 +62,11 @@ public class SavePostitHandler implements PacketHandler {
             return;
         }
         
-        String data = message.popFixedString();
-        if (data == null || data.isEmpty()) {
-            return;
+        if (postitText == null) {
+            postitText = "";
         }
-        
-        // Parse color and text
-        String[] parts = data.split(" ", 2);
-        if (parts.length < 2) {
-            return;
-        }
-        
-        String color = parts[0];
-        String text = parts.length > 1 ? StringUtil.filterInjectionChars(parts[1], true) : "";
+        String text = StringUtil.filterInjectionChars(postitText, true);
+        String color = postitColor;
         
         // Check if user has rights (if not, can only append to existing text)
         if (!room.checkRights(client)) {

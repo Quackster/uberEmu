@@ -21,23 +21,32 @@ public class DeclineRequestHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        java.util.List<Long> userIds = new java.util.ArrayList<>();
+        int amount = message.popWiredInt32();
+        for (int i = 0; i < amount; i++) {
+            userIds.add(message.popWiredUInt());
+        }
+        
+        com.uber.server.event.packet.messenger.DeclineBuddyEvent event = new com.uber.server.event.packet.messenger.DeclineBuddyEvent(client, message, userIds);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        userIds = event.getUserIds();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getMessenger() == null) {
             return;
         }
         
-        // Mode: 0 = decline specific, 1 = decline all
-        int mode = message.popWiredInt32();
-        int amount = message.popWiredInt32();
-        
-        if (mode == 0 && amount == 1) {
-            // Decline specific request
-            long requestId = message.popWiredUInt(); // Actually fromUser ID
+        // Process declined requests
+        for (long requestId : userIds) {
             habbo.getMessenger().handleRequest(requestId);
-        } else if (mode == 1) {
-            // Decline all requests
-            habbo.getMessenger().handleAllRequests();
         }
-        // else: invalid mode - do nothing
     }
 }

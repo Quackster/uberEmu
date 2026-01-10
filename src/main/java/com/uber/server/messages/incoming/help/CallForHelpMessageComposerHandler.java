@@ -24,6 +24,24 @@ public class CallForHelpMessageComposerHandler implements IncomingMessageHandler
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String messageText = message.popFixedString();
+        int categoryId = message.popWiredInt32();
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.CallForHelpEvent event = new com.uber.server.event.packet.help.CallForHelpEvent(client, message, messageText, categoryId, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        messageText = event.getMessage();
+        categoryId = event.getCategoryId();
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
@@ -37,12 +55,9 @@ public class CallForHelpMessageComposerHandler implements IncomingMessageHandler
         }
         
         if (!errorOccurred) {
-            String ticketMessage = StringUtil.filterInjectionChars(message.popFixedString());
-            int junk = message.popWiredInt32(); // Unused
-            int type = message.popWiredInt32();
-            long reportedUserId = message.popWiredUInt();
-            
-            game.getModerationTool().sendNewTicket(client, type, reportedUserId, ticketMessage);
+            String ticketMessage = StringUtil.filterInjectionChars(messageText);
+            // Use categoryId as type, roomId for context
+            game.getModerationTool().sendNewTicket(client, categoryId, 0, ticketMessage);
         }
         
         // TODO: Replace with CallForHelpResultMessageEventComposer (ID 321)

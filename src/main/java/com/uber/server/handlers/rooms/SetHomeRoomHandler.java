@@ -22,27 +22,41 @@ public class SetHomeRoomHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.SetHomeRoomEvent event = new com.uber.server.event.packet.room.SetHomeRoomEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long roomId = message.popWiredUInt();
-        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomId);
+        long roomIdLong = roomId;
+        com.uber.server.game.rooms.RoomData data = game.getRoomManager().generateRoomData(roomIdLong);
         
-        if (roomId != 0) {
+        if (roomIdLong != 0) {
             if (data == null || !data.getOwner().toLowerCase().equals(habbo.getUsername().toLowerCase())) {
                 return;
             }
         }
         
         // Update home room
-        habbo.setHomeRoom(roomId);
-        game.getUserRepository().updateHomeRoom(habbo.getId(), roomId);
+        habbo.setHomeRoom(roomIdLong);
+        game.getUserRepository().updateHomeRoom(habbo.getId(), roomIdLong);
         
         // Send confirmation
         ServerMessage response = new ServerMessage(455);
-        response.appendUInt(roomId);
+        response.appendUInt(roomIdLong);
         client.sendMessage(response);
     }
 }

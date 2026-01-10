@@ -25,15 +25,27 @@ public class OpenConnectionMessageComposerHandler implements IncomingMessageHand
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // OpenConnectionMessageComposer format: reads roomId, password, junk
+        int roomId = message.popWiredInt32();
+        String password = message.popFixedString();
+        message.popWiredInt32(); // Junk
+        
+        com.uber.server.event.packet.room.OpenConnectionEvent event = new com.uber.server.event.packet.room.OpenConnectionEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
-        
-        // OpenConnectionMessageComposer format: reads roomId, password, junk
-        long roomId = message.popWiredUInt();
-        String password = message.popFixedString();
-        message.popWiredInt32(); // Junk
         
         prepareRoomForUser(client, habbo, roomId, password);
     }

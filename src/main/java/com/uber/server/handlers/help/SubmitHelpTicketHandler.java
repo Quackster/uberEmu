@@ -23,6 +23,17 @@ public class SubmitHelpTicketHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: This handler uses different parsing than CallForHelpEvent (legacy format?)
+        // CallForHelpMessageComposerHandler is registered for ID 453 with different structure
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 453);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;

@@ -20,12 +20,26 @@ public class PerformSearch2Handler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int junk = message.popWiredInt32(); // Unused
+        String tag = message.popFixedString();
+        
+        com.uber.server.event.packet.navigator.RoomTagSearchEvent event = new com.uber.server.event.packet.navigator.RoomTagSearchEvent(client, message, tag);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        tag = event.getTag();
+        
         if (game.getNavigator() == null) {
             return;
         }
         
-        int junk = message.popWiredInt32(); // Unused
-        String searchQuery = message.popFixedString();
+        String searchQuery = tag;
         client.sendMessage(game.getNavigator().serializeSearchResults(searchQuery));
     }
 }

@@ -21,9 +21,23 @@ public class GetFaqTextMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        long topicId = message.popWiredUInt();
+        message.resetPointer();
         
-        var topic = game.getHelpTool().getTopic(topicId);
+        int topicId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.GetFaqTextEvent event = new com.uber.server.event.packet.help.GetFaqTextEvent(client, message, topicId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        topicId = event.getTopicId();
+        
+        long topicIdLong = topicId;
+        
+        var topic = game.getHelpTool().getTopic(topicIdLong);
         if (topic != null) {
             // TODO: Replace with FaqTextMessageEventComposer (ID 520)
             client.sendMessage(game.getHelpTool().serializeTopic(topic));

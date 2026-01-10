@@ -22,6 +22,17 @@ public class DeletePendingCallForHelpHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: This handler may be unused - DeletePendingCallsForHelpMessageComposerHandler is registered for ID 238
+        com.uber.server.event.packet.help.DeletePendingCallsForHelpEvent event = new com.uber.server.event.packet.help.DeletePendingCallsForHelpEvent(
+            client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;

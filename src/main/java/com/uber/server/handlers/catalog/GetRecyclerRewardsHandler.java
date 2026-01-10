@@ -26,6 +26,15 @@ public class GetRecyclerRewardsHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.catalog.GetRecyclerRewardsEvent event = new com.uber.server.event.packet.catalog.GetRecyclerRewardsEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Catalog catalog = game.getCatalog();
         if (catalog == null) {
             return;

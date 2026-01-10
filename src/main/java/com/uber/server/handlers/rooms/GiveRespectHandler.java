@@ -22,6 +22,20 @@ public class GiveRespectHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long targetUserId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.GiveRespectEvent event = new com.uber.server.event.packet.room.GiveRespectEvent(client, message, targetUserId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        targetUserId = event.getUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom() || habbo.getDailyRespectPoints() <= 0) {
             return;
@@ -31,8 +45,6 @@ public class GiveRespectHandler implements PacketHandler {
         if (room == null) {
             return;
         }
-        
-        long targetUserId = message.popWiredUInt();
         com.uber.server.game.rooms.RoomUser targetUser = room.getRoomUserByHabbo(targetUserId);
         
         if (targetUser == null || targetUser.isBot() || targetUser.getHabboId() == habbo.getId()) {

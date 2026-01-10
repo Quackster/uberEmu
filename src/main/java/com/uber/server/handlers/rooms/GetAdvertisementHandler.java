@@ -22,6 +22,15 @@ public class GetAdvertisementHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.room.GetAdvertisementEvent event = new com.uber.server.event.packet.room.GetAdvertisementEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         com.uber.server.game.advertisements.RoomAdvertisement ad = 
             game.getAdvertisementManager().getRandomRoomAdvertisement();
         

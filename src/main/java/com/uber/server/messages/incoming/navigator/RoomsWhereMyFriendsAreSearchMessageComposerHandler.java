@@ -21,6 +21,16 @@ public class RoomsWhereMyFriendsAreSearchMessageComposerHandler implements Incom
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.navigator.RoomsWhereMyFriendsAreSearchEvent event = new com.uber.server.event.packet.navigator.RoomsWhereMyFriendsAreSearchEvent(
+            client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         if (game.getNavigator() == null) {
             return;
         }

@@ -22,6 +22,22 @@ public class LookAtHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int targetX = message.popWiredInt32();
+        int targetY = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.LookAtEvent event = new com.uber.server.event.packet.room.LookAtEvent(client, message, targetX, targetY);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        targetX = event.getTargetX();
+        targetY = event.getTargetY();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -38,9 +54,6 @@ public class LookAtHandler implements PacketHandler {
         }
         
         roomUser.unidle();
-        
-        int targetX = message.popWiredInt32();
-        int targetY = message.popWiredInt32();
         
         // Don't rotate if already at target position
         if (targetX == roomUser.getX() && targetY == roomUser.getY()) {

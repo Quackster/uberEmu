@@ -14,6 +14,15 @@ public class PongHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.global.PongEvent event = new com.uber.server.event.packet.global.PongEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         // Set PongOK flag to indicate client responded
         client.setPongOK(true);
         logger.debug("Received pong from client {}", client.getClientId());

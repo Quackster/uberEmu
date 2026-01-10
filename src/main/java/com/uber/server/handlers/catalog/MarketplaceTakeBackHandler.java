@@ -26,15 +26,29 @@ public class MarketplaceTakeBackHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int offerId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.catalog.MarketplaceTakeBackEvent event = new com.uber.server.event.packet.catalog.MarketplaceTakeBackEvent(client, message, offerId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        offerId = event.getOfferId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long offerId = message.popWiredUInt();
+        long offerIdLong = offerId;
         MarketplaceRepository repository = game.getMarketplaceRepository();
         
-        Map<String, Object> offer = repository.getOffer(offerId);
+        Map<String, Object> offer = repository.getOffer(offerIdLong);
         if (offer == null) {
             return;
         }
@@ -60,10 +74,10 @@ public class MarketplaceTakeBackHandler implements PacketHandler {
         }
         
         // Delete offer
-        repository.deleteOffer(offerId);
+        repository.deleteOffer(offerIdLong);
         
         ServerMessage response = new ServerMessage(614);
-        response.appendUInt(offerId);
+        response.appendUInt(offerIdLong);
         response.appendBoolean(true);
         client.sendMessage(response);
     }

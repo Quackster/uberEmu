@@ -22,15 +22,30 @@ public class AcceptBuddyMessageComposerHandler implements IncomingMessageHandler
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        java.util.List<Long> userIds = new java.util.ArrayList<>();
+        int amount = message.popWiredInt32();
+        for (int i = 0; i < amount; i++) {
+            userIds.add(message.popWiredUInt());
+        }
+        
+        com.uber.server.event.packet.messenger.AcceptBuddyEvent event = new com.uber.server.event.packet.messenger.AcceptBuddyEvent(client, message, userIds);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        userIds = event.getUserIds();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getMessenger() == null) {
             return;
         }
         
-        int amount = message.popWiredInt32();
-        
-        for (int i = 0; i < amount; i++) {
-            long requestId = message.popWiredUInt(); // Actually fromUser ID
+        for (long requestId : userIds) {
             
             var request = habbo.getMessenger().getRequest(requestId);
             if (request == null) {

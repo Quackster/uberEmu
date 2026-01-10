@@ -23,6 +23,27 @@ public class MoveItemMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        int x = message.popWiredInt32();
+        int y = message.popWiredInt32();
+        int rot = message.popWiredInt32();
+        int junk = message.popWiredInt32(); // Unused
+        
+        com.uber.server.event.packet.room.MoveItemEvent event = new com.uber.server.event.packet.room.MoveItemEvent(client, message, itemId, x, y, rot);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        itemId = event.getItemId();
+        x = event.getX();
+        y = event.getY();
+        rot = event.getRotation();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -33,17 +54,11 @@ public class MoveItemMessageComposerHandler implements IncomingMessageHandler {
             return;
         }
         
-        long itemId = message.popWiredUInt();
         RoomItem item = room.getItem(itemId);
         
         if (item == null) {
             return;
         }
-        
-        int x = message.popWiredInt32();
-        int y = message.popWiredInt32();
-        int rot = message.popWiredInt32();
-        int junk = message.popWiredInt32(); // Unused
         
         room.setFloorItem(client, item, x, y, rot, false);
     }

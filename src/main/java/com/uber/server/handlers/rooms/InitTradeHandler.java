@@ -21,6 +21,20 @@ public class InitTradeHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long targetUserId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.InitTradeEvent event = new com.uber.server.event.packet.room.InitTradeEvent(client, message, targetUserId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        targetUserId = event.getTargetUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -36,8 +50,8 @@ public class InitTradeHandler implements PacketHandler {
             return;
         }
         
-        int virtualId = message.popWiredInt32();
-        com.uber.server.game.rooms.RoomUser user2 = room.getRoomUserByVirtualId(virtualId);
+        // Find user by userId (convert from event's targetUserId)
+        com.uber.server.game.rooms.RoomUser user2 = room.getRoomUserByHabbo(targetUserId);
         
         if (user2 == null) {
             return;

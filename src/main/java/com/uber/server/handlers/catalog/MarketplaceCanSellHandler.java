@@ -21,6 +21,15 @@ public class MarketplaceCanSellHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.catalog.MarketplaceCanSellEvent event = new com.uber.server.event.packet.catalog.MarketplaceCanSellEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         ServerMessage response = new ServerMessage(611);
         response.appendBoolean(true); // Can sell
         response.appendInt32(99999); // Max price

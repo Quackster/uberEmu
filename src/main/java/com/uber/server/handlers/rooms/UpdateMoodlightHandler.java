@@ -22,6 +22,27 @@ public class UpdateMoodlightHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int presetId = message.popWiredInt32();
+        int backgroundMode = message.popWiredInt32();
+        String color = message.popFixedString();
+        int intensity = message.popWiredInt32();
+        boolean backgroundOnly = (backgroundMode == 2);
+        
+        com.uber.server.event.packet.room.UpdateMoodlightEvent event = new com.uber.server.event.packet.room.UpdateMoodlightEvent(client, message, presetId, color, intensity, backgroundOnly);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        presetId = event.getPresetId();
+        color = event.getColor();
+        intensity = event.getIntensity();
+        backgroundOnly = event.isBackgroundOnly();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -46,8 +67,7 @@ public class UpdateMoodlightHandler implements PacketHandler {
             return;
         }
         
-        int preset = message.popWiredInt32();
-        int backgroundMode = message.popWiredInt32();
+        int preset = presetId;
         String colorCode = message.popFixedString();
         int intensity = message.popWiredInt32();
         

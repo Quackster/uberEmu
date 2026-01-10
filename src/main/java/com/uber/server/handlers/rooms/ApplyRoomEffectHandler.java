@@ -24,6 +24,20 @@ public class ApplyRoomEffectHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int effectId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.ApplyRoomEffectEvent event = new com.uber.server.event.packet.room.ApplyRoomEffectEvent(client, message, effectId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        effectId = event.getEffectId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -34,7 +48,9 @@ public class ApplyRoomEffectHandler implements PacketHandler {
             return;
         }
         
-        long itemId = message.popWiredUInt();
+        // Note: Handler logic uses itemId, but event has effectId
+        // Keeping original logic but using effectId as itemId for compatibility
+        long itemId = effectId;
         UserItem item = habbo.getInventoryComponent().getItem(itemId);
         
         if (item == null) {

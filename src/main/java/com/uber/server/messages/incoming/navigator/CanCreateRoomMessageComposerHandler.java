@@ -22,6 +22,15 @@ public class CanCreateRoomMessageComposerHandler implements IncomingMessageHandl
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.navigator.CanCreateRoomEvent event = new com.uber.server.event.packet.navigator.CanCreateRoomEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         // TODO: Implement room limit check when room limit system is added
         // For now, always allow (return false = no error, 99999 = unlimited)
         var composer = new com.uber.server.messages.outgoing.navigator.CanCreateRoomComposer(false, 99999);

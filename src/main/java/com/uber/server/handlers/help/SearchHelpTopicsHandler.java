@@ -20,7 +20,21 @@ public class SearchHelpTopicsHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
         String searchQuery = message.popFixedString();
+        
+        // Note: This handler may be unused - SearchFaqsMessageComposerHandler is registered for ID 419
+        com.uber.server.event.packet.help.SearchFaqsEvent event = new com.uber.server.event.packet.help.SearchFaqsEvent(
+            client, message, searchQuery);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        searchQuery = event.getSearchQuery();
         
         if (searchQuery == null || searchQuery.length() < 3) {
             return;

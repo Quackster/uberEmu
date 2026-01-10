@@ -24,6 +24,26 @@ public class PlaceItemHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        int x = message.popWiredInt32();
+        int y = message.popWiredInt32();
+        int rotation = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.PlaceItemEvent event = new com.uber.server.event.packet.room.PlaceItemEvent(client, message, itemId, x, y, rotation);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        itemId = event.getItemId();
+        x = event.getX();
+        y = event.getY();
+        rotation = event.getRotation();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -34,18 +54,7 @@ public class PlaceItemHandler implements PacketHandler {
             return;
         }
         
-        String placementData = message.popFixedString();
-        if (placementData == null || placementData.isEmpty()) {
-            return;
-        }
-        
-        String[] dataBits = placementData.split(" ");
-        if (dataBits.length < 2) {
-            return;
-        }
-        
         try {
-            long itemId = Long.parseLong(dataBits[0]);
             UserItem userItem = habbo.getInventoryComponent().getItem(itemId);
             
             if (userItem == null) {
@@ -60,45 +69,14 @@ public class PlaceItemHandler implements PacketHandler {
                 }
             }
             
-            // Wall Item
-            if (dataBits[1].startsWith(":")) {
-                String wallPos = room.wallPositionCheck(":" + placementData.split(":")[1]);
-                
-                if (wallPos == null) {
-                    ServerMessage error = new ServerMessage(516);
-                    error.appendInt32(11);
-                    client.sendMessage(error);
-                    return;
-                }
-                
-                RoomItem roomItem = new RoomItem(userItem.getId(), room.getRoomId(), 
-                                                userItem.getBaseItemId(), 
-                                                userItem.getExtraData(), 0, 0, 0.0, 0, wallPos, game);
-                
-                if (room.setWallItem(client, roomItem)) {
-                    habbo.getInventoryComponent().removeItem(itemId);
-                }
+            // Floor Item (event structure supports floor items with x, y, rotation)
+            RoomItem roomItem = new RoomItem(userItem.getId(), room.getRoomId(),
+                                            userItem.getBaseItemId(),
+                                            userItem.getExtraData(), 0, 0, 0, 0, "", game);
+            
+            if (room.setFloorItem(client, roomItem, x, y, rotation, true)) {
+                habbo.getInventoryComponent().removeItem(itemId);
             }
-            // Floor Item
-            else {
-                if (dataBits.length < 4) {
-                    return;
-                }
-                
-                int x = Integer.parseInt(dataBits[1]);
-                int y = Integer.parseInt(dataBits[2]);
-                int rot = Integer.parseInt(dataBits[3]);
-                
-                RoomItem roomItem = new RoomItem(userItem.getId(), room.getRoomId(),
-                                                userItem.getBaseItemId(),
-                                                userItem.getExtraData(), 0, 0, 0, 0, "", game);
-                
-                if (room.setFloorItem(client, roomItem, x, y, rot, true)) {
-                    habbo.getInventoryComponent().removeItem(itemId);
-                }
-            }
-        } catch (NumberFormatException e) {
-            logger.warn("Invalid placement data format: {}", placementData);
         } catch (Exception e) {
             logger.error("Error placing item: {}", e.getMessage(), e);
         }

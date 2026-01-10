@@ -26,6 +26,39 @@ public class SaveRoomDataHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int id = message.popWiredInt32();
+        String name = message.popFixedString();
+        String description = message.popFixedString();
+        int state = message.popWiredInt32();
+        String password = message.popFixedString();
+        int maxUsers = message.popWiredInt32();
+        int categoryId = message.popWiredInt32();
+        int tagCount = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.SaveRoomDataEvent event = new com.uber.server.event.packet.room.SaveRoomDataEvent(client, message, id, name, description, state, password, maxUsers, categoryId, tagCount);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        id = event.getRoomId();
+        name = event.getName();
+        description = event.getDescription();
+        state = event.getState();
+        password = event.getPassword();
+        maxUsers = event.getMaxUsers();
+        categoryId = event.getCategoryId();
+        tagCount = event.getTags();
+        
+        // Filter injection characters
+        name = StringUtil.filterInjectionChars(name, true);
+        description = StringUtil.filterInjectionChars(description, true);
+        password = StringUtil.filterInjectionChars(password, true);
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,15 +68,6 @@ public class SaveRoomDataHandler implements PacketHandler {
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
-        
-        int id = message.popWiredInt32();
-        String name = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        String description = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        int state = message.popWiredInt32();
-        String password = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        int maxUsers = message.popWiredInt32();
-        int categoryId = message.popWiredInt32();
-        int tagCount = message.popWiredInt32();
         
         List<String> tags = new ArrayList<>();
         for (int i = 0; i < tagCount; i++) {

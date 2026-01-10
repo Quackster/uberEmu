@@ -22,6 +22,20 @@ public class EnterInquiredRoomMessageComposerHandler implements IncomingMessageH
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.navigator.EnterInquiredRoomEvent event = new com.uber.server.event.packet.navigator.EnterInquiredRoomEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         // TODO: Implement room inquiry entry functionality
         logger.debug("EnterInquiredRoom called by user {}", 
                     client.getHabbo() != null ? client.getHabbo().getId() : 0);

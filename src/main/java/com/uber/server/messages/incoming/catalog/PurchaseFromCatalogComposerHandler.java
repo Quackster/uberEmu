@@ -21,6 +21,17 @@ public class PurchaseFromCatalogComposerHandler implements IncomingMessageHandle
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: This handler uses simplified purchase format (legacy)
+        // The proper handler is HandlePurchaseMessageComposerHandler which handles the full format
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 100);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         if (client.getHabbo() == null) {
             return;
         }

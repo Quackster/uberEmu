@@ -26,15 +26,29 @@ public class MarketplacePurchaseHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int offerId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.catalog.MarketplacePurchaseEvent event = new com.uber.server.event.packet.catalog.MarketplacePurchaseEvent(client, message, offerId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        offerId = event.getOfferId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long offerId = message.popWiredUInt();
+        long offerIdLong = offerId;
         MarketplaceRepository repository = game.getMarketplaceRepository();
         
-        Map<String, Object> offer = repository.getOffer(offerId);
+        Map<String, Object> offer = repository.getOffer(offerIdLong);
         if (offer == null) {
             client.sendNotif("Sorry, this offer has expired.");
             return;
@@ -72,7 +86,7 @@ public class MarketplacePurchaseHandler implements PacketHandler {
         game.getCatalog().deliverItems(client, item, 1, extraData != null ? extraData : "");
         
         // Update offer state to sold (2)
-        repository.updateOfferState(offerId, 2);
+        repository.updateOfferState(offerIdLong, 2);
         
         // Send purchase confirmation
         ServerMessage response = new ServerMessage(67);

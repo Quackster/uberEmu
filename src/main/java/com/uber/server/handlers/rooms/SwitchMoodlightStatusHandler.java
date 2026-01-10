@@ -22,6 +22,20 @@ public class SwitchMoodlightStatusHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int presetId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.SwitchMoodlightStatusEvent event = new com.uber.server.event.packet.room.SwitchMoodlightStatusEvent(client, message, presetId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        presetId = event.getPresetId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

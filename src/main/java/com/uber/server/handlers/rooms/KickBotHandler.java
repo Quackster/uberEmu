@@ -21,6 +21,20 @@ public class KickBotHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int botId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.KickBotEvent event = new com.uber.server.event.packet.room.KickBotEvent(client, message, botId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        botId = event.getBotId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -31,7 +45,7 @@ public class KickBotHandler implements PacketHandler {
             return;
         }
         
-        int virtualId = message.popWiredInt32();
+        int virtualId = botId;
         com.uber.server.game.rooms.RoomUser botUser = room.getRoomUserByVirtualId(virtualId);
         
         if (botUser == null || !botUser.isBot()) {

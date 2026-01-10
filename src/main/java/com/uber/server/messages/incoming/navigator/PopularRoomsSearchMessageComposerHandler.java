@@ -21,6 +21,16 @@ public class PopularRoomsSearchMessageComposerHandler implements IncomingMessage
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.navigator.PopularRoomsSearchEvent event = new com.uber.server.event.packet.navigator.PopularRoomsSearchEvent(
+            client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         if (game.getNavigator() == null) {
             return;
         }

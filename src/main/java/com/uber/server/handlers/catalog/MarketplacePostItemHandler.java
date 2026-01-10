@@ -21,14 +21,28 @@ public class MarketplacePostItemHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        int price = message.popWiredInt32();
+        
+        com.uber.server.event.packet.catalog.MarketplacePostItemEvent event = new com.uber.server.event.packet.catalog.MarketplacePostItemEvent(client, message, itemId, price);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        itemId = event.getItemId();
+        price = event.getPrice();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getInventoryComponent() == null) {
             return;
         }
         
-        int sellingPrice = message.popWiredInt32();
-        int junk = message.popWiredInt32(); // Unused
-        long itemId = message.popWiredUInt();
+        int sellingPrice = price;
         
         com.uber.server.game.users.inventory.UserItem item = habbo.getInventoryComponent().getItem(itemId);
         if (item == null || item.getBaseItem() == null || !item.getBaseItem().allowTrade()) {

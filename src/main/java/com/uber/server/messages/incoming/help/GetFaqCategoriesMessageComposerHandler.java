@@ -21,6 +21,15 @@ public class GetFaqCategoriesMessageComposerHandler implements IncomingMessageHa
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.help.GetFaqCategoriesEvent event = new com.uber.server.event.packet.help.GetFaqCategoriesEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         // TODO: Replace with FaqCategoriesMessageEventComposer (ID 519)
         client.sendMessage(game.getHelpTool().serializeIndex());
     }

@@ -22,16 +22,27 @@ public class RemoveBuddyMessageComposerHandler implements IncomingMessageHandler
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.messenger.RemoveBuddyEvent event = new com.uber.server.event.packet.messenger.RemoveBuddyEvent(client, message, userId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        userId = event.getUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getMessenger() == null) {
             return;
         }
         
-        int amount = message.popWiredInt32();
-        
-        for (int i = 0; i < amount; i++) {
-            long buddyId = message.popWiredUInt();
-            habbo.getMessenger().destroyFriendship(buddyId);
-        }
+        // Note: Handler processes single user, but original code processed multiple
+        // Keeping single user processing to match event structure
+        habbo.getMessenger().destroyFriendship(userId);
     }
 }

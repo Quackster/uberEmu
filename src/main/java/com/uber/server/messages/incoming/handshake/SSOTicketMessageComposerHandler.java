@@ -1,5 +1,6 @@
 package com.uber.server.messages.incoming.handshake;
 
+import com.uber.server.event.packet.handshake.SSOTicketEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -27,15 +28,27 @@ public class SSOTicketMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Read auth ticket
+        String authTicket = message.popFixedString();
+        
+        SSOTicketEvent event = new SSOTicketEvent(client, message, authTicket);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        authTicket = event.getSsoTicket();
+        
         // Check if already logged in
         if (client.getHabbo() != null) {
             var alreadyLoggedInComposer = new com.uber.server.messages.outgoing.handshake.AuthenticationOKComposer("You are already logged in!");
             client.sendMessage(alreadyLoggedInComposer.compose());
             return;
         }
-        
-        // Read auth ticket
-        String authTicket = message.popFixedString();
         
         if (authTicket == null || authTicket.length() < 10) {
             logger.warn("Invalid auth ticket from client {}", client.getClientId());

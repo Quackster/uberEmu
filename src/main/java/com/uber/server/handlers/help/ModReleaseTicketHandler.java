@@ -21,11 +21,25 @@ public class ModReleaseTicketHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: Handler reads amount and loops through multiple tickets
+        // ModReleaseTicketEvent expects just single ticketId (int)
+        // Handler needs to process multiple tickets, so using GenericPacketEvent due to structure mismatch
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 451);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_mod")) {
             return;
         }
         
+        // Re-read after event (GenericPacketEvent doesn't store fields)
+        message.resetPointer();
         int amount = message.popWiredInt32();
         
         // Release multiple tickets

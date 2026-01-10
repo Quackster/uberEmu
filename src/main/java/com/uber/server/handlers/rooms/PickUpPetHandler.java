@@ -23,6 +23,20 @@ public class PickUpPetHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long petId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.PickUpPetEvent event = new com.uber.server.event.packet.room.PickUpPetEvent(client, message, petId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        petId = event.getPetId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -37,8 +51,6 @@ public class PickUpPetHandler implements PacketHandler {
         if (!room.getData().isAllowPets() && !room.checkRights(client, true)) {
             return;
         }
-        
-        long petId = message.popWiredUInt();
         RoomUser petUser = room.getPet(petId);
         
         if (petUser == null || petUser.getPetData() == null || petUser.getPetData().getOwnerId() != habbo.getId()) {

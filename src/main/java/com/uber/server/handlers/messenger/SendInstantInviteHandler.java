@@ -26,10 +26,7 @@ public class SendInstantInviteHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        Habbo habbo = client.getHabbo();
-        if (habbo == null || habbo.getMessenger() == null) {
-            return;
-        }
+        message.resetPointer();
         
         int count = message.popWiredInt32();
         List<Long> userIds = new ArrayList<>();
@@ -38,7 +35,26 @@ public class SendInstantInviteHandler implements PacketHandler {
             userIds.add(message.popWiredUInt());
         }
         
-        String inviteMessage = StringUtil.filterInjectionChars(message.popFixedString(), true);
+        String inviteMessage = message.popFixedString();
+        
+        com.uber.server.event.packet.messenger.SendRoomInviteEvent event = new com.uber.server.event.packet.messenger.SendRoomInviteEvent(client, message, userIds, inviteMessage);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        userIds = event.getUserIds();
+        inviteMessage = event.getMessage();
+        
+        // Filter injection characters
+        inviteMessage = StringUtil.filterInjectionChars(inviteMessage, true);
+        
+        Habbo habbo = client.getHabbo();
+        if (habbo == null || habbo.getMessenger() == null) {
+            return;
+        }
         
         ServerMessage invite = new ServerMessage(135);
         invite.appendUInt(habbo.getId());

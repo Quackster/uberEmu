@@ -24,6 +24,15 @@ public class GetGroupBadgesHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.room.GetGroupBadgesEvent event = new com.uber.server.event.packet.room.GetGroupBadgesEvent(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         // Hardcoded group badges
         ServerMessage response = new ServerMessage(309);
         response.appendStringWithBreak("IcIrDs43103s19014d5a1dc291574a508bc80a64663e61a00");

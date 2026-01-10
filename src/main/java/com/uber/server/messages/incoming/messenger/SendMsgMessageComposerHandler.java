@@ -23,13 +23,29 @@ public class SendMsgMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        String messageText = message.popFixedString();
+        
+        com.uber.server.event.packet.messenger.SendMsgEvent event = new com.uber.server.event.packet.messenger.SendMsgEvent(client, message, userId, messageText);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        userId = event.getUserId();
+        messageText = event.getMessage();
+        
+        // Filter injection characters
+        messageText = StringUtil.filterInjectionChars(messageText, true);
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getMessenger() == null) {
             return;
         }
-        
-        long userId = message.popWiredUInt();
-        String messageText = StringUtil.filterInjectionChars(message.popFixedString(), true);
         
         habbo.getMessenger().sendInstantMessage(userId, messageText);
     }

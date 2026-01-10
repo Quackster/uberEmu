@@ -22,12 +22,25 @@ public class RedeemVoucherHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String code = message.popFixedString();
+        
+        com.uber.server.event.packet.catalog.RedeemVoucherEvent event = new com.uber.server.event.packet.catalog.RedeemVoucherEvent(
+            client, message, code);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        code = event.getVoucherCode();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
-        
-        String code = message.popFixedString();
         
         if (code == null || code.isEmpty()) {
             ServerMessage error = new ServerMessage(213);

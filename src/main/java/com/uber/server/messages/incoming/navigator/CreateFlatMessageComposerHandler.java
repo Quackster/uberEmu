@@ -23,20 +23,38 @@ public class CreateFlatMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        Habbo habbo = client.getHabbo();
-        if (habbo == null) {
+        message.resetPointer();
+        
+        String name = message.popFixedString();
+        String description = message.popFixedString();
+        String model = message.popFixedString();
+        int categoryId = message.popWiredInt32();
+        int maxUsers = message.popWiredInt32();
+        int tradeMode = message.popWiredInt32();
+        
+        com.uber.server.event.packet.navigator.CreateFlatEvent event = new com.uber.server.event.packet.navigator.CreateFlatEvent(client, message, name, description, model, categoryId, maxUsers, tradeMode);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
             return;
         }
         
-        String roomName = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        String modelName = message.popFixedString();
-        String roomState = message.popFixedString(); // Unused - room open by default on creation
+        // Use event fields instead of local variables
+        name = event.getName();
+        description = event.getDescription();
+        model = event.getModel();
+        categoryId = event.getCategoryId();
+        maxUsers = event.getMaxUsers();
+        tradeMode = event.getTradeMode();
         
-        if (roomName == null || modelName == null) {
+        // Filter injection characters
+        String roomName = StringUtil.filterInjectionChars(name, true);
+        
+        if (roomName == null || model == null) {
             return;
         }
         
-        var newRoom = game.getRoomManager().createRoom(client, roomName, modelName);
+        var newRoom = game.getRoomManager().createRoom(client, roomName, model);
         
         if (newRoom != null) {
             // Send FlatCreatedEvent (outgoing ID 59 from _events[59])

@@ -22,6 +22,20 @@ public class BanUserMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.BanUserEvent event = new com.uber.server.event.packet.room.BanUserEvent(client, message, userId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        userId = event.getUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -31,8 +45,6 @@ public class BanUserMessageComposerHandler implements IncomingMessageHandler {
         if (room == null || !room.checkRights(client, true)) {
             return; // Insufficient permissions
         }
-        
-        long userId = message.popWiredUInt();
         com.uber.server.game.rooms.RoomUser user = room.getRoomUserByHabbo(userId);
         
         if (user == null || user.isBot()) {

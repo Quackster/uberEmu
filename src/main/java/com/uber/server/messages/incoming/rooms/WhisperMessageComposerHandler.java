@@ -1,5 +1,6 @@
 package com.uber.server.messages.incoming.rooms;
 
+import com.uber.server.event.packet.room.WhisperMessageEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -25,6 +26,22 @@ public class WhisperMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String targetUsername = message.popFixedString();
+        String chatMessage = message.popFixedString();
+        
+        WhisperMessageEvent event = new WhisperMessageEvent(client, message, chatMessage, targetUsername);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        chatMessage = event.getMessage();
+        targetUsername = event.getTargetUsername();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
@@ -33,9 +50,6 @@ public class WhisperMessageComposerHandler implements IncomingMessageHandler {
         if (!habbo.isInRoom()) {
             return;
         }
-        
-        String targetUsername = message.popFixedString();
-        String chatMessage = message.popFixedString();
         
         if (chatMessage == null || chatMessage.isEmpty() || targetUsername == null) {
             return;

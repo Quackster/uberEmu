@@ -21,15 +21,42 @@ public class HandlePurchaseMessageComposerHandler implements IncomingMessageHand
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int pageId = message.popWiredInt32();
+        java.util.List<Integer> itemIds = new java.util.ArrayList<>();
+        int itemCount = message.popWiredInt32();
+        for (int i = 0; i < itemCount; i++) {
+            itemIds.add(message.popWiredInt32());
+        }
+        String extraData = message.popFixedString();
+        String recipientName = message.popFixedString();
+        String giftMessage = message.popFixedString();
+        
+        com.uber.server.event.packet.catalog.HandlePurchaseEvent event = new com.uber.server.event.packet.catalog.HandlePurchaseEvent(client, message, pageId, itemIds, extraData, recipientName, giftMessage);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        pageId = event.getPageId();
+        itemIds = event.getItemIds();
+        extraData = event.getExtraData();
+        recipientName = event.getRecipientName();
+        giftMessage = event.getGiftMessage();
+        
         if (client.getHabbo() == null) {
             return;
         }
         
-        int pageId = message.popWiredInt32();
-        long itemId = message.popWiredUInt();
-        String extraData = message.popFixedString();
-        
-        // Call catalog handlePurchase (not a gift purchase)
-        game.getCatalog().handlePurchase(client, pageId, itemId, extraData, false, "", "");
+        // Process first item (handler logic may need adjustment for multiple items)
+        if (!itemIds.isEmpty()) {
+            long itemId = itemIds.get(0);
+            boolean isGift = (recipientName != null && !recipientName.isEmpty());
+            // Call catalog handlePurchase
+            game.getCatalog().handlePurchase(client, pageId, itemId, extraData, isGift, recipientName != null ? recipientName : "", giftMessage != null ? giftMessage : "");
+        }
     }
 }

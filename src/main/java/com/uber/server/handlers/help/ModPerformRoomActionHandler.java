@@ -21,11 +21,24 @@ public class ModPerformRoomActionHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: Handler reads roomId + 3 booleans, but ModPerformRoomActionEvent expects roomId + action (int)
+        // Handler logic combines booleans into actions, so using GenericPacketEvent due to structure mismatch
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 460);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_mod")) {
             return;
         }
         
+        // Re-read after event (GenericPacketEvent doesn't store fields)
+        message.resetPointer();
         long roomId = message.popWiredUInt();
         boolean actOne = message.popWiredBoolean(); // Set room lock to doorbell
         boolean actTwo = message.popWiredBoolean(); // Set room to inappropriate

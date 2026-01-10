@@ -6,8 +6,6 @@ import com.uber.server.game.Habbo;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.PacketHandler;
 import com.uber.server.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.List;
  * Handler for editing a room event (message ID 348).
  */
 public class EditEventHandler implements PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(EditEventHandler.class);
     private final Game game;
     
     public EditEventHandler(Game game) {
@@ -25,6 +22,36 @@ public class EditEventHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int eventId = message.popWiredInt32();
+        String name = message.popFixedString();
+        String description = message.popFixedString();
+        int category = message.popWiredInt32();
+        int tagCount = message.popWiredInt32();
+        
+        // Parse tags
+        List<String> tags = new ArrayList<>();
+        for (int i = 0; i < tagCount; i++) {
+            tags.add(message.popFixedString());
+        }
+        
+        // Create and fire event with all fields
+        com.uber.server.event.packet.room.EditEventEvent event = new com.uber.server.event.packet.room.EditEventEvent(
+            client, message, eventId, name, description, category, tags);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        eventId = event.getEventId();
+        name = event.getName();
+        description = event.getDescription();
+        category = event.getCategory();
+        tags = event.getTags();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,29 +62,26 @@ public class EditEventHandler implements PacketHandler {
             return;
         }
         
-        com.uber.server.game.rooms.RoomEvent event = room.getEvent();
-        if (event == null) {
+        com.uber.server.game.rooms.RoomEvent roomEvent = room.getEvent();
+        if (roomEvent == null) {
             return;
         }
         
-        int category = message.popWiredInt32();
-        String name = StringUtil.filterInjectionChars(message.popFixedString());
-        String description = StringUtil.filterInjectionChars(message.popFixedString());
-        int tagCount = message.popWiredInt32();
+        // Filter injection characters
+        name = StringUtil.filterInjectionChars(name);
+        description = StringUtil.filterInjectionChars(description);
+        List<String> filteredTags = new ArrayList<>();
+        for (String tag : tags) {
+            filteredTags.add(StringUtil.filterInjectionChars(tag));
+        }
         
         // Update event
-        event.setCategory(category);
-        event.setName(name);
-        event.setDescription(description);
-        
-        // Update tags
-        List<String> tags = new ArrayList<>();
-        for (int i = 0; i < tagCount; i++) {
-            tags.add(StringUtil.filterInjectionChars(message.popFixedString()));
-        }
-        event.setTags(tags);
+        roomEvent.setCategory(category);
+        roomEvent.setName(name);
+        roomEvent.setDescription(description);
+        roomEvent.setTags(filteredTags);
         
         // Broadcast updated event to room
-        room.sendMessage(event.serialize(client));
+        room.sendMessage(roomEvent.serialize(client));
     }
 }

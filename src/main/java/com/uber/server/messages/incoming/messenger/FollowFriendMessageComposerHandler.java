@@ -23,12 +23,24 @@ public class FollowFriendMessageComposerHandler implements IncomingMessageHandle
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long buddyId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.messenger.FollowFriendEvent event = new com.uber.server.event.packet.messenger.FollowFriendEvent(client, message, buddyId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        buddyId = event.getUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
-        
-        long buddyId = message.popWiredUInt();
         var buddyClient = game.getClientManager().getClientByHabbo(buddyId);
         
         if (buddyClient == null || buddyClient.getHabbo() == null || !buddyClient.getHabbo().isInRoom()) {

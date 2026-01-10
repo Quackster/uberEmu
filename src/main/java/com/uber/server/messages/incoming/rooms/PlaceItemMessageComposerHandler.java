@@ -25,6 +25,17 @@ public class PlaceItemMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: Handler reads placementData string and parses it, but PlaceItemEvent expects itemId, x, y, rotation directly
+        // Using GenericPacketEvent due to parsing structure mismatch
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 90);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,6 +46,8 @@ public class PlaceItemMessageComposerHandler implements IncomingMessageHandler {
             return;
         }
         
+        // Re-read after event (GenericPacketEvent doesn't store fields)
+        message.resetPointer();
         String placementData = message.popFixedString();
         if (placementData == null || placementData.isEmpty()) {
             return;

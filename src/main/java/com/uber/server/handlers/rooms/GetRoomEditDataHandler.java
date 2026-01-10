@@ -22,6 +22,20 @@ public class GetRoomEditDataHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.GetRoomEditDataEvent event = new com.uber.server.event.packet.room.GetRoomEditDataEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

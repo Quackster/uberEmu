@@ -1,5 +1,6 @@
 package com.uber.server.handlers.rooms;
 
+import com.uber.server.event.packet.room.GetPetInfoEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -24,12 +25,24 @@ public class GetPetInfoHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long petId = message.popWiredUInt();
+        
+        GetPetInfoEvent event = new GetPetInfoEvent(client, message, petId);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        petId = event.getPetId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
-        
-        long petId = message.popWiredUInt();
         
         // Get pet data from database
         PetRepository petRepository = game.getPetRepository();

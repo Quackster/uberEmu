@@ -23,6 +23,22 @@ public class UpdateLookHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String gender = message.popFixedString();
+        String look = message.popFixedString();
+        
+        com.uber.server.event.packet.user.ChangeLooksEvent event = new com.uber.server.event.packet.user.ChangeLooksEvent(client, message, gender, look);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        gender = event.getGender();
+        look = event.getFigure();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
@@ -34,14 +50,11 @@ public class UpdateLookHandler implements PacketHandler {
             return;
         }
         
-        // Read gender and look
-        String gender = message.popFixedString();
         if (gender == null) {
             return;
         }
         gender = gender.toUpperCase();
         
-        String look = message.popFixedString();
         if (look == null) {
             return;
         }

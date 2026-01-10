@@ -22,12 +22,24 @@ public class HabboSearchMessageComposerHandler implements IncomingMessageHandler
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String searchQuery = message.popFixedString();
+        
+        com.uber.server.event.packet.messenger.HabboSearchEvent event = new com.uber.server.event.packet.messenger.HabboSearchEvent(client, message, searchQuery);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        searchQuery = event.getSearchQuery();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || habbo.getMessenger() == null) {
             return;
         }
-        
-        String searchQuery = message.popFixedString();
         // TODO: Replace with HabboSearchResultEventComposer (ID 435)
         client.sendMessage(habbo.getMessenger().performSearch(searchQuery));
     }

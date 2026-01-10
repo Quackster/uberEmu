@@ -21,13 +21,27 @@ public class RoomTagSearchMessageComposerHandler implements IncomingMessageHandl
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        message.popWiredInt32(); // Junk/unused
+        String tag = message.popFixedString();
+        
+        com.uber.server.event.packet.navigator.RoomTagSearchEvent event = new com.uber.server.event.packet.navigator.RoomTagSearchEvent(
+            client, message, tag);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        tag = event.getTag();
+        
         if (game.getNavigator() == null) {
             return;
         }
         
-        int junk = message.popWiredInt32(); // Unused
-        String searchQuery = message.popFixedString();
         // TODO: Replace with GuestRoomSearchResultEventComposer (ID 451)
-        client.sendMessage(game.getNavigator().serializeSearchResults(searchQuery));
+        client.sendMessage(game.getNavigator().serializeSearchResults(tag));
     }
 }

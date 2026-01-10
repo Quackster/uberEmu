@@ -22,6 +22,23 @@ public class RateRoomHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        int rating = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.RateFlatEvent event = new com.uber.server.event.packet.room.RateFlatEvent(
+            client, message, roomId, rating);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        roomId = event.getRoomId();
+        rating = event.getRating();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -36,8 +53,6 @@ public class RateRoomHandler implements PacketHandler {
         if (habbo.getRatedRooms().contains(room.getRoomId()) || room.checkRights(client, true)) {
             return;
         }
-        
-        int rating = message.popWiredInt32();
         
         // Update room score
         int scoreChange = switch (rating) {

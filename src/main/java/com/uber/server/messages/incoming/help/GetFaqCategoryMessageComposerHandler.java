@@ -21,9 +21,23 @@ public class GetFaqCategoryMessageComposerHandler implements IncomingMessageHand
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
-        long categoryId = message.popWiredUInt();
+        message.resetPointer();
         
-        var category = game.getHelpTool().getCategory(categoryId);
+        int categoryId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.GetFaqCategoryEvent event = new com.uber.server.event.packet.help.GetFaqCategoryEvent(client, message, categoryId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        categoryId = event.getCategoryId();
+        
+        long categoryIdLong = categoryId;
+        
+        var category = game.getHelpTool().getCategory(categoryIdLong);
         if (category != null) {
             // TODO: Replace with FaqCategoryMessageEventComposer (ID 522)
             client.sendMessage(game.getHelpTool().serializeCategory(category));

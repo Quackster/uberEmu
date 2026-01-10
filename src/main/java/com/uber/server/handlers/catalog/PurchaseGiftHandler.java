@@ -22,17 +22,43 @@ public class PurchaseGiftHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int pageId = message.popWiredInt32();
+        int itemId = message.popWiredInt32();
+        String extraData = message.popFixedString();
+        String recipientName = message.popFixedString();
+        String giftMessage = message.popFixedString();
+        int giftSpriteId = message.popWiredInt32();
+        int giftRibbon = message.popWiredInt32();
+        int giftBox = message.popWiredInt32();
+        
+        com.uber.server.event.packet.catalog.PurchaseGiftEvent event = new com.uber.server.event.packet.catalog.PurchaseGiftEvent(client, message, pageId, itemId, extraData, recipientName, giftMessage, giftSpriteId, giftRibbon, giftBox);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        pageId = event.getPageId();
+        itemId = event.getItemId();
+        extraData = event.getExtraData();
+        recipientName = event.getRecipientName();
+        giftMessage = event.getGiftMessage();
+        giftSpriteId = event.getGiftSpriteId();
+        giftRibbon = event.getGiftRibbon();
+        giftBox = event.getGiftBox();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        int pageId = message.popWiredInt32();
-        long itemId = message.popWiredUInt();
-        String extraData = message.popFixedString();
-        String giftUser = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        String giftMessage = StringUtil.filterInjectionChars(message.popFixedString(), true);
+        // Filter injection characters
+        String giftUser = StringUtil.filterInjectionChars(recipientName, true);
+        String giftMsg = StringUtil.filterInjectionChars(giftMessage, true);
         
-        game.getCatalog().handlePurchase(client, pageId, itemId, extraData, true, giftUser, giftMessage);
+        game.getCatalog().handlePurchase(client, pageId, itemId, extraData, true, giftUser, giftMsg);
     }
 }

@@ -22,6 +22,20 @@ public class DanceMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int danceId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.DanceEvent event = new com.uber.server.event.packet.room.DanceEvent(client, message, danceId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        danceId = event.getDanceId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -38,8 +52,6 @@ public class DanceMessageComposerHandler implements IncomingMessageHandler {
         }
         
         roomUser.unidle();
-        
-        int danceId = message.popWiredInt32();
         
         // Validate dance ID (0-4, and 2-4 require club membership)
         if (danceId < 0 || danceId > 4 || 

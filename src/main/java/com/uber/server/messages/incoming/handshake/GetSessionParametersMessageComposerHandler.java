@@ -1,5 +1,7 @@
 package com.uber.server.messages.incoming.handshake;
 
+import com.uber.server.event.packet.handshake.GetSessionParametersEvent;
+import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.incoming.IncomingMessageHandler;
@@ -16,6 +18,14 @@ public class GetSessionParametersMessageComposerHandler implements IncomingMessa
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        GetSessionParametersEvent event = new GetSessionParametersEvent(client, message);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
         // TODO: Replace with SessionParamsMessageEventComposer (ID 0x0101)
         ServerMessage response = new ServerMessage(257);
         response.appendInt32(9);

@@ -21,11 +21,25 @@ public class ModSendRoomAlertHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: Handler reads one, two, alertMessage and gets roomId from current room
+        // ModSendRoomAlertEvent expects roomId from message + alertMessage
+        // Using GenericPacketEvent due to structure mismatch
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 200);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_alert")) {
             return;
         }
         
+        // Re-read after event
+        message.resetPointer();
         int one = message.popWiredInt32(); // Unused
         int two = message.popWiredInt32();
         String alertMessage = message.popFixedString();

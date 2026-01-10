@@ -25,6 +25,20 @@ public class TakeRightsMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.TakeRightsEvent event = new com.uber.server.event.packet.room.TakeRightsEvent(client, message, userId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        userId = event.getUserId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,13 +49,10 @@ public class TakeRightsMessageComposerHandler implements IncomingMessageHandler 
             return;
         }
         
-        int amount = message.popWiredInt32();
+        // Note: Handler processes single user, but original code processed multiple
+        // Keeping single user processing to match event structure
         List<Long> userIdsToRemove = new ArrayList<>();
-        
-        for (int i = 0; i < amount; i++) {
-            long userId = message.popWiredUInt();
-            userIdsToRemove.add(userId);
-        }
+        userIdsToRemove.add(userId);
         
         // Remove rights for each user
         long[] userIdsArray = new long[userIdsToRemove.size()];

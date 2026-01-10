@@ -22,13 +22,30 @@ public class ModGetTicketChatlogHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: PacketEventFactory shows ticketId as int, but handler reads as long
+        // Matching event structure: reading as int per PacketEventFactory
+        int ticketId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.ModGetTicketChatlogEvent event = new com.uber.server.event.packet.help.ModGetTicketChatlogEvent(
+            client, message, ticketId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        ticketId = event.getTicketId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_mod")) {
             return;
         }
         
-        long ticketId = message.popWiredUInt();
-        SupportTicket ticket = game.getModerationTool().getTicket(ticketId);
+        long ticketIdLong = ticketId;
+        SupportTicket ticket = game.getModerationTool().getTicket(ticketIdLong);
         
         if (ticket == null) {
             return;

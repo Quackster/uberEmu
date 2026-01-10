@@ -1,5 +1,6 @@
 package com.uber.server.messages.incoming.rooms;
 
+import com.uber.server.event.packet.room.MoveAvatarEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -22,6 +23,22 @@ public class MoveAvatarMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int moveX = message.popWiredInt32();
+        int moveY = message.popWiredInt32();
+        
+        MoveAvatarEvent event = new MoveAvatarEvent(client, message, moveX, moveY);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        moveX = event.getX();
+        moveY = event.getY();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -36,9 +53,6 @@ public class MoveAvatarMessageComposerHandler implements IncomingMessageHandler 
         if (roomUser == null || !roomUser.canWalk()) {
             return;
         }
-        
-        int moveX = message.popWiredInt32();
-        int moveY = message.popWiredInt32();
         
         // Don't move if already at destination
         if (moveX == roomUser.getX() && moveY == roomUser.getY()) {

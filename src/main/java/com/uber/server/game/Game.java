@@ -1,5 +1,7 @@
 package com.uber.server.game;
 
+import com.uber.server.event.EventManager;
+import com.uber.server.plugin.PluginManager;
 import com.uber.server.repository.*;
 import com.uber.server.util.TimeUtil;
 import org.slf4j.Logger;
@@ -28,6 +30,8 @@ public class Game {
     private com.uber.server.game.support.ModerationTool moderationTool;
     private com.uber.server.game.bots.BotManager botManager;
     private com.uber.server.plugins.PluginHandler pluginHandler;
+    private EventManager eventManager;
+    private PluginManager pluginManager;
     
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
@@ -177,6 +181,16 @@ public class Game {
         botManager = new com.uber.server.game.bots.BotManager(botRepository);
         botManager.loadBots();
         
+        // Initialize event system
+        eventManager = new EventManager();
+        logger.info("Event manager initialized");
+        
+        // Initialize plugin system (uses EventManager)
+        pluginManager = new PluginManager(eventManager, this);
+        pluginManager.loadPlugins();
+        logger.info("Plugin manager initialized");
+        
+        // Keep old plugin handler for backward compatibility (deprecated)
         pluginHandler = new com.uber.server.plugins.PluginHandler();
         pluginHandler.loadPlugins();
         
@@ -240,6 +254,17 @@ public class Game {
             statisticsThread = null;
         }
         
+        // Disable plugins
+        if (pluginManager != null) {
+            pluginManager.disablePlugins();
+            pluginManager = null;
+        }
+        
+        if (pluginHandler != null) {
+            pluginHandler.unloadPlugins();
+            pluginHandler = null;
+        }
+        
         // Perform cleanup
         performDatabaseCleanup(0);
         
@@ -279,6 +304,8 @@ public class Game {
     }
     public com.uber.server.game.bots.BotManager getBotManager() { return botManager; }
     public com.uber.server.plugins.PluginHandler getPluginHandler() { return pluginHandler; }
+    public EventManager getEventManager() { return eventManager; }
+    public PluginManager getPluginManager() { return pluginManager; }
     
     // Repository getters (for handlers that need direct repository access)
     public UserRepository getUserRepository() { return userRepository; }

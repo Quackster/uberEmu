@@ -25,12 +25,26 @@ public class GetCatalogPageHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int pageId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.catalog.GetCatalogPageEvent event = new com.uber.server.event.packet.catalog.GetCatalogPageEvent(
+            client, message, pageId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        pageId = event.getPageId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        int pageId = message.popWiredInt32();
         Catalog catalog = game.getCatalog();
         if (catalog == null) {
             logger.warn("Catalog is not initialized");

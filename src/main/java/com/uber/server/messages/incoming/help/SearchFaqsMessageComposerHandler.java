@@ -21,7 +21,19 @@ public class SearchFaqsMessageComposerHandler implements IncomingMessageHandler 
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
         String searchQuery = message.popFixedString();
+        
+        com.uber.server.event.packet.help.SearchFaqsEvent event = new com.uber.server.event.packet.help.SearchFaqsEvent(client, message, searchQuery);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        searchQuery = event.getSearchQuery();
         
         if (searchQuery == null || searchQuery.length() < 3) {
             return;

@@ -23,16 +23,30 @@ public class GetGuestRoomMessageComposerHandler implements IncomingMessageHandle
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        boolean unk = message.popWiredBoolean(); // Unused
+        boolean unk2 = message.popWiredBoolean(); // Unused
+        
+        com.uber.server.event.packet.navigator.GetGuestRoomEvent event = new com.uber.server.event.packet.navigator.GetGuestRoomEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long roomId = message.popWiredUInt();
-        boolean unk = message.popWiredBoolean(); // Unused
-        boolean unk2 = message.popWiredBoolean(); // Unused
+        long roomIdLong = roomId;
         
-        var data = game.getRoomManager().generateRoomData(roomId);
+        var data = game.getRoomManager().generateRoomData(roomIdLong);
         if (data == null) {
             return;
         }

@@ -1,5 +1,6 @@
 package com.uber.server.handlers.rooms;
 
+import com.uber.server.event.packet.room.OpenPresentEvent;
 import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.game.Habbo;
@@ -26,6 +27,20 @@ public class OpenPresentHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        
+        OpenPresentEvent event = new OpenPresentEvent(client, message, itemId);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemId = event.getItemId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,8 +50,6 @@ public class OpenPresentHandler implements PacketHandler {
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
-        
-        long itemId = message.popWiredUInt();
         RoomItem presentItem = room.getItem(itemId);
         
         if (presentItem == null) {

@@ -26,6 +26,21 @@ public class SSOLoginHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Read auth ticket
+        String authTicket = message.popFixedString();
+        
+        com.uber.server.event.packet.handshake.SSOTicketEvent event = new com.uber.server.event.packet.handshake.SSOTicketEvent(client, message, authTicket);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        authTicket = event.getSsoTicket();
+        
         // Check if already logged in
         if (client.getHabbo() != null) {
             ServerMessage notif = new ServerMessage(3);
@@ -33,9 +48,6 @@ public class SSOLoginHandler implements PacketHandler {
             client.sendMessage(notif);
             return;
         }
-        
-        // Read auth ticket
-        String authTicket = message.popFixedString();
         
         if (authTicket == null || authTicket.length() < 10) {
             logger.warn("Invalid auth ticket from client {}", client.getClientId());

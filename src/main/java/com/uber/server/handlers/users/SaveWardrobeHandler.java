@@ -23,14 +23,32 @@ public class SaveWardrobeHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int slotId = message.popWiredInt32();
+        String wardrobeFigure = message.popFixedString();
+        String wardrobeGender = message.popFixedString();
+        
+        com.uber.server.event.packet.user.SaveWardrobeEvent event = new com.uber.server.event.packet.user.SaveWardrobeEvent(client, message, slotId, wardrobeFigure, wardrobeGender);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        slotId = event.getSlotId();
+        wardrobeFigure = event.getFigure();
+        wardrobeGender = event.getGender();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || game.getWardrobeRepository() == null) {
             return;
         }
         
-        long slotId = message.popWiredUInt();
-        String look = message.popFixedString();
-        String gender = message.popFixedString();
+        long slotIdLong = slotId;
+        String look = wardrobeFigure;
+        String gender = wardrobeGender;
         
         // Filter and validate look
         look = StringUtil.filterInjectionChars(look);
@@ -40,7 +58,7 @@ public class SaveWardrobeHandler implements PacketHandler {
         
         // Save wardrobe item
         String genderUpper = gender != null ? gender.toUpperCase() : "M";
-        if (!game.getWardrobeRepository().saveWardrobeItem(habbo.getId(), slotId, look, genderUpper)) {
+        if (!game.getWardrobeRepository().saveWardrobeItem(habbo.getId(), slotIdLong, look, genderUpper)) {
             logger.warn("Failed to save wardrobe item for user {}", habbo.getId());
         }
     }

@@ -21,12 +21,26 @@ public class CheckPetNameHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String petName = message.popFixedString();
+        
+        com.uber.server.event.packet.catalog.CheckPetNameEvent event = new com.uber.server.event.packet.catalog.CheckPetNameEvent(
+            client, message, petName);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        petName = event.getPetName();
+        
         Catalog catalog = game.getCatalog();
         if (catalog == null) {
             return;
         }
         
-        String petName = message.popFixedString();
         boolean isValid = catalog.checkPetName(petName);
         
         var composer = new com.uber.server.messages.outgoing.catalog.ApproveNameComposer(isValid);

@@ -21,13 +21,27 @@ public class ModKickUserHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        String kickMessage = message.popFixedString();
+        
+        com.uber.server.event.packet.help.ModKickUserEvent event = new com.uber.server.event.packet.help.ModKickUserEvent(
+            client, message, userId, kickMessage);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        userId = event.getUserId();
+        kickMessage = event.getKickMessage();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_kick")) {
             return;
         }
-        
-        long userId = message.popWiredUInt();
-        String kickMessage = message.popFixedString();
         
         game.getModerationTool().kickUser(client, userId, kickMessage, false); // false = hard kick
     }

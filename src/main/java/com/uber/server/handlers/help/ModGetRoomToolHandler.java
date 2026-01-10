@@ -21,14 +21,30 @@ public class ModGetRoomToolHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: PacketEventFactory shows roomId as int
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.help.ModGetRoomToolEvent event = new com.uber.server.event.packet.help.ModGetRoomToolEvent(
+            client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_mod")) {
             return;
         }
         
-        long roomId = message.popWiredUInt();
+        long roomIdLong = roomId;
         com.uber.server.game.rooms.RoomData roomData = game != null && game.getRoomManager() != null ?
-                                                 game.getRoomManager().generateNullableRoomData(roomId) : null;
+                                                 game.getRoomManager().generateNullableRoomData(roomIdLong) : null;
         
         if (roomData == null) {
             return;

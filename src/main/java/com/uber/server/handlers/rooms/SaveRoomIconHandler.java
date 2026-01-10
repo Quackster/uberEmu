@@ -25,6 +25,22 @@ public class SaveRoomIconHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        String iconData = message.popFixedString();
+        
+        com.uber.server.event.packet.room.SaveRoomIconEvent event = new com.uber.server.event.packet.room.SaveRoomIconEvent(client, message, roomId, iconData);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        roomId = event.getRoomId();
+        iconData = event.getIconData();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,40 +51,41 @@ public class SaveRoomIconHandler implements PacketHandler {
             return;
         }
         
-        int junk = message.popWiredInt32(); // Always 3
-        int background = message.popWiredInt32();
-        int topLayer = message.popWiredInt32();
-        int amountOfItems = message.popWiredInt32();
+        // Parse iconData string (format: "background,topLayer|pos1,item1|pos2,item2|...")
+        String[] parts = iconData.split("\\|");
+        if (parts.length < 1) {
+            return;
+        }
+        
+        String[] mainParts = parts[0].split(",");
+        if (mainParts.length < 2) {
+            return;
+        }
+        
+        int background = Integer.parseInt(mainParts[0]);
+        int topLayer = Integer.parseInt(mainParts[1]);
         
         Map<Integer, Integer> items = new HashMap<>();
-        for (int i = 0; i < amountOfItems; i++) {
-            int pos = message.popWiredInt32();
-            int item = message.popWiredInt32();
-            
-            if (pos < 0 || pos > 10) {
-                return;
+        for (int i = 1; i < parts.length; i++) {
+            String[] itemParts = parts[i].split(",");
+            if (itemParts.length < 2) {
+                continue;
             }
+            int pos = Integer.parseInt(itemParts[0]);
+            int item = Integer.parseInt(itemParts[1]);
             
-            if (item < 1 || item > 27) {
-                return;
-            }
-            
-            if (items.containsKey(pos)) {
-                return;
+            if (pos < 0 || pos > 10 || item < 1 || item > 27) {
+                continue;
             }
             
             items.put(pos, item);
         }
         
-        if (background < 1 || background > 24) {
+        if (background < 1 || background > 24 || topLayer < 0 || topLayer > 11) {
             return;
         }
         
-        if (topLayer < 0 || topLayer > 11) {
-            return;
-        }
-        
-        // Format items string
+        // Format items string back (for database)
         StringBuilder formattedItems = new StringBuilder();
         int j = 0;
         for (Map.Entry<Integer, Integer> entry : items.entrySet()) {

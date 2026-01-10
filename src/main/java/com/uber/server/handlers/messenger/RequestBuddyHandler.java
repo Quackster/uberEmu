@@ -23,12 +23,24 @@ public class RequestBuddyHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String username = message.popFixedString();
+        
+        com.uber.server.event.packet.messenger.RequestBuddyEvent event = new com.uber.server.event.packet.messenger.RequestBuddyEvent(client, message, username);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        username = event.getUsername();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
-        
-        String username = message.popFixedString();
         if (username == null || username.isEmpty()) {
             return;
         }

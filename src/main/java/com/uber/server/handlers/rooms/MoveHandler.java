@@ -21,6 +21,22 @@ public class MoveHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int moveX = message.popWiredInt32();
+        int moveY = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.MoveAvatarEvent event = new com.uber.server.event.packet.room.MoveAvatarEvent(client, message, moveX, moveY);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        moveX = event.getMoveX();
+        moveY = event.getMoveY();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -35,9 +51,6 @@ public class MoveHandler implements PacketHandler {
         if (roomUser == null || !roomUser.canWalk()) {
             return;
         }
-        
-        int moveX = message.popWiredInt32();
-        int moveY = message.popWiredInt32();
         
         // Don't move if already at destination
         if (moveX == roomUser.getX() && moveY == roomUser.getY()) {

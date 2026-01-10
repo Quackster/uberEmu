@@ -23,6 +23,15 @@ public class GetCatalogData1Handler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        com.uber.server.event.packet.catalog.GetCatalogData1Event event = new com.uber.server.event.packet.catalog.GetCatalogData1Event(client, message);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         ServerMessage response = new ServerMessage(612);
         // Hardcoded values
         response.appendInt32(1);

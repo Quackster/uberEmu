@@ -23,6 +23,20 @@ public class TakeBackTradeItemHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.TakeBackTradeItemEvent event = new com.uber.server.event.packet.room.TakeBackTradeItemEvent(client, message, itemId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemId = event.getItemId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -37,8 +51,6 @@ public class TakeBackTradeItemHandler implements PacketHandler {
         if (trade == null) {
             return;
         }
-        
-        long itemId = message.popWiredUInt();
         UserItem item = habbo.getInventoryComponent().getItem(itemId);
         
         if (item == null) {

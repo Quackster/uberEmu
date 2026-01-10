@@ -21,6 +21,16 @@ public class StopTradeHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int packetId = (int) message.getId();
+        com.uber.server.event.packet.room.StopTradeEvent event = new com.uber.server.event.packet.room.StopTradeEvent(client, message, packetId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

@@ -22,20 +22,34 @@ public class RemoveFavoriteHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.navigator.DeleteFavouriteRoomEvent event = new com.uber.server.event.packet.navigator.DeleteFavouriteRoomEvent(client, message, roomId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        roomId = event.getRoomId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        long roomId = message.popWiredUInt();
+        long roomIdLong = roomId;
         
         // Remove from in-memory list first
-        habbo.removeFavoriteRoom(roomId);
+        habbo.removeFavoriteRoom(roomIdLong);
         
         // Remove from database
-        game.getUserRepository().removeFavorite(habbo.getId(), roomId);
+        game.getUserRepository().removeFavorite(habbo.getId(), roomIdLong);
         
-        var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedComposer(roomId, false);
+        var composer = new com.uber.server.messages.outgoing.navigator.FavouriteChangedComposer(roomIdLong, false);
         client.sendMessage(composer.compose());
     }
 }

@@ -22,18 +22,30 @@ public class ModSendRoomAlertMessageComposerHandler implements IncomingMessageHa
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int roomId = message.popWiredInt32();
+        String alertMessage = message.popFixedString();
+        
+        com.uber.server.event.packet.help.ModSendRoomAlertEvent event = new com.uber.server.event.packet.help.ModSendRoomAlertEvent(client, message, roomId, alertMessage);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        roomId = event.getRoomId();
+        alertMessage = event.getMessage();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_alert")) {
             return;
         }
         
-        int one = message.popWiredInt32(); // Unused
-        int two = message.popWiredInt32();
-        String alertMessage = message.popFixedString();
+        long roomIdLong = roomId;
+        boolean caution = true; // Default to caution
         
-        long roomId = habbo.getCurrentRoomId();
-        boolean caution = (two != 3); // If two == 3, it's a message, not a caution
-        
-        game.getModerationTool().roomAlert(roomId, caution, alertMessage);
+        game.getModerationTool().roomAlert(roomIdLong, caution, alertMessage);
     }
 }

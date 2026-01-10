@@ -23,14 +23,39 @@ public class CreateRoomHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String name = message.popFixedString();
+        String description = message.popFixedString();
+        String model = message.popFixedString();
+        int categoryId = message.popWiredInt32();
+        int maxUsers = message.popWiredInt32();
+        int tradeMode = message.popWiredInt32();
+        
+        com.uber.server.event.packet.navigator.CreateFlatEvent event = new com.uber.server.event.packet.navigator.CreateFlatEvent(client, message, name, description, model, categoryId, maxUsers, tradeMode);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        name = event.getName();
+        description = event.getDescription();
+        model = event.getModel();
+        categoryId = event.getCategoryId();
+        maxUsers = event.getMaxUsers();
+        tradeMode = event.getTradeMode();
+        
+        // Filter injection characters
+        String roomName = StringUtil.filterInjectionChars(name, true);
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
         }
         
-        String roomName = StringUtil.filterInjectionChars(message.popFixedString(), true);
-        String modelName = message.popFixedString();
-        String roomState = message.popFixedString(); // Unused - room open by default on creation
+        String modelName = model;
         
         if (roomName == null || modelName == null) {
             return;

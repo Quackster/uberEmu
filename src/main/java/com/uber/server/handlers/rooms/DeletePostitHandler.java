@@ -22,6 +22,20 @@ public class DeletePostitHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.DeletePostitEvent event = new com.uber.server.event.packet.room.DeletePostitEvent(client, message, itemId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemId = event.getItemId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -31,8 +45,6 @@ public class DeletePostitHandler implements PacketHandler {
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
-        
-        long itemId = message.popWiredUInt();
         RoomItem item = room.getItem(itemId);
         
         if (item == null) {

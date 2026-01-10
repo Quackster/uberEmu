@@ -31,12 +31,30 @@ public class RecycleItemsHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        java.util.List<Long> itemIds = new java.util.ArrayList<>();
+        int recycleCount = message.popWiredInt32();
+        for (int i = 0; i < recycleCount; i++) {
+            itemIds.add(message.popWiredUInt());
+        }
+        
+        com.uber.server.event.packet.room.RecycleItemsEvent event = new com.uber.server.event.packet.room.RecycleItemsEvent(client, message, itemIds);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemIds = event.getItemIds();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
         }
         
-        int itemCount = message.popWiredInt32();
+        int itemCount = itemIds.size();
         
         // Must recycle exactly 5 items
         if (itemCount != 5) {
@@ -44,8 +62,7 @@ public class RecycleItemsHandler implements PacketHandler {
         }
         
         // Collect items to recycle
-        for (int i = 0; i < itemCount; i++) {
-            long itemId = message.popWiredUInt();
+        for (long itemId : itemIds) {
             UserItem item = habbo.getInventoryComponent().getItem(itemId);
             
             if (item == null || item.getBaseItem() == null || !item.getBaseItem().allowRecycle()) {

@@ -22,6 +22,20 @@ public class UnignoreUserHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String username = message.popFixedString();
+        
+        com.uber.server.event.packet.room.UnignoreUserEvent event = new com.uber.server.event.packet.room.UnignoreUserEvent(client, message, username);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        username = event.getUsername();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

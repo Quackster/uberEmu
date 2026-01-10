@@ -23,6 +23,21 @@ public class TakeItemMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int junk = message.popWiredInt32(); // Unused
+        long itemId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.TakeItemEvent event = new com.uber.server.event.packet.room.TakeItemEvent(client, message, itemId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemId = event.getItemId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -32,9 +47,6 @@ public class TakeItemMessageComposerHandler implements IncomingMessageHandler {
         if (room == null || !room.checkRights(client, true)) {
             return;
         }
-        
-        int junk = message.popWiredInt32(); // Unused
-        long itemId = message.popWiredUInt();
         
         RoomItem item = room.getItem(itemId);
         if (item == null) {

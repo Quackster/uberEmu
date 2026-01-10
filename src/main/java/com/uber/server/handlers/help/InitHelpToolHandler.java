@@ -20,6 +20,16 @@ public class InitHelpToolHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        // Note: This handler may be unused - GetClientFaqsMessageComposerHandler is registered for ID 416
+        com.uber.server.event.packet.GenericPacketEvent event = new com.uber.server.event.packet.GenericPacketEvent(client, message, 416);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         client.sendMessage(game.getHelpTool().serializeFrontpage());
     }
 }

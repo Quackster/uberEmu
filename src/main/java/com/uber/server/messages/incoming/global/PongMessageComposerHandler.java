@@ -1,5 +1,7 @@
 package com.uber.server.messages.incoming.global;
 
+import com.uber.server.event.packet.global.PongEvent;
+import com.uber.server.game.Game;
 import com.uber.server.game.GameClient;
 import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.incoming.IncomingMessageHandler;
@@ -15,6 +17,15 @@ public class PongMessageComposerHandler implements IncomingMessageHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        PongEvent event = new PongEvent(client, message);
+        Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
         // Set PongOK flag to indicate client responded
         client.setPongOK(true);
         logger.debug("Received pong from client {}", client.getClientId());

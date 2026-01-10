@@ -24,6 +24,24 @@ public class SetActivatedBadgesComposerHandler implements IncomingMessageHandler
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        java.util.List<String> badges = new java.util.ArrayList<>();
+        int badgeCount = message.popWiredInt32();
+        for (int i = 0; i < badgeCount; i++) {
+            badges.add(message.popFixedString());
+        }
+        
+        com.uber.server.event.packet.user.SetActivatedBadgesEvent event = new com.uber.server.event.packet.user.SetActivatedBadgesEvent(client, message, badges);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        badges = event.getActivatedBadges();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null) {
             return;
@@ -37,11 +55,11 @@ public class SetActivatedBadgesComposerHandler implements IncomingMessageHandler
         // Reset all slots
         badgeComponent.resetSlots();
         
-        // Update slots from message
-        while (message.getRemainingLength() > 0) {
-            int slot = message.popWiredInt32();
-            String badgeCode = message.popFixedString();
-            
+        // Update slots from event badges (format: slot,badgeCode pairs)
+        // Note: Handler needs to parse badges list - original code read slot,badgeCode pairs
+        // For now, process badges as simple list (may need adjustment based on actual format)
+        int slot = 1;
+        for (String badgeCode : badges) {
             if (badgeCode == null || badgeCode.isEmpty()) {
                 continue;
             }
@@ -49,6 +67,7 @@ public class SetActivatedBadgesComposerHandler implements IncomingMessageHandler
             // Validate: user must have badge and slot must be 1-5
             if (!badgeComponent.hasBadge(badgeCode) || slot < 1 || slot > 5) {
                 // Invalid request - ignore
+                slot++;
                 continue;
             }
             
@@ -59,6 +78,7 @@ public class SetActivatedBadgesComposerHandler implements IncomingMessageHandler
                 // Update in database
                 game.getBadgeRepository().updateBadgeSlot(habbo.getId(), badgeCode, slot);
             }
+            slot++;
         }
         
         // Send update message

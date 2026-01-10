@@ -22,6 +22,20 @@ public class StopEventHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        int eventId = message.popWiredInt32();
+        
+        com.uber.server.event.packet.room.StopEventEvent event = new com.uber.server.event.packet.room.StopEventEvent(client, message, eventId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        eventId = event.getEventId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;

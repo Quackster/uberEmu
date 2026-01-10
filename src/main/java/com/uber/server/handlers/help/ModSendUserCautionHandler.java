@@ -21,13 +21,27 @@ public class ModSendUserCautionHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long userId = message.popWiredUInt();
+        String cautionMessage = message.popFixedString();
+        
+        com.uber.server.event.packet.help.ModSendUserCautionEvent event = new com.uber.server.event.packet.help.ModSendUserCautionEvent(
+            client, message, userId, cautionMessage);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        userId = event.getUserId();
+        cautionMessage = event.getCautionMessage();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_alert")) {
             return;
         }
-        
-        long userId = message.popWiredUInt();
-        String cautionMessage = message.popFixedString();
         
         game.getModerationTool().alertUser(client, userId, cautionMessage, true); // true = caution
     }

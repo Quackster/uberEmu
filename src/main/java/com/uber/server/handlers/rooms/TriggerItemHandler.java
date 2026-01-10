@@ -31,6 +31,23 @@ public class TriggerItemHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        int parameter = isDiceSpecial ? -1 : message.popWiredInt32();
+        
+        int packetId = (int) message.getId();
+        com.uber.server.event.packet.room.TriggerItemEvent event = new com.uber.server.event.packet.room.TriggerItemEvent(client, message, packetId, itemId, parameter);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        itemId = event.getItemId();
+        parameter = event.getParameter();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -41,7 +58,6 @@ public class TriggerItemHandler implements PacketHandler {
             return;
         }
         
-        long itemId = message.popWiredUInt();
         RoomItem item = room.getItem(itemId);
         
         if (item == null) {
@@ -49,7 +65,7 @@ public class TriggerItemHandler implements PacketHandler {
         }
         
         boolean hasRights = room.checkRights(client);
-        int request = isDiceSpecial ? -1 : message.popWiredInt32();
+        int request = parameter;
         
         // Call item interactor OnTrigger
         item.getInteractor().onTrigger(client, item, request, hasRights);

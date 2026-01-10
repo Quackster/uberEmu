@@ -23,6 +23,20 @@ public class OpenPostitHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        long itemId = message.popWiredUInt();
+        
+        com.uber.server.event.packet.room.OpenPostitEvent event = new com.uber.server.event.packet.room.OpenPostitEvent(client, message, itemId);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event field instead of local variable
+        itemId = event.getItemId();
+        
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {
             return;
@@ -32,8 +46,6 @@ public class OpenPostitHandler implements PacketHandler {
         if (room == null) {
             return;
         }
-        
-        long itemId = message.popWiredUInt();
         RoomItem item = room.getItem(itemId);
         
         if (item == null) {

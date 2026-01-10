@@ -20,9 +20,24 @@ public class MarketplaceGetOffersHandler implements PacketHandler {
     
     @Override
     public void handle(GameClient client, ClientMessage message) {
+        message.resetPointer();
+        
+        String searchQuery = message.popFixedString();
         int minPrice = message.popWiredInt32();
         int maxPrice = message.popWiredInt32();
-        String searchQuery = message.popFixedString();
+        
+        com.uber.server.event.packet.catalog.MarketplaceGetOffersEvent event = new com.uber.server.event.packet.catalog.MarketplaceGetOffersEvent(client, message, searchQuery, minPrice, maxPrice);
+        com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        // Use event fields instead of local variables
+        searchQuery = event.getSearchQuery();
+        minPrice = event.getMinPrice();
+        maxPrice = event.getMaxPrice();
+        
         int filterMode = message.popWiredInt32();
         
         if (game.getCatalog() != null && game.getCatalog().getMarketplace() != null) {
