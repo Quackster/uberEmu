@@ -138,4 +138,42 @@ public class BadgeRepository {
             return false;
         }
     }
+    
+    /**
+     * Gives a badge to a user (adds if not exists, updates slot if exists).
+     * @param userId User ID
+     * @param badgeId Badge ID
+     * @param slot Badge slot (0 = unequipped)
+     * @param insertIfNotExists If true, inserts badge if it doesn't exist
+     * @return True if successful
+     */
+    public boolean giveBadge(long userId, String badgeId, int slot, boolean insertIfNotExists) {
+        // First check if badge exists
+        String checkSql = "SELECT badge_id FROM user_badges WHERE user_id = ? AND badge_id = ? LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            
+            checkStmt.setLong(1, userId);
+            checkStmt.setString(2, badgeId);
+            
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next()) {
+                    // Badge exists, update slot if needed
+                    if (slot != 0) {
+                        return updateBadgeSlot(userId, badgeId, slot);
+                    }
+                    return true;
+                } else if (insertIfNotExists) {
+                    // Badge doesn't exist and we should insert it
+                    return addBadge(userId, badgeId, slot);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Failed to give badge {} to user {}: {}", badgeId, userId, e.getMessage(), e);
+            return false;
+        }
+        
+        return false;
+    }
 }

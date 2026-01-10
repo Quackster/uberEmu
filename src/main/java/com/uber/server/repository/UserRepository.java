@@ -229,6 +229,28 @@ public class UserRepository {
     }
     
     /**
+     * Updates user muted status.
+     * @param userId User ID
+     * @param muted Muted status (true = muted, false = not muted)
+     * @return True if update was successful
+     */
+    public boolean updateMutedStatus(long userId, boolean muted) {
+        String sql = "UPDATE users SET is_muted = ? WHERE id = ? LIMIT 1";
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, muted ? 1 : 0);
+            stmt.setLong(2, userId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Failed to update muted status for user {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
      * Updates server status for all users (clears auth tickets and sets online status).
      * Used during server startup/shutdown cleanup.
      * @param onlineStatus Online status to set (1 = online, 0 = offline)

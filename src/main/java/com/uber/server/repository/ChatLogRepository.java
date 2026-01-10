@@ -211,4 +211,38 @@ public class ChatLogRepository {
         
         return logs;
     }
+    
+    /**
+     * Gets room visits with chat logs for a user.
+     * Groups by room_id and returns distinct rooms with their chat log counts.
+     * @param userId User ID
+     * @param limit Maximum number of rooms to return
+     * @return List of room visit maps with room_id and chat log count
+     */
+    public List<Map<String, Object>> getUserRoomVisitsWithChatLogs(long userId, int limit) {
+        String sql = "SELECT room_id, COUNT(*) as chat_count, MAX(timestamp) as last_visit " +
+                    "FROM chatlogs WHERE user_id = ? GROUP BY room_id ORDER BY last_visit DESC LIMIT ?";
+        List<Map<String, Object>> visits = new ArrayList<>();
+        
+        try (Connection conn = databasePool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, userId);
+            stmt.setInt(2, limit);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> visit = new HashMap<>();
+                    visit.put("room_id", rs.getLong("room_id"));
+                    visit.put("chat_count", rs.getInt("chat_count"));
+                    visit.put("last_visit", rs.getLong("last_visit"));
+                    visits.add(visit);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Failed to get room visits with chat logs for user {}: {}", userId, e.getMessage(), e);
+        }
+        
+        return visits;
+    }
 }
