@@ -251,6 +251,8 @@ public class UserRepository {
     }
     
     /**
+=======
+>>>>>>> b3aa6ecb17e8cc84b686d06e487f18dcb3523d4a
      * Updates server status for all users (clears auth tickets and sets online status).
      * Used during server startup/shutdown cleanup.
      * @param onlineStatus Online status to set (1 = online, 0 = offline)

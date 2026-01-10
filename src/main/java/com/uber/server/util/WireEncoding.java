@@ -46,7 +46,7 @@ public final class WireEncoding {
     /**
      * Decodes a wire-encoded integer from a byte array.
      * @param data The byte array containing the encoded integer
-     * @param totalBytes Output parameter - number of bytes consumed
+     * @param totalBytesOut Output parameter - number of bytes consumed
      * @return Decoded integer
      */
     public static int decodeInt32(byte[] data, int[] totalBytesOut) {

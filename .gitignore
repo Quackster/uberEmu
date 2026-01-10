@@ -34,5 +34,9 @@ error.web.log
 Havana-Server/src/main/java/META-INF/MANIFEST.MF
 Havana-Web/src/main/java/META-INF/MANIFEST.MF
 Havana-Server/META-INF/MANIFEST.MF
+<<<<<<< HEAD
 .DS_Store
 /target
+=======
+.DS_Store
+>>>>>>> b3aa6ecb17e8cc84b686d06e487f18dcb3523d4a

@@ -183,7 +183,7 @@ public class ChatCommandHandler {
                         
                         for (RoomItem item : toRemove) {
                             targetRoom.removeFurniture(session, item.getId());
-                            habbo.getInventoryComponent().addItem(item.getId(), item.getBaseItem(), item.getExtraData());
+                            habbo.getInventoryComponent().addItem(item.getId(), item.getBaseItem().getId(), item.getExtraData());
                         }
                         
                         habbo.getInventoryComponent().updateItems(true);

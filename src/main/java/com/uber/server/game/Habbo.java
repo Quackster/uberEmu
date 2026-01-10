@@ -199,7 +199,6 @@ public class Habbo {
     public void setLoadingChecksPassed(boolean loadingChecksPassed) { this.loadingChecksPassed = loadingChecksPassed; }
     public boolean isMuted() { return muted; }
     public void setMuted(boolean muted) { this.muted = muted; }
-    
     /**
      * Mutes the user.
      */

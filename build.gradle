@@ -51,8 +51,35 @@ tasks.shadowJar {
     // Produces <project.name>-<project.version>.jar (no "-all" suffix).
     archiveClassifier.set("")
     archiveFileName.set("${project.name}-${project.version}.jar")
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
 }
 
+// Make sure start scripts use shadow jar
+tasks.startScripts {
+    dependsOn tasks.shadowJar
+    doFirst {
+        classpath = files(tasks.shadowJar.archiveFile)
+    }
+}
+
+// Make distribution tasks use shadow jar
+tasks.distZip {
+    dependsOn tasks.shadowJar
+}
+
+tasks.distTar {
+    dependsOn tasks.shadowJar
+}
+
+// Make the shadow jar the default jar artifact
 artifacts {
     archives tasks.named("shadowJar")
+}
+
+// Make jar task depend on shadowJar so it's built first
+tasks.jar {
+    enabled = false
+    dependsOn tasks.shadowJar
 }

@@ -36,9 +36,14 @@ public class CanGiftHandler implements PacketHandler {
             return;
         }
         
+        com.uber.server.items.Item baseItem = item.getBaseItem(this.game.getItemManager());
+        if (baseItem == null) {
+            return;
+        }
+        
         ServerMessage response = new ServerMessage(622);
         response.appendUInt(item.getId());
-        response.appendBoolean(item.getBaseItem(this.game.getItemManager()).allowGift());
+        response.appendBoolean(baseItem.allowGift());
         client.sendMessage(response);
     }
 }
