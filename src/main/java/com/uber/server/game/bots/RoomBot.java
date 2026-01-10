@@ -174,6 +174,5 @@ public class RoomBot {
     public int getMinY() { return minY; }
     public int getMaxX() { return maxX; }
     public int getMaxY() { return maxY; }
-    public List<RandomSpeech> getRandomSpeech() { return new ArrayList<>(randomSpeech); }
     public List<BotResponse> getResponses() { return new ArrayList<>(responses); }
 }

@@ -22,8 +22,19 @@ public class HabboPacketDecoder extends ReplayingDecoder<Void> {
     
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        // Check for cross-domain policy request (data[0] != 64)
-        // Skip this check for now as it's handled in GameClient
+        // Check for cross-domain policy request
+        // Flash clients send "<policy-file-request/>" which starts with '<' (0x3C)
+        // Normal packets start with Base64-encoded length bytes (0x40-0x7F range)
+        if (in.readableBytes() > 0) {
+            byte firstByte = in.getByte(in.readerIndex());
+            // Policy requests typically start with '<' (0x3C) or other ASCII chars
+            // Base64 encoding for length starts at 0x40 ('@'), so any byte < 0x40 that's not a control char is likely a policy request
+            if (firstByte < 0x40 && firstByte >= 0x20) {
+                // This is likely a cross-domain policy request (ASCII text)
+                handleCrossDomainPolicy(ctx, in);
+                return;
+            }
+        }
         
         // Parse batched messages until buffer is exhausted
         while (in.readableBytes() >= MIN_PACKET_SIZE) {
@@ -74,6 +85,41 @@ public class HabboPacketDecoder extends ReplayingDecoder<Void> {
                     break;
                 }
             }
+        }
+    }
+    
+    /**
+     * Handles cross-domain policy requests from Flash clients.
+     * Ported from C# GameClient.handleConnectionData() cross-domain check
+     */
+    private void handleCrossDomainPolicy(ChannelHandlerContext ctx, ByteBuf in) {
+        // Read the policy request (usually "<policy-file-request/>" or similar)
+        // Flash clients need this to establish connections
+        try {
+            byte[] policyRequest = new byte[in.readableBytes()];
+            in.readBytes(policyRequest);
+            String request = new String(policyRequest);
+            
+            logger.debug("Received cross-domain policy request from client {}: {}", ctx.channel().remoteAddress(), request);
+            
+            // Send cross-domain policy response
+            // The policy file allows Flash clients to connect
+            String policyResponse = "<?xml version=\"1.0\"?>\r\n" +
+                    "<!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\">\r\n" +
+                    "<cross-domain-policy>\r\n" +
+                    "<allow-access-from domain=\"*\" to-ports=\"*\" />\r\n" +
+                    "</cross-domain-policy>\0";
+            
+            ByteBuf response = ctx.alloc().buffer(policyResponse.length());
+            response.writeBytes(policyResponse.getBytes());
+            ctx.writeAndFlush(response);
+            
+            // Close connection after sending policy (Flash clients reconnect)
+            ctx.close();
+            
+        } catch (Exception e) {
+            logger.warn("Error handling cross-domain policy request: {}", e.getMessage());
+            ctx.close();
         }
     }
     

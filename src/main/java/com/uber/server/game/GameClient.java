@@ -54,6 +54,7 @@ public class GameClient {
     
     /**
      * Starts the connection and begins receiving messages.
+     * With Netty, message reception is handled automatically by the pipeline.
      */
     public void startConnection() {
         if (connection == null) {
@@ -62,8 +63,9 @@ public class GameClient {
         
         pongOK.set(true);
         
-        // Start receiving data
-        connection.start(this::handleConnectionData);
+        // With Netty, data reception is handled automatically by the pipeline
+        // This method is kept for compatibility but doesn't need to start anything
+        logger.debug("Client {} started (Netty pipeline active)", clientId);
     }
     
     /**
