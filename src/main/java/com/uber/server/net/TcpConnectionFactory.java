@@ -1,13 +1,14 @@
 package com.uber.server.net;
 
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Factory for creating TCP connections with unique IDs.
+ * Ported from C# TcpConnectionFactory.cs
  */
 public class TcpConnectionFactory {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnectionFactory.class);
@@ -18,11 +19,11 @@ public class TcpConnectionFactory {
     }
     
     /**
-     * Creates a new TCP connection.
-     * @param channel The socket channel
+     * Creates a new TCP connection from a Netty Channel.
+     * @param channel The Netty channel
      * @return A new TcpConnection, or null if channel is null
      */
-    public TcpConnection createConnection(AsynchronousSocketChannel channel) {
+    public TcpConnection createConnection(Channel channel) {
         if (channel == null) {
             return null;
         }

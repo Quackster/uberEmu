@@ -79,6 +79,14 @@ public class TcpConnectionManager {
     }
     
     /**
+     * Gets the game client manager.
+     * @return The game client manager
+     */
+    public GameClientManager getGameClientManager() {
+        return gameClientManager;
+    }
+    
+    /**
      * Handles a new connection.
      * Thread-safe: checks connection limit and adds atomically.
      * @param connection The new connection

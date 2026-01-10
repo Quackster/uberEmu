@@ -125,8 +125,9 @@ public class GameClient {
     /**
      * Handles a parsed client message.
      * Thread-safe handler lookup and invocation.
+     * Called by Netty channel handler or internal packet parser.
      */
-    private void handleMessage(ClientMessage message) {
+    void handleMessage(ClientMessage message) {
         int messageId = (int) message.getId();
         
         logger.debug("[{}] --> {}", messageId, message.getBody());

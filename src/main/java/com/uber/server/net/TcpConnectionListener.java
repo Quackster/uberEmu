@@ -1,20 +1,21 @@
 package com.uber.server.net;
 
+import com.uber.server.game.GameClientManager;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.channels.AsynchronousChannelGroup;
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * TCP connection listener using AsynchronousServerSocketChannel.
- * Matches C# async callback model (BeginAcceptSocket / EndAcceptSocket).
+ * TCP connection listener using Netty.
+ * Ported from C# TcpConnectionListener.cs
  */
 public class TcpConnectionListener {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnectionListener.class);
@@ -24,8 +25,10 @@ public class TcpConnectionListener {
     private final int listenerPort;
     private final TcpConnectionManager manager;
     
-    private AsynchronousServerSocketChannel serverChannel;
-    private AsynchronousChannelGroup channelGroup;
+    private ServerBootstrap bootstrap;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+    private Channel serverChannel;
     private final AtomicBoolean isListening;
     
     public TcpConnectionListener(String localIP, int port, TcpConnectionManager manager) {
@@ -36,7 +39,7 @@ public class TcpConnectionListener {
     }
     
     /**
-     * Starts listening for connections.
+     * Starts listening for connections using Netty ServerBootstrap.
      */
     public void start() {
         if (isListening.getAndSet(true)) {
@@ -45,22 +48,65 @@ public class TcpConnectionListener {
         }
         
         try {
-            // Create channel group with thread pool
-            channelGroup = AsynchronousChannelGroup.withThreadPool(Executors.newCachedThreadPool());
+            // Create event loop groups
+            bossGroup = new NioEventLoopGroup(1); // Single thread for accepting connections
+            workerGroup = new NioEventLoopGroup(); // Default thread count for handling connections
             
-            // Create server socket channel
-            serverChannel = AsynchronousServerSocketChannel.open(channelGroup);
+            // Create server bootstrap
+            bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, QUEUE_LENGTH)
+                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            // This is called when a new connection is accepted
+                            // Create TcpConnection first
+                            TcpConnection connection = manager.getFactory().createConnection(ch);
+                            if (connection == null) {
+                                ch.close();
+                                return;
+                            }
+                            
+                            // Set connection ID in channel attributes for HabboChannelHandler
+                            ch.attr(io.netty.util.AttributeKey.valueOf("connectionId")).set(connection.getId());
+                            
+                            // Add connection to manager (this will create GameClient)
+                            manager.handleNewConnection(connection);
+                            
+                            // Set up the pipeline with decoder, encoder, and handler
+                            GameClientManager gameClientManager = manager.getGameClientManager();
+                            if (gameClientManager == null) {
+                                logger.error("GameClientManager not set in TcpConnectionManager");
+                                ch.close();
+                                return;
+                            }
+                            
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast("decoder", new HabboPacketDecoder());
+                            pipeline.addLast("encoder", new HabboPacketEncoder());
+                            pipeline.addLast("handler", new HabboChannelHandler(manager, gameClientManager));
+                        }
+                    });
             
             // Bind to address
-            InetSocketAddress bindAddress = new InetSocketAddress(listenerIP, listenerPort);
-            serverChannel.bind(bindAddress, QUEUE_LENGTH);
+            InetAddress bindAddress = null;
+            try {
+                bindAddress = InetAddress.getByName(listenerIP);
+            } catch (Exception e) {
+                logger.error("Could not parse IP address: {}, falling back to loopback", listenerIP);
+                bindAddress = InetAddress.getLoopbackAddress();
+            }
             
-            logger.info("Game socket listening on {}:{}", listenerIP, listenerPort);
+            ChannelFuture bindFuture = bootstrap.bind(new InetSocketAddress(bindAddress, listenerPort));
+            serverChannel = bindFuture.sync().channel();
             
-            // Start accepting connections
-            waitForNextConnection();
+            logger.info("Game socket listening on {}:{}", bindAddress.getHostAddress(), listenerPort);
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             isListening.set(false);
             logger.error("Failed to start TCP listener on {}:{}: {}", listenerIP, listenerPort, e.getMessage(), e);
             
@@ -68,14 +114,51 @@ public class TcpConnectionListener {
             if (!listenerIP.equals("127.0.0.1") && !listenerIP.equals("localhost")) {
                 logger.warn("Falling back to loopback address");
                 try {
+                    shutdown();
+                    
+                    // Try again with loopback
+                    bossGroup = new NioEventLoopGroup(1);
+                    workerGroup = new NioEventLoopGroup();
+                    bootstrap = new ServerBootstrap();
+                    bootstrap.group(bossGroup, workerGroup)
+                            .channel(NioServerSocketChannel.class)
+                            .option(ChannelOption.SO_BACKLOG, QUEUE_LENGTH)
+                            .option(ChannelOption.SO_REUSEADDR, true)
+                            .childOption(ChannelOption.TCP_NODELAY, true)
+                            .childOption(ChannelOption.SO_KEEPALIVE, true)
+                            .childHandler(new ChannelInitializer<SocketChannel>() {
+                                @Override
+                                protected void initChannel(SocketChannel ch) throws Exception {
+                                    TcpConnection connection = manager.getFactory().createConnection(ch);
+                                    if (connection == null) {
+                                        ch.close();
+                                        return;
+                                    }
+                                    
+                                    ch.attr(io.netty.util.AttributeKey.valueOf("connectionId")).set(connection.getId());
+                                    manager.handleNewConnection(connection);
+                                    
+                                    GameClientManager gameClientManager = manager.getGameClientManager();
+                                    if (gameClientManager == null) {
+                                        ch.close();
+                                        return;
+                                    }
+                                    
+                                    ChannelPipeline pipeline = ch.pipeline();
+                                    pipeline.addLast("decoder", new HabboPacketDecoder());
+                                    pipeline.addLast("encoder", new HabboPacketEncoder());
+                                    pipeline.addLast("handler", new HabboChannelHandler(manager, gameClientManager));
+                                }
+                            });
+                    
                     InetSocketAddress loopback = new InetSocketAddress("127.0.0.1", listenerPort);
-                    serverChannel = AsynchronousServerSocketChannel.open();
-                    serverChannel.bind(loopback, QUEUE_LENGTH);
+                    ChannelFuture bindFuture = bootstrap.bind(loopback);
+                    serverChannel = bindFuture.sync().channel();
                     isListening.set(true);
                     logger.info("Game socket listening on 127.0.0.1:{}", listenerPort);
-                    waitForNextConnection();
-                } catch (IOException e2) {
+                } catch (Exception e2) {
                     logger.error("Failed to bind to loopback address: {}", e2.getMessage(), e2);
+                    shutdown();
                 }
             }
         }
@@ -90,17 +173,29 @@ public class TcpConnectionListener {
         }
         
         try {
-            if (serverChannel != null && serverChannel.isOpen()) {
-                serverChannel.close();
+            if (serverChannel != null && serverChannel.isActive()) {
+                serverChannel.close().sync();
             }
-            
-            if (channelGroup != null && !channelGroup.isShutdown()) {
-                channelGroup.shutdown();
-            }
-            
-            logger.info("TCP listener stopped");
-        } catch (IOException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Interrupted while closing server channel: {}", e.getMessage());
+        } catch (Exception e) {
             logger.error("Error stopping TCP listener: {}", e.getMessage(), e);
+        }
+        
+        shutdown();
+        logger.info("TCP listener stopped");
+    }
+    
+    /**
+     * Shuts down the event loop groups.
+     */
+    private void shutdown() {
+        if (workerGroup != null && !workerGroup.isShutdown()) {
+            workerGroup.shutdownGracefully();
+        }
+        if (bossGroup != null && !bossGroup.isShutdown()) {
+            bossGroup.shutdownGracefully();
         }
     }
     
@@ -110,47 +205,7 @@ public class TcpConnectionListener {
     public void destroy() {
         stop();
         serverChannel = null;
-        channelGroup = null;
-    }
-    
-    /**
-     * Waits for the next connection asynchronously.
-     * Matches C# BeginAcceptSocket pattern.
-     */
-    private void waitForNextConnection() {
-        if (!isListening.get()) {
-            return;
-        }
-        
-        serverChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
-            @Override
-            public void completed(AsynchronousSocketChannel channel, Void attachment) {
-                try {
-                    // Create connection using factory from manager
-                    TcpConnection connection = manager.getFactory().createConnection(channel);
-                    
-                    if (connection != null) {
-                        manager.handleNewConnection(connection);
-                    }
-                } catch (Exception e) {
-                    logger.warn("Could not handle new connection request: {}", e.getMessage());
-                } finally {
-                    // Continue accepting more connections
-                    if (isListening.get()) {
-                        waitForNextConnection();
-                    }
-                }
-            }
-            
-            @Override
-            public void failed(Throwable exc, Void attachment) {
-                if (isListening.get()) {
-                    logger.warn("Failed to accept connection: {}", exc.getMessage());
-                    // Continue accepting more connections
-                    waitForNextConnection();
-                }
-            }
-        });
+        bootstrap = null;
     }
     
     /**

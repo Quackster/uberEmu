@@ -1,52 +1,54 @@
 package com.uber.server.net;
 
-import com.uber.server.messages.ClientMessage;
 import com.uber.server.messages.ServerMessage;
 import com.uber.server.util.Base64Encoding;
-import com.uber.server.util.ByteUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 /**
- * Represents a TCP connection with a client.
- * Thread-safe with proper synchronization.
+ * Represents a TCP connection with a client using Netty.
+ * Ported from C# TcpConnection.cs
  */
 public class TcpConnection {
     private static final Logger logger = LoggerFactory.getLogger(TcpConnection.class);
-    private static final int RCV_BUFFER_SIZE = 512;
+    
+    public static final io.netty.util.AttributeKey<TcpConnection> CONNECTION_ATTR = 
+        io.netty.util.AttributeKey.valueOf("TcpConnection");
     
     private final long id;
     private final Instant created;
-    private final AsynchronousSocketChannel channel;
+    private final Channel channel;
     private final AtomicBoolean isAlive;
-    private final AtomicBoolean isReceiving;
-    
-    private final ByteBuffer receiveBuffer;
-    private Consumer<byte[]> dataRouter;
     
     private SocketAddress remoteAddress;
     
-    public TcpConnection(long id, AsynchronousSocketChannel channel) {
+    public TcpConnection(long id, Channel channel) {
         this.id = id;
         this.channel = channel;
         this.created = Instant.now();
         this.isAlive = new AtomicBoolean(true);
-        this.isReceiving = new AtomicBoolean(false);
-        this.receiveBuffer = ByteBuffer.allocate(RCV_BUFFER_SIZE);
         
-        try {
-            this.remoteAddress = channel.getRemoteAddress();
-        } catch (IOException e) {
-            logger.error("Failed to get remote address for connection {}: {}", id, e.getMessage(), e);
+        // Store this TcpConnection in channel attributes
+        if (channel != null) {
+            channel.attr(CONNECTION_ATTR).set(this);
+            this.remoteAddress = channel.remoteAddress();
+            
+            // Set connection ID in channel attributes for HabboChannelHandler
+            channel.attr(io.netty.util.AttributeKey.valueOf("connectionId")).set(id);
+            
+            // Close future listener
+            channel.closeFuture().addListener(future -> {
+                if (future.isDone()) {
+                    connectionDead();
+                }
+            });
+        } else {
             this.remoteAddress = null;
         }
     }
@@ -74,20 +76,20 @@ public class TcpConnection {
     }
     
     public boolean isAlive() {
-        return isAlive.get() && channel.isOpen();
+        return isAlive.get() && channel != null && channel.isActive();
     }
     
     /**
      * Starts receiving data from the connection.
-     * @param dataRouter Callback to handle received data
+     * With Netty, this is handled automatically by the pipeline.
+     * @param dataRouter Callback to handle received data (not used with Netty, kept for compatibility)
      */
-    public void start(Consumer<byte[]> dataRouter) {
-        if (!isAlive.get()) {
-            return;
+    public void start(java.util.function.Consumer<byte[]> dataRouter) {
+        // With Netty, data reception is handled automatically by the pipeline
+        // This method is kept for compatibility but doesn't need to do anything
+        if (channel != null && channel.isActive()) {
+            logger.debug("Connection {} started (Netty pipeline active)", id);
         }
-        
-        this.dataRouter = dataRouter;
-        waitForData();
     }
     
     /**
@@ -98,12 +100,15 @@ public class TcpConnection {
             return;
         }
         
-        try {
-            if (channel.isOpen()) {
-                channel.close();
+        if (channel != null && channel.isActive()) {
+            try {
+                channel.close().sync();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.debug("Interrupted while closing channel for connection {}: {}", id, e.getMessage());
+            } catch (Exception e) {
+                logger.debug("Error closing channel for connection {}: {}", id, e.getMessage());
             }
-        } catch (IOException e) {
-            logger.debug("Error closing channel for connection {}: {}", id, e.getMessage());
         }
     }
     
@@ -117,8 +122,8 @@ public class TcpConnection {
         }
         
         try {
-            ByteBuffer testBuffer = ByteBuffer.wrap(new byte[]{0});
-            return channel.write(testBuffer).get() > 0;
+            // With Netty, we can check if the channel is writable
+            return channel.isActive() && channel.isWritable();
         } catch (Exception e) {
             logger.debug("Connection test failed for connection {}: {}", id, e.getMessage());
             return false;
@@ -138,22 +143,26 @@ public class TcpConnection {
             return;
         }
         
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-        channel.write(buffer, buffer, new CompletionHandler<Integer, ByteBuffer>() {
-            @Override
-            public void completed(Integer result, ByteBuffer attachment) {
-                if (attachment.hasRemaining()) {
-                    // Continue writing remaining data
-                    channel.write(attachment, attachment, this);
-                }
-            }
+        if (channel == null || !channel.isActive()) {
+            connectionDead();
+            return;
+        }
+        
+        try {
+            io.netty.buffer.ByteBuf buf = channel.alloc().buffer(data.length);
+            buf.writeBytes(data);
+            ChannelFuture future = channel.writeAndFlush(buf);
             
-            @Override
-            public void failed(Throwable exc, ByteBuffer attachment) {
-                logger.warn("Failed to send data to connection {}: {}", id, exc.getMessage());
-                connectionDead();
-            }
-        });
+            future.addListener(f -> {
+                if (!f.isSuccess()) {
+                    logger.warn("Failed to send data to connection {}: {}", id, f.cause().getMessage());
+                    connectionDead();
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Error sending data to connection {}: {}", id, e.getMessage());
+            connectionDead();
+        }
     }
     
     /**
@@ -176,8 +185,25 @@ public class TcpConnection {
             }
         }
         
-        byte[] messageBytes = message.getBytes();
-        sendData(messageBytes);
+        if (channel == null || !channel.isActive()) {
+            connectionDead();
+            return;
+        }
+        
+        try {
+            // Send ServerMessage directly - the encoder will handle it
+            ChannelFuture future = channel.writeAndFlush(message);
+            
+            future.addListener(f -> {
+                if (!f.isSuccess()) {
+                    logger.warn("Failed to send message to connection {}: {}", id, f.cause().getMessage());
+                    connectionDead();
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Error sending message to connection {}: {}", id, e.getMessage());
+            connectionDead();
+        }
     }
     
     /**
@@ -191,79 +217,20 @@ public class TcpConnection {
     }
     
     /**
-     * Waits for data from the client asynchronously.
-     */
-    private synchronized void waitForData() {
-        if (!isAlive() || isReceiving.get()) {
-            return;
-        }
-        
-        isReceiving.set(true);
-        receiveBuffer.clear();
-        
-        channel.read(receiveBuffer, null, new CompletionHandler<Integer, Void>() {
-            @Override
-            public void completed(Integer result, Void attachment) {
-                isReceiving.set(false);
-                
-                if (result < 0) {
-                    // Connection closed
-                    connectionDead();
-                    return;
-                }
-                
-                if (result == 0) {
-                    // No data received, continue waiting
-                    if (isAlive()) {
-                        waitForData();
-                    }
-                    return;
-                }
-                
-                // Process received data
-                receiveBuffer.flip();
-                byte[] receivedData = new byte[receiveBuffer.remaining()];
-                receiveBuffer.get(receivedData);
-                
-                // Route the data to the handler
-                if (dataRouter != null) {
-                    try {
-                        dataRouter.accept(receivedData);
-                    } catch (Exception e) {
-                        logger.error("Error in data router for connection {}: {}", id, e.getMessage(), e);
-                    }
-                }
-                
-                // Continue waiting for more data
-                if (isAlive()) {
-                    waitForData();
-                }
-            }
-            
-            @Override
-            public void failed(Throwable exc, Void attachment) {
-                isReceiving.set(false);
-                logger.warn("Failed to receive data from connection {}: {}", id, exc.getMessage());
-                connectionDead();
-            }
-        });
-    }
-    
-    /**
      * Called when the connection is dead.
      */
     private void connectionDead() {
         if (isAlive.getAndSet(false)) {
             logger.debug("Connection [{}] closed", id);
-            // This will be handled by GameClientManager
+            // This will be handled by GameClientManager via channelInactive
         }
     }
     
     /**
-     * Gets the underlying AsynchronousSocketChannel.
-     * @return The socket channel
+     * Gets the underlying Netty Channel.
+     * @return The channel
      */
-    public AsynchronousSocketChannel getChannel() {
+    public Channel getChannel() {
         return channel;
     }
 }
